@@ -7,8 +7,22 @@ use Illuminate\Support\Facades\Auth; // <-- Gunakan Auth facade
 
 class LoginController extends Controller
 {
+    /**
+     * Show the login form only to unauthenticated users
+     */
     public function showLoginForm()
     {
+        // Additional check: redirect if already authenticated
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+        if (Auth::guard('dosen')->check()) {
+            return redirect()->route('dosen.dashboard');
+        }
+        if (Auth::guard('mahasiswa')->check()) {
+            return redirect()->route('mahasiswa.dashboard');
+        }
+        
         return view('auth.login');
     }
 
@@ -49,6 +63,9 @@ class LoginController extends Controller
             
             // Simpan tipe guard di session untuk proses logout
             session(['auth_guard' => $guard]);
+            
+            // Clear any existing session data that might cause conflicts
+            $request->session()->forget(['user_id', 'user_type']);
 
             // Redirect berdasarkan tipe user
             switch ($userType) {
@@ -69,12 +86,20 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        // Logout dari guard yang aktif
+        // Logout dari semua guards untuk memastikan session bersih
+        Auth::guard('admin')->logout();
+        Auth::guard('dosen')->logout();
+        Auth::guard('mahasiswa')->logout();
+        
+        // Logout dari guard yang aktif juga
         $guard = session('auth_guard', 'web');
         Auth::guard($guard)->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        
+        // Clear any remaining session data
+        $request->session()->flush();
 
         return redirect('/login')->with('success', 'Berhasil logout.');
     }
