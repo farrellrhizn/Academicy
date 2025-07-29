@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Input Presensi Akademik</title>
+    <title>Input Presensi Cepat</title>
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('bootstrap/vendors/images/apple-touch-icon.png') }}" />
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('bootstrap/vendors/images/favicon-32x32.png') }}" />
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('bootstrap/vendors/images/favicon-16x16.png') }}" />
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    {{-- Header dan Sidebar sama seperti template index.blade.php Anda --}}
+    {{-- Header dan Sidebar --}}
     <div class="header">
         <div class="header-left">
             <div class="menu-icon bi bi-list"></div>
@@ -51,51 +51,47 @@
     </div>
 
     <div class="left-side-bar">
-			<div class="brand-logo">
-				<a href="index.html">
-					<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
-					<img
-						src="../../bootstrap/vendors/images/deskapp-logo-white.svg"
-						alt=""
-						class="light-logo"
-					/>
-				</a>
-				<div class="close-sidebar" data-toggle="left-sidebar-close">
-					<i class="ion-close-round"></i>
-				</div>
-			</div>
-			<div class="menu-block customscroll">
-				<div class="sidebar-menu">
-					<ul id="accordion-menu">
-						<li>
-							<a href="{{ route('dosen.dashboard') }}" class="dropdown-toggle no-arrow active">
-								<span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
-							</a>
-						</li>
-						<li>
-							<a href="{{ route('dosen.jadwal.index') }}" class="dropdown-toggle no-arrow">
-								<span class="micon bi bi-calendar3-week"></span><span class="mtext">Jadwal Mengajar</span>
-							</a>
-						</li>
-						<li>
-							<a href="{{ route('dosen.presensi.simple') }}" class="dropdown-toggle no-arrow">
-								<span class="micon bi bi-journal-check"></span><span class="mtext">Input Presensi Cepat</span>
-							</a>
-						</li>
-						<li>
-							<a href="{{ route('dosen.presensi.index') }}" class="dropdown-toggle no-arrow active">
-								<span class="micon bi bi-journal"></span><span class="mtext">Input Presensi Detail</span>
-							</a>
-						</li>
-						<li>
-							<a href="matkul-diampu.html" class="dropdown-toggle no-arrow">
-								<span class="micon bi bi-book"></span><span class="mtext">Mata Kuliah Diampu</span>
-							</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
+        <div class="brand-logo">
+            <a href="index.html">
+                <img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
+                <img src="../../bootstrap/vendors/images/deskapp-logo-white.svg" alt="" class="light-logo" />
+            </a>
+            <div class="close-sidebar" data-toggle="left-sidebar-close">
+                <i class="ion-close-round"></i>
+            </div>
+        </div>
+        <div class="menu-block customscroll">
+            <div class="sidebar-menu">
+                <ul id="accordion-menu">
+                    <li>
+                        <a href="{{ route('dosen.dashboard') }}" class="dropdown-toggle no-arrow">
+                            <span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('dosen.jadwal.index') }}" class="dropdown-toggle no-arrow">
+                            <span class="micon bi bi-calendar3-week"></span><span class="mtext">Jadwal Mengajar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('dosen.presensi.simple') }}" class="dropdown-toggle no-arrow active">
+                            <span class="micon bi bi-journal-check"></span><span class="mtext">Input Presensi Cepat</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('dosen.presensi.index') }}" class="dropdown-toggle no-arrow">
+                            <span class="micon bi bi-journal"></span><span class="mtext">Input Presensi Detail</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="matkul-diampu.html" class="dropdown-toggle no-arrow">
+                            <span class="micon bi bi-book"></span><span class="mtext">Mata Kuliah Diampu</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     <div class="mobile-menu-overlay"></div>
 
@@ -106,36 +102,49 @@
                     <div class="row">
                         <div class="col-md-6 col-sm-12">
                             <div class="title">
-                                <h4>Input Presensi Akademik</h4>
+                                <h4>Input Presensi Cepat</h4>
                             </div>
                             <nav aria-label="breadcrumb" role="navigation">
                                 <ol class="breadcrumb">
                                     <li class="breadcrumb-item"><a href="{{ route('dosen.dashboard') }}">Home</a></li>
-                                    <li class="breadcrumb-item active" aria-current="page">Input Presensi</li>
+                                    <li class="breadcrumb-item active" aria-current="page">Input Presensi Cepat</li>
                                 </ol>
                             </nav>
                         </div>
                         <div class="col-md-6 col-sm-12 text-right">
                             <div class="dropdown">
-                                <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                                    <i class="fa fa-calendar"></i> {{ date('d F Y') }}
-                                </a>
+                                <span class="btn btn-success">
+                                    <i class="fa fa-calendar"></i> {{ date('l, d F Y') }}
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- FORM PILIH MATA KULIAH DAN TANGGAL --}}
+                {{-- INFO CARD --}}
                 <div class="pd-20 card-box mb-30">
                     <div class="clearfix">
                         <div class="pull-left">
-                            <h4 class="text-blue h4">Pilih Mata Kuliah & Tanggal</h4>
-                            <p class="mb-30">Pilih mata kuliah yang akan diisi presensinya</p>
+                            <h4 class="text-blue h4">Presensi Otomatis Hari Ini</h4>
+                            <p class="mb-20">Pilih mata kuliah dan langsung input presensi. Tanggal akan tersimpan otomatis untuk hari ini ({{ date('d F Y') }}).</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Informasi:</strong> Sistem akan otomatis menyimpan presensi dengan tanggal hari ini. Anda tidak perlu menentukan tanggal secara manual.
+                    </div>
+                </div>
+
+                {{-- FORM PILIH MATA KULIAH --}}
+                <div class="pd-20 card-box mb-30">
+                    <div class="clearfix">
+                        <div class="pull-left">
+                            <h4 class="text-blue h4">Pilih Mata Kuliah</h4>
+                            <p class="mb-30">Silakan pilih mata kuliah yang akan diisi presensinya</p>
                         </div>
                     </div>
                     <form id="filterForm">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <div class="form-group">
                                     <label>Mata Kuliah <span class="text-danger">*</span></label>
                                     <select class="form-control" name="kode_mk" id="kode_mk" required>
@@ -150,16 +159,9 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Tanggal <span class="text-danger">*</span></label>
-                                    <input class="form-control" name="tanggal" id="tanggal" type="date" 
-                                           value="{{ $selectedDate }}" required />
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
                                     <label>&nbsp;</label>
                                     <button type="submit" class="btn btn-primary btn-block">
-                                        <i class="fa fa-search"></i> Tampilkan
+                                        <i class="fa fa-search"></i> Tampilkan Mahasiswa
                                     </button>
                                 </div>
                             </div>
@@ -174,15 +176,14 @@
                         <h4 class="text-blue h4">Input Presensi Mahasiswa</h4>
                         <p class="mb-30">
                             Mata Kuliah: <strong>{{ $selectedMkName }}</strong> | 
-                            Tanggal: <strong>{{ date('d F Y', strtotime($selectedDate)) }}</strong>
+                            Tanggal: <strong>{{ date('d F Y') }}</strong> |
+                            Hari: <strong>{{ date('l') }}</strong>
                         </p>
                     </div>
                     <div class="pb-20">
                         <form id="presensiForm">
                             @csrf
                             <input type="hidden" name="kode_mk" value="{{ $selectedMk }}">
-                            <input type="hidden" name="tanggal" value="{{ $selectedDate }}">
-                            <input type="hidden" name="hari" value="{{ date('l', strtotime($selectedDate)) }}">
                             
                             <div class="table-responsive">
                                 <table class="table table-striped">
@@ -205,17 +206,14 @@
                                             <td>
                                                 <input type="hidden" name="mahasiswa[{{ $index }}][nim]" value="{{ $mhs->NIM }}">
                                                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                                    <label class="btn btn-outline-success btn-sm {{ (isset($presensiData[$mhs->NIM]) && $presensiData[$mhs->NIM] == 'Hadir') ? 'active' : '' }}">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Hadir" 
-                                                               {{ (isset($presensiData[$mhs->NIM]) && $presensiData[$mhs->NIM] == 'Hadir') ? 'checked' : '' }}> Hadir
+                                                    <label class="btn btn-outline-success btn-sm">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Hadir"> Hadir
                                                     </label>
-                                                    <label class="btn btn-outline-warning btn-sm {{ (isset($presensiData[$mhs->NIM]) && $presensiData[$mhs->NIM] == 'Izin') ? 'active' : '' }}">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Izin"
-                                                               {{ (isset($presensiData[$mhs->NIM]) && $presensiData[$mhs->NIM] == 'Izin') ? 'checked' : '' }}> Izin
+                                                    <label class="btn btn-outline-warning btn-sm">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Izin"> Izin
                                                     </label>
-                                                    <label class="btn btn-outline-danger btn-sm {{ (isset($presensiData[$mhs->NIM]) && $presensiData[$mhs->NIM] == 'Alpa') ? 'active' : '' }}">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Alpa"
-                                                               {{ (isset($presensiData[$mhs->NIM]) && $presensiData[$mhs->NIM] == 'Alpa') ? 'checked' : '' }}> Alpa
+                                                    <label class="btn btn-outline-danger btn-sm">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Alpa"> Alpa
                                                     </label>
                                                 </div>
                                             </td>
@@ -237,7 +235,7 @@
                                     </div>
                                     <div class="col-md-6 text-right">
                                         <button type="submit" class="btn btn-primary btn-lg">
-                                            <i class="fa fa-save"></i> Simpan Presensi
+                                            <i class="fa fa-save"></i> Simpan Presensi ({{ date('d/m/Y') }})
                                         </button>
                                     </div>
                                 </div>
@@ -253,7 +251,7 @@
                     <div class="pd-20 text-center">
                         <img src="{{ asset('bootstrap/vendors/images/sitting-girl.png') }}" alt="" style="max-width: 200px;">
                         <h4 class="text-muted mt-3">Tidak Ada Data Mahasiswa</h4>
-                        <p class="text-muted">Silakan pilih mata kuliah dan tanggal terlebih dahulu untuk menampilkan daftar mahasiswa.</p>
+                        <p class="text-muted">Silakan pilih mata kuliah terlebih dahulu untuk menampilkan daftar mahasiswa.</p>
                     </div>
                 </div>
                 @endif
@@ -281,18 +279,17 @@
             $('#filterForm').on('submit', function (e) {
                 e.preventDefault();
                 var kodeMk = $('#kode_mk').val();
-                var tanggal = $('#tanggal').val();
                 
-                if (!kodeMk || !tanggal) {
+                if (!kodeMk) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Perhatian!',
-                        text: 'Silakan pilih mata kuliah dan tanggal terlebih dahulu.'
+                        text: 'Silakan pilih mata kuliah terlebih dahulu.'
                     });
                     return;
                 }
                 
-                window.location.href = "{{ route('dosen.presensi.index') }}?kode_mk=" + kodeMk + "&tanggal=" + tanggal;
+                window.location.href = "{{ route('dosen.presensi.simple') }}?kode_mk=" + kodeMk;
             });
 
             // Mark All Hadir
@@ -321,13 +318,8 @@
                 e.preventDefault();
                 
                 // Validasi - pastikan semua mahasiswa sudah dipilih statusnya
-                var allSelected = true;
                 var totalMahasiswa = $('input[name*="[nim]"]').length;
-                var selectedCount = 0;
-                
-                $('input[type="radio"]:checked').each(function() {
-                    selectedCount++;
-                });
+                var selectedCount = $('input[type="radio"]:checked').length;
                 
                 if (selectedCount !== totalMahasiswa) {
                     Swal.fire({
@@ -341,7 +333,7 @@
                 // Konfirmasi sebelum menyimpan
                 Swal.fire({
                     title: 'Konfirmasi Simpan',
-                    text: 'Apakah Anda yakin ingin menyimpan data presensi ini?',
+                    text: 'Apakah Anda yakin ingin menyimpan data presensi untuk hari ini (' + '{{ date("d F Y") }}' + ')?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
@@ -361,7 +353,7 @@
 
                         // Submit via AJAX
                         $.ajax({
-                            url: "{{ route('dosen.presensi.store') }}",
+                            url: "{{ route('dosen.presensi.store-simple') }}",
                             type: 'POST',
                             data: $(this).serialize(),
                             success: function (response) {
@@ -371,7 +363,7 @@
                                         icon: 'success',
                                         title: 'Berhasil!',
                                         text: response.message,
-                                        timer: 2000,
+                                        timer: 3000,
                                         showConfirmButton: false
                                     }).then(() => {
                                         // Refresh halaman untuk menampilkan data terbaru
