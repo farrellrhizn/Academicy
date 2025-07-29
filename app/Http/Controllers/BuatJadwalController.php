@@ -14,18 +14,34 @@ class BuatJadwalController extends Controller
     /**
      * Menampilkan halaman dan daftar jadwal.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $jadwal = JadwalAkademik::with(['matakuliah.pengampu.dosen', 'ruang', 'golongan'])
-            ->orderBy('hari')
-            ->orderBy('waktu')
-            ->get();
+        // Ambil parameter semester dari request
+        $semesterFilter = $request->get('semester');
+        
+        // Query untuk jadwal dengan filter semester jika ada
+        $jadwalQuery = JadwalAkademik::with(['matakuliah.pengampu.dosen', 'ruang', 'golongan']);
+        
+        if ($semesterFilter && $semesterFilter != 'all') {
+            $jadwalQuery->whereHas('matakuliah', function($query) use ($semesterFilter) {
+                $query->where('semester', $semesterFilter);
+            });
+        }
+        
+        $jadwal = $jadwalQuery->orderBy('hari')->orderBy('waktu')->get();
 
-        $matakuliah = Matakuliah::all();
+        // Data untuk dropdown
+        $matakuliah = Matakuliah::orderBy('semester')->orderBy('Nama_mk')->get();
         $ruang = Ruang::all();
         $golongan = Golongan::all();
+        
+        // Data semester untuk dropdown filter
+        $semesterList = [];
+        for ($i = 1; $i <= 8; $i++) {
+            $semesterList[$i] = "Semester $i";
+        }
 
-        return view('buat-jadwal.index', compact('jadwal', 'matakuliah', 'ruang', 'golongan'));
+        return view('buat-jadwal.index', compact('jadwal', 'matakuliah', 'ruang', 'golongan', 'semesterList', 'semesterFilter'));
     }
 
     /**
@@ -87,5 +103,25 @@ class BuatJadwalController extends Controller
     {
         $buat_jadwal->delete();
         return response()->json(['message' => 'Jadwal berhasil dihapus.']);
+    }
+
+    /**
+     * API untuk mendapatkan mata kuliah berdasarkan semester
+     */
+    public function getMatakuliahBySemester(Request $request)
+    {
+        $semester = $request->get('semester');
+        
+        if ($semester && $semester != 'all') {
+            $matakuliah = Matakuliah::where('semester', $semester)
+                                   ->orderBy('Nama_mk')
+                                   ->get();
+        } else {
+            $matakuliah = Matakuliah::orderBy('semester')
+                                   ->orderBy('Nama_mk')
+                                   ->get();
+        }
+        
+        return response()->json($matakuliah);
     }
 }

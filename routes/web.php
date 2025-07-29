@@ -48,6 +48,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::resource('ruang', RuangController::class);
     Route::resource('golongan', GolonganController::class);
     Route::resource('buat-jadwal', BuatJadwalController::class);
+    Route::get('/buat-jadwal/matakuliah/semester', [BuatJadwalController::class, 'getMatakuliahBySemester'])->name('buat-jadwal.matakuliah.semester');
 
     // Route::get('/buat-jadwal', [BuatJadwalController::class, 'index'])->name('buat-jadwal.index');
     // Route::post('/buat-jadwal/store', [BuatJadwalController::class, 'store'])->name('buat-jadwal.store');
@@ -55,6 +56,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     // Route::post('/buat-jadwal/destroy', [BuatJadwalController::class, 'destroy'])->name('buat-jadwal.destroy');
 
     Route::get('/kelola-jadwal', [KelolaJadwalController::class, 'index'])->name('kelola-jadwal.index');
+    Route::get('/kelola-jadwal/matakuliah/semester', [KelolaJadwalController::class, 'getMatakuliahBySemester'])->name('kelola-jadwal.matakuliah.semester');
     Route::post('/kelola-jadwal/update/{id}', [KelolaJadwalController::class, 'update'])->name('kelola-jadwal.update');
     Route::delete('/kelola-jadwal/destroy/{id}', [KelolaJadwalController::class, 'destroy'])->name('kelola-jadwal.destroy');
 });
