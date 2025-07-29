@@ -274,13 +274,15 @@
 																@endif
 															</td>
 															<td>
-																<form action="{{ route('mahasiswa.krs.destroy') }}" method="POST" class="d-inline">
+																<form action="{{ route('mahasiswa.krs.destroy') }}" method="POST" class="d-inline delete-form">
 																	@csrf
 																	@method('DELETE')
 																	<input type="hidden" name="Kode_mk" value="{{ $krs->Kode_mk }}">
-																	<button type="submit" class="btn btn-outline-danger btn-sm" 
-																			onclick="return confirm('Yakin ingin menghapus mata kuliah ini dari KRS?')">
-																		<i class="fa fa-trash"></i>
+																	<input type="hidden" name="nama_mk" value="{{ $krs->matakuliah->Nama_mk }}">
+																	<button type="submit" class="btn btn-outline-danger btn-sm delete-btn" 
+																			data-kode="{{ $krs->Kode_mk }}" 
+																			data-nama="{{ $krs->matakuliah->Nama_mk }}">
+																		<i class="fa fa-trash"></i> Hapus
 																	</button>
 																</form>
 															</td>
@@ -342,10 +344,13 @@
 																@endif
 															</td>
 															<td>
-																<form action="{{ route('mahasiswa.krs.store') }}" method="POST" class="d-inline">
+																<form action="{{ route('mahasiswa.krs.store') }}" method="POST" class="d-inline add-form">
 																	@csrf
 																	<input type="hidden" name="Kode_mk" value="{{ $matkul->Kode_mk }}">
-																	<button type="submit" class="btn btn-outline-success btn-sm">
+																	<button type="submit" class="btn btn-outline-success btn-sm add-btn" 
+																			data-kode="{{ $matkul->Kode_mk }}" 
+																			data-nama="{{ $matkul->Nama_mk }}"
+																			data-sks="{{ $matkul->sks }}">
 																		<i class="fa fa-plus"></i> Ambil
 																	</button>
 																</form>
@@ -448,5 +453,191 @@
 		<script src="../../../bootstrap/src/plugins/datatables/js/dataTables.bootstrap4.min.js"></script>
 		<script src="../../../bootstrap/src/plugins/datatables/js/dataTables.responsive.min.js"></script>
 		<script src="../../../bootstrap/src/plugins/datatables/js/responsive.bootstrap4.min.js"></script>
+		
+		<!-- SweetAlert2 for better alerts -->
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		
+		<script>
+		$(document).ready(function() {
+			// Check SKS limit before adding
+			function checkSksLimit(additionalSks) {
+				const currentSks = {{ $krsAmbil->sum(fn($krs) => $krs->matakuliah->sks) }};
+				const maxSks = 24;
+				const totalAfterAdd = currentSks + additionalSks;
+				
+				return {
+					isValid: totalAfterAdd <= maxSks,
+					currentSks: currentSks,
+					additionalSks: additionalSks,
+					totalAfterAdd: totalAfterAdd,
+					maxSks: maxSks,
+					remaining: maxSks - totalAfterAdd
+				};
+			}
+			// Handle delete button clicks
+			$('.delete-btn').on('click', function(e) {
+				e.preventDefault();
+				
+				const form = $(this).closest('form');
+				const kodeMatkuliah = $(this).data('kode');
+				const namaMatkuliah = $(this).data('nama');
+				
+				Swal.fire({
+					title: 'Konfirmasi Hapus',
+					html: `Yakin ingin menghapus mata kuliah <strong>${namaMatkuliah}</strong> (${kodeMatkuliah}) dari KRS?`,
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#d33',
+					cancelButtonColor: '#3085d6',
+					confirmButtonText: 'Ya, Hapus!',
+					cancelButtonText: 'Batal',
+					reverseButtons: true
+				}).then((result) => {
+					if (result.isConfirmed) {
+						// Show loading state
+						Swal.fire({
+							title: 'Menghapus...',
+							text: 'Sedang memproses permintaan Anda',
+							allowOutsideClick: false,
+							didOpen: () => {
+								Swal.showLoading();
+							}
+						});
+						
+						// Submit form via AJAX
+						$.ajax({
+							url: form.attr('action'),
+							type: 'POST',
+							data: form.serialize(),
+							success: function(response) {
+								Swal.fire({
+									title: 'Berhasil!',
+									text: `Mata kuliah ${namaMatkuliah} berhasil dihapus dari KRS`,
+									icon: 'success',
+									timer: 2000,
+									showConfirmButton: false
+								}).then(() => {
+									// Reload page to show updated data
+									window.location.reload();
+								});
+							},
+							error: function(xhr) {
+								let errorMessage = 'Terjadi kesalahan saat menghapus mata kuliah';
+								
+								if (xhr.responseJSON && xhr.responseJSON.message) {
+									errorMessage = xhr.responseJSON.message;
+								}
+								
+								Swal.fire({
+									title: 'Gagal!',
+									text: errorMessage,
+									icon: 'error',
+									confirmButtonText: 'OK'
+								});
+							}
+						});
+					}
+				});
+			});
+			
+			// Handle add course button clicks
+			$('.add-btn').on('click', function(e) {
+				e.preventDefault();
+				
+				const form = $(this).closest('form');
+				const button = $(this);
+				const kodeMatkuliah = $(this).data('kode');
+				const namaMatkuliah = $(this).data('nama');
+				const sks = $(this).data('sks');
+				const originalText = button.html();
+				
+				// Check SKS limit first
+				const sksCheck = checkSksLimit(parseInt(sks));
+				
+				if (!sksCheck.isValid) {
+					Swal.fire({
+						title: 'Batas SKS Terlampaui!',
+						html: `
+							<div class="text-left">
+								<p>Tidak dapat menambahkan mata kuliah karena akan melebihi batas maksimal SKS.</p>
+								<hr>
+								<p><strong>SKS saat ini:</strong> ${sksCheck.currentSks} SKS</p>
+								<p><strong>SKS mata kuliah:</strong> ${sksCheck.additionalSks} SKS</p>
+								<p><strong>Total setelah ditambah:</strong> ${sksCheck.totalAfterAdd} SKS</p>
+								<p><strong>Batas maksimal:</strong> ${sksCheck.maxSks} SKS</p>
+							</div>
+						`,
+						icon: 'warning',
+						confirmButtonText: 'OK'
+					});
+					return;
+				}
+				
+				// Show confirmation dialog
+				Swal.fire({
+					title: 'Konfirmasi Ambil',
+					html: `
+						<div class="text-left">
+							<p>Yakin ingin mengambil mata kuliah <strong>${namaMatkuliah}</strong> (${kodeMatkuliah}) - ${sks} SKS?</p>
+							<hr>
+							<p><strong>SKS saat ini:</strong> ${sksCheck.currentSks} SKS</p>
+							<p><strong>SKS setelah ditambah:</strong> ${sksCheck.totalAfterAdd} SKS</p>
+							<p><strong>Sisa kuota SKS:</strong> ${sksCheck.remaining} SKS</p>
+						</div>
+					`,
+					icon: 'question',
+					showCancelButton: true,
+					confirmButtonColor: '#28a745',
+					cancelButtonColor: '#6c757d',
+					confirmButtonText: 'Ya, Ambil!',
+					cancelButtonText: 'Batal',
+					reverseButtons: true
+				}).then((result) => {
+					if (result.isConfirmed) {
+						// Show loading state
+						button.html('<i class="fa fa-spinner fa-spin"></i> Menambah...');
+						button.prop('disabled', true);
+						
+						// Submit form via AJAX
+						$.ajax({
+							url: form.attr('action'),
+							type: 'POST',
+							data: form.serialize(),
+							success: function(response) {
+								Swal.fire({
+									title: 'Berhasil!',
+									text: `Mata kuliah ${namaMatkuliah} berhasil ditambahkan ke KRS`,
+									icon: 'success',
+									timer: 2000,
+									showConfirmButton: false
+								}).then(() => {
+									// Reload page to show updated data
+									window.location.reload();
+								});
+							},
+							error: function(xhr) {
+								let errorMessage = 'Terjadi kesalahan saat menambahkan mata kuliah';
+								
+								if (xhr.responseJSON && xhr.responseJSON.message) {
+									errorMessage = xhr.responseJSON.message;
+								}
+								
+								Swal.fire({
+									title: 'Gagal!',
+									text: errorMessage,
+									icon: 'error',
+									confirmButtonText: 'OK'
+								});
+								
+								// Reset button
+								button.html(originalText);
+								button.prop('disabled', false);
+							}
+						});
+					}
+				});
+			});
+		});
+		</script>
 	</body>
 </html>
