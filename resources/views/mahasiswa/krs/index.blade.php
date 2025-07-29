@@ -242,7 +242,7 @@
 									
 									@if($krsAmbil->count() > 0)
 										<div class="table-responsive">
-											<table class="table table-striped">
+											<table id="krs-mata-kuliah" class="table table-striped">
 												<thead>
 													<tr>
 														<th>Kode</th>
@@ -252,44 +252,38 @@
 														<th>Aksi</th>
 													</tr>
 												</thead>
-												<tbody>
-													@foreach($krsAmbil as $krs)
-														<tr>
-															<td><span class="badge badge-primary">{{ $krs->Kode_mk }}</span></td>
-															<td><strong>{{ $krs->matakuliah->Nama_mk }}</strong></td>
-															<td>
-																<span class="badge badge-success">{{ $krs->matakuliah->sks }} SKS</span>
-															</td>
-															<td>
-																@if($krs->matakuliah->jadwalAkademik->isNotEmpty())
-																	@foreach($krs->matakuliah->jadwalAkademik as $jadwal)
-																		@if($jadwal->id_Gol == $mahasiswa->id_Gol)
-																			<small class="text-muted">
-																				{{ $jadwal->hari }}, {{ $jadwal->waktu }}<br>
-																				<i class="fa fa-map-marker"></i> {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}
-																			</small>
-																		@endif
-																	@endforeach
-																@else
-																	<small class="text-warning">Belum dijadwalkan</small>
-																@endif
-															</td>
-															<td>
-																<form action="{{ route('mahasiswa.krs.destroy') }}" method="POST" class="d-inline delete-form">
-																	@csrf
-																	@method('DELETE')
-																	<input type="hidden" name="Kode_mk" value="{{ $krs->Kode_mk }}">
-																	<input type="hidden" name="nama_mk" value="{{ $krs->matakuliah->Nama_mk }}">
-																	<button type="submit" class="btn btn-outline-danger btn-sm delete-btn" 
-																			data-kode="{{ $krs->Kode_mk }}" 
-																			data-nama="{{ $krs->matakuliah->Nama_mk }}">
-																		<i class="fa fa-trash"></i> Hapus
-																	</button>
-																</form>
-															</td>
-														</tr>
+																				<tbody>
+									@foreach($krsAmbil as $krs)
+										<tr id="krs-row-{{ $krs->Kode_mk }}">
+											<td><span class="badge badge-primary">{{ $krs->Kode_mk }}</span></td>
+											<td><strong>{{ $krs->matakuliah->Nama_mk }}</strong></td>
+											<td>
+												<span class="badge badge-success">{{ $krs->matakuliah->sks }} SKS</span>
+											</td>
+											<td>
+												@if($krs->matakuliah->jadwalAkademik->isNotEmpty())
+													@foreach($krs->matakuliah->jadwalAkademik as $jadwal)
+														@if($jadwal->id_Gol == $mahasiswa->id_Gol)
+															<small class="text-muted">
+																{{ $jadwal->hari }}, {{ $jadwal->waktu }}<br>
+																<i class="fa fa-map-marker"></i> {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}
+															</small>
+														@endif
 													@endforeach
-												</tbody>
+												@else
+													<small class="text-warning">Belum dijadwalkan</small>
+												@endif
+											</td>
+											<td>
+												<button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
+														data-kode="{{ $krs->Kode_mk }}" 
+														data-nama="{{ $krs->matakuliah->Nama_mk }}">
+													<i class="fa fa-trash"></i> Hapus
+												</button>
+											</td>
+										</tr>
+									@endforeach
+								</tbody>
 											</table>
 										</div>
 									@else
@@ -486,9 +480,9 @@
 			$('.delete-btn').on('click', function(e) {
 				e.preventDefault();
 				
-				const form = $(this).closest('form');
-				const kodeMatkuliah = $(this).data('kode');
-				const namaMatkuliah = $(this).data('nama');
+				const button = $(this);
+				const kodeMatkuliah = button.data('kode');
+				const namaMatkuliah = button.data('nama');
 				
 				Swal.fire({
 					title: 'Konfirmasi Hapus',
@@ -512,11 +506,19 @@
 							}
 						});
 						
-						// Submit form via AJAX
+						// Submit DELETE request via AJAX
 						$.ajax({
-							url: form.attr('action'),
+							url: '{{ route("mahasiswa.krs.destroy") }}',
 							type: 'DELETE',
-							data: form.serialize(),
+							data: {
+								'Kode_mk': kodeMatkuliah,
+								'_token': $('meta[name="csrf-token"]').attr('content')
+							},
+							dataType: 'json',
+							headers: {
+								'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+								'Accept': 'application/json'
+							},
 							success: function(response) {
 								Swal.fire({
 									title: 'Berhasil!',
@@ -525,15 +527,27 @@
 									timer: 2000,
 									showConfirmButton: false
 								}).then(() => {
-									// Reload page to show updated data
-									window.location.reload();
+									// Remove the row instead of reloading
+									$('#krs-row-' + kodeMatkuliah).fadeOut(500, function() {
+										$(this).remove();
+										// Update summary counters
+										updateSummary();
+									});
 								});
 							},
 							error: function(xhr) {
+								console.error('Delete request failed:', xhr);
+								console.error('Status:', xhr.status);
+								console.error('Response:', xhr.responseText);
+								
 								let errorMessage = 'Terjadi kesalahan saat menghapus mata kuliah';
 								
 								if (xhr.responseJSON && xhr.responseJSON.message) {
 									errorMessage = xhr.responseJSON.message;
+								} else if (xhr.status === 500) {
+									errorMessage = 'Server error. Silakan coba lagi atau hubungi administrator.';
+								} else if (xhr.status === 422) {
+									errorMessage = 'Data yang dikirim tidak valid.';
 								}
 								
 								Swal.fire({
@@ -547,6 +561,13 @@
 					}
 				});
 			});
+			
+			// Function to update summary without page reload
+			function updateSummary() {
+				const rowCount = $('#krs-mata-kuliah tbody tr').length;
+				// This is a simple approach - you might want to make an AJAX call to get updated totals
+				location.reload(); // For now, just reload to get accurate counts
+			}
 			
 			// Handle add course button clicks
 			$('.add-btn').on('click', function(e) {

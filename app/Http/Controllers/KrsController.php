@@ -131,51 +131,59 @@ class KrsController extends Controller
      */
     public function destroy(Request $request)
     {
-        $request->validate([
-            'Kode_mk' => 'required|string|exists:matakuliah,Kode_mk'
-        ]);
-        
-        $mahasiswa = Auth::guard('mahasiswa')->user();
-        
-        if (!$mahasiswa) {
-            $message = 'Sesi login telah berakhir. Silakan login kembali.';
-            
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $message], 401);
-            }
-            
-            return redirect()->route('login')->with('error', $message);
-        }
-        
-        $krs = Krs::where('NIM', $mahasiswa->NIM)
-                  ->where('Kode_mk', $request->Kode_mk)
-                  ->with('matakuliah')
-                  ->first();
-        
-        if (!$krs) {
-            $message = 'Mata kuliah tidak ditemukan dalam KRS Anda.';
-            
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $message], 404);
-            }
-            
-            return redirect()->back()->with('error', $message);
-        }
-        
-        // Get mata kuliah info for response
-        $matakuliah = $krs->matakuliah;
-        
-        if (!$matakuliah) {
-            $message = 'Data mata kuliah tidak ditemukan.';
-            
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $message], 404);
-            }
-            
-            return redirect()->back()->with('error', $message);
-        }
-        
         try {
+            // Debug logging
+            \Log::info('KRS Delete Request', [
+                'method' => $request->method(),
+                'all_data' => $request->all(),
+                'content_type' => $request->header('Content-Type'),
+                'expects_json' => $request->expectsJson()
+            ]);
+
+            $request->validate([
+                'Kode_mk' => 'required|string|exists:matakuliah,Kode_mk'
+            ]);
+            
+            $mahasiswa = Auth::guard('mahasiswa')->user();
+            
+            if (!$mahasiswa) {
+                $message = 'Sesi login telah berakhir. Silakan login kembali.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 401);
+                }
+                
+                return redirect()->route('login')->with('error', $message);
+            }
+            
+            $krs = Krs::where('NIM', $mahasiswa->NIM)
+                      ->where('Kode_mk', $request->Kode_mk)
+                      ->with('matakuliah')
+                      ->first();
+            
+            if (!$krs) {
+                $message = 'Mata kuliah tidak ditemukan dalam KRS Anda.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 404);
+                }
+                
+                return redirect()->back()->with('error', $message);
+            }
+            
+            // Get mata kuliah info for response
+            $matakuliah = $krs->matakuliah;
+            
+            if (!$matakuliah) {
+                $message = 'Data mata kuliah tidak ditemukan.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 404);
+                }
+                
+                return redirect()->back()->with('error', $message);
+            }
+            
             $krs->delete();
             
             $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil dihapus dari KRS.";
@@ -193,12 +201,29 @@ class KrsController extends Controller
             
             return redirect()->back()->with('success', $message);
             
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('KRS Delete Validation Error', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Data yang dikirim tidak valid.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            
+            return redirect()->back()->withErrors($e->errors())->withInput();
+            
         } catch (\Exception $e) {
             // Log the actual error for debugging
             \Log::error('KRS Delete Error: ' . $e->getMessage(), [
-                'nim' => $mahasiswa->NIM,
-                'kode_mk' => $request->Kode_mk,
-                'exception' => $e->getTraceAsString()
+                'nim' => $mahasiswa->NIM ?? 'unknown',
+                'kode_mk' => $request->Kode_mk ?? 'unknown',
+                'exception' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ]);
             
             $message = 'Terjadi kesalahan saat menghapus mata kuliah dari KRS.';
