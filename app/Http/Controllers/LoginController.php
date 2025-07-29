@@ -86,21 +86,33 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        // Dapatkan guard yang aktif
+        $activeGuard = null;
+        if (Auth::guard('admin')->check()) {
+            $activeGuard = 'admin';
+        } elseif (Auth::guard('dosen')->check()) {
+            $activeGuard = 'dosen';
+        } elseif (Auth::guard('mahasiswa')->check()) {
+            $activeGuard = 'mahasiswa';
+        }
+
+        // Logout dari guard yang aktif
+        if ($activeGuard) {
+            Auth::guard($activeGuard)->logout();
+        }
+        
         // Logout dari semua guards untuk memastikan session bersih
         Auth::guard('admin')->logout();
         Auth::guard('dosen')->logout();
         Auth::guard('mahasiswa')->logout();
-        
-        // Logout dari guard yang aktif juga
-        $guard = session('auth_guard', 'web');
-        Auth::guard($guard)->logout();
 
+        // Invalidate session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
         // Clear any remaining session data
         $request->session()->flush();
 
-        return redirect('/login')->with('success', 'Berhasil logout.');
+        return redirect()->route('login')->with('success', 'Berhasil logout.');
     }
 }

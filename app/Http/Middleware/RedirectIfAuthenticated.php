@@ -19,21 +19,23 @@ class RedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next, ...$guards)
     {
-        $guards = empty($guards) ? [null] : $guards;
+        // Jika tidak ada guard yang dispesifikasi, gunakan default guards
+        $guards = empty($guards) ? ['admin', 'dosen', 'mahasiswa'] : $guards;
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                // Check which guard is authenticated and redirect accordingly
-                if (Auth::guard('admin')->check()) {
-                    return redirect()->route('admin.dashboard');
-                } elseif (Auth::guard('dosen')->check()) {
-                    return redirect()->route('dosen.dashboard');
-                } elseif (Auth::guard('mahasiswa')->check()) {
-                    return redirect()->route('mahasiswa.dashboard');
+                // Redirect berdasarkan guard yang aktif
+                switch ($guard) {
+                    case 'admin':
+                        return redirect()->route('admin.dashboard');
+                    case 'dosen':
+                        return redirect()->route('dosen.dashboard');
+                    case 'mahasiswa':
+                        return redirect()->route('mahasiswa.dashboard');
+                    default:
+                        // Fallback redirect if guard tidak dikenali
+                        return redirect('/');
                 }
-                
-                // Fallback redirect if guard check fails
-                return redirect('/');
             }
         }
 
