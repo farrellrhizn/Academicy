@@ -28,6 +28,11 @@ class Mahasiswa extends Authenticatable
     {
         return $this->belongsTo(Golongan::class, 'id_Gol', 'id_Gol');
     }
+    
+    public function krs()
+    {
+        return $this->hasMany(Krs::class, 'NIM', 'NIM');
+    }
 
     // Method getAuthPassword() bisa dihapus karena nama kolom sudah standar
 }

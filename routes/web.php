@@ -82,6 +82,13 @@ Route::middleware('auth:dosen')->prefix('dosen')->name('dosen.')->group(function
 // Route untuk MAHASISWA
 Route::middleware('auth:mahasiswa')->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'showDashboard'])->name('dashboard');
+    
+    // Route KRS
+    Route::get('/krs', [App\Http\Controllers\KrsController::class, 'index'])->name('krs.index');
+    Route::post('/krs', [App\Http\Controllers\KrsController::class, 'store'])->name('krs.store');
+    Route::delete('/krs', [App\Http\Controllers\KrsController::class, 'destroy'])->name('krs.destroy');
+    Route::get('/krs/jadwal', [App\Http\Controllers\KrsController::class, 'jadwal'])->name('krs.jadwal');
+    Route::get('/krs/cetak', [App\Http\Controllers\KrsController::class, 'cetak'])->name('krs.cetak');
 });
 
 // Route::get('/', function () {
