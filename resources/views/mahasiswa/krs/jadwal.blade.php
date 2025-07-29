@@ -1,337 +1,451 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jadwal Kuliah - KRS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .navbar-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .card-custom {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .schedule-card {
-            border-left: 4px solid;
-            transition: transform 0.2s ease-in-out;
-        }
-        .schedule-card:hover {
-            transform: translateY(-2px);
-        }
-        .time-label {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-        .day-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ route('mahasiswa.dashboard') }}">
-                <i class="bi bi-mortarboard-fill me-2"></i>SIAKAD
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('mahasiswa.dashboard') }}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('mahasiswa.krs.index') }}">KRS</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ route('mahasiswa.krs.jadwal') }}">Jadwal Kuliah</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i>{{ $mahasiswa->Nama }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Jadwal Kuliah - KRS</title>
 
-    <div class="container mt-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card card-custom bg-primary text-white">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h3 class="card-title mb-1">
-                                    <i class="bi bi-calendar-week me-2"></i>Jadwal Kuliah
-                                </h3>
-                                <p class="card-text mb-0">Jadwal mata kuliah berdasarkan KRS yang telah diambil</p>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <div class="bg-white text-primary rounded p-3">
-                                    <h5 class="mb-1">{{ $mahasiswa->NIM }}</h5>
-                                    <small>{{ $mahasiswa->Nama }}</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="../../../bootstrap/vendors/images/apple-touch-icon.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="../../../bootstrap/vendors/images/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="../../../bootstrap/vendors/images/favicon-16x16.png"
+		/>
 
-        @if($jadwalKuliah->count() > 0)
-            <!-- Ringkasan Jadwal -->
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card card-custom">
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-md-3">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-book text-primary me-2" style="font-size: 1.5rem;"></i>
-                                        <div>
-                                            <h5 class="mb-0">{{ $jadwalKuliah->count() }}</h5>
-                                            <small class="text-muted">Mata Kuliah</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-award text-success me-2" style="font-size: 1.5rem;"></i>
-                                        <div>
-                                            <h5 class="mb-0">{{ $jadwalKuliah->sum('sks') }}</h5>
-                                            <small class="text-muted">Total SKS</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-calendar-date text-info me-2" style="font-size: 1.5rem;"></i>
-                                        <div>
-                                            <h5 class="mb-0">{{ $jadwalKuliah->groupBy('hari')->count() }}</h5>
-                                            <small class="text-muted">Hari Kuliah</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <i class="bi bi-people text-warning me-2" style="font-size: 1.5rem;"></i>
-                                        <div>
-                                            <h5 class="mb-0">{{ $mahasiswa->golongan->nama_Gol ?? 'N/A' }}</h5>
-                                            <small class="text-muted">Golongan</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1"
+		/>
 
-            <!-- Jadwal Per Hari -->
-            @php
-                $hariUrutan = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-                $jadwalPerHari = $jadwalKuliah->groupBy('hari');
-                $warna = [
-                    'Senin' => 'primary',
-                    'Selasa' => 'success', 
-                    'Rabu' => 'info',
-                    'Kamis' => 'warning',
-                    'Jumat' => 'danger',
-                    'Sabtu' => 'secondary',
-                    'Minggu' => 'dark'
-                ];
-            @endphp
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" type="text/css" href="../../../bootstrap/vendors/styles/core.css" />
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="../../../bootstrap/vendors/styles/icon-font.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="../../../bootstrap/src/plugins/datatables/css/dataTables.bootstrap4.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="../../../bootstrap/src/plugins/datatables/css/responsive.bootstrap4.min.css"
+		/>
+		<link rel="stylesheet" type="text/css" href="../../../bootstrap/vendors/styles/style.css" />
+	</head>
+	<body>
+		<div class="pre-loader">
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
+			</div>
+		</div>
 
-            @foreach($hariUrutan as $hari)
-                @if(isset($jadwalPerHari[$hari]))
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <div class="day-header">
-                                <h4 class="mb-0">
-                                    <i class="bi bi-calendar-day me-2"></i>{{ $hari }}
-                                </h4>
-                            </div>
-                            
-                            @foreach($jadwalPerHari[$hari]->sortBy('waktu') as $jadwal)
-                                <div class="card schedule-card border-{{ $warna[$hari] ?? 'primary' }} mb-3">
-                                    <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-md-2">
-                                                <div class="time-label text-center">
-                                                    <i class="bi bi-clock"></i><br>
-                                                    {{ $jadwal->waktu }}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h5 class="card-title text-{{ $warna[$hari] ?? 'primary' }} mb-1">
-                                                    {{ $jadwal->Nama_mk }}
-                                                </h5>
-                                                <p class="card-text mb-2">
-                                                    <span class="badge bg-{{ $warna[$hari] ?? 'primary' }} me-2">{{ $jadwal->Kode_mk }}</span>
-                                                    <span class="badge bg-secondary me-2">{{ $jadwal->sks }} SKS</span>
-                                                    <span class="badge bg-info">{{ $jadwal->nama_Gol }}</span>
-                                                </p>
-                                                <small class="text-muted">
-                                                    <i class="bi bi-geo-alt me-1"></i>{{ $jadwal->nama_ruang }}
-                                                </small>
-                                            </div>
-                                            <div class="col-md-2 text-end">
-                                                <div class="d-flex flex-column">
-                                                    <span class="badge bg-light text-dark mb-1">{{ $hari }}</span>
-                                                    <small class="text-muted">{{ $jadwal->waktu }}</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            @endforeach
+		<div class="header">
+			<div class="header-left">
+				<div class="menu-icon bi bi-list"></div>
+			</div>
+			<div class="header-right">
+				<div class="user-notification">
+					<div class="dropdown">
+						<a
+							class="dropdown-toggle no-arrow"
+							href="#"
+							role="button"
+							data-toggle="dropdown"
+						>
+							<i class="icon-copy dw dw-notification"></i>
+							<span class="badge notification-active"></span>
+						</a>
+						<div class="dropdown-menu dropdown-menu-right">
+							<div class="notification-list mx-h-350 customscroll">
+								<ul>
+									<li>
+										<a href="#">
+											<img src="../../../bootstrap/vendors/images/img.jpg" alt="" />
+											<h3>Info Akademik</h3>
+											<p>
+												Jadwal kuliah sudah tersedia. Pastikan Anda hadir tepat waktu.
+											</p>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="user-info-dropdown">
+					<div class="dropdown">
+						<a
+							class="dropdown-toggle"
+							href="#"
+							role="button"
+							data-toggle="dropdown"
+						>
+							<span class="user-icon">
+								<img src="../../../bootstrap/vendors/images/photo1.jpg" alt="" />
+							</span>
+							<span class="user-name">{{ $mahasiswa->Nama }}</span>
+						</a>
+						<div
+							class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
+						>
+							<a class="dropdown-item" href="#"
+								><i class="dw dw-user1"></i> Profile</a
+							>
+							<form method="POST" action="{{ route('logout') }}" style="display: inline;">
+								@csrf
+								<button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+									<i class="dw dw-logout"></i> Log Out
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="left-side-bar">
+			<div class="brand-logo">
+				<a href="{{ route('mahasiswa.dashboard') }}">
+					<img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
+					<img
+						src="../../../bootstrap/vendors/images/deskapp-logo-white.svg"
+						alt=""
+						class="light-logo"
+					/>
+				</a>
+				<div class="close-sidebar" data-toggle="left-sidebar-close">
+					<i class="ion-close-round"></i>
+				</div>
+			</div>
+			<div class="menu-block customscroll">
+				<div class="sidebar-menu">
+					<ul id="accordion-menu">
+						<li>
+							<a href="{{ route('mahasiswa.dashboard') }}" class="dropdown-toggle no-arrow">
+								<span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
+							</a>
+						</li>
+						<li>
+							<a href="{{ route('mahasiswa.krs.index') }}" class="dropdown-toggle no-arrow">
+								<span class="micon bi bi-card-list"></span><span class="mtext">KRS</span>
+							</a>
+						</li>
+						<li>
+							<a href="{{ route('mahasiswa.krs.jadwal') }}" class="dropdown-toggle no-arrow active">
+								<span class="micon bi bi-calendar-week"></span><span class="mtext">Jadwal Kuliah</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" class="dropdown-toggle no-arrow">
+								<span class="micon bi bi-check2-square"></span><span class="mtext">Riwayat Presensi</span>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="mobile-menu-overlay"></div>
 
-            <!-- Tabel Ringkasan -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-custom">
-                        <div class="card-header bg-dark text-white">
-                            <h5 class="card-title mb-0">
-                                <i class="bi bi-table me-2"></i>Ringkasan Jadwal Kuliah
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>No</th>
-                                            <th>Kode MK</th>
-                                            <th>Mata Kuliah</th>
-                                            <th>SKS</th>
-                                            <th>Hari</th>
-                                            <th>Waktu</th>
-                                            <th>Ruang</th>
-                                            <th>Golongan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($jadwalKuliah as $index => $jadwal)
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td><code>{{ $jadwal->Kode_mk }}</code></td>
-                                                <td><strong>{{ $jadwal->Nama_mk }}</strong></td>
-                                                <td>
-                                                    <span class="badge bg-primary">{{ $jadwal->sks }} SKS</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-{{ $warna[$jadwal->hari] ?? 'primary' }}">{{ $jadwal->hari }}</span>
-                                                </td>
-                                                <td>{{ $jadwal->waktu }}</td>
-                                                <td>
-                                                    <i class="bi bi-geo-alt me-1"></i>{{ $jadwal->nama_ruang }}
-                                                </td>
-                                                <td>{{ $jadwal->nama_Gol }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot class="table-light">
-                                        <tr>
-                                            <td colspan="3"><strong>Total</strong></td>
-                                            <td><strong>{{ $jadwalKuliah->sum('sks') }} SKS</strong></td>
-                                            <td colspan="4"></td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+		<div class="main-container">
+			<div class="pd-ltr-20 xs-pd-20-10">
+				<div class="min-height-200px">
+					<!-- Page Header -->
+					<div class="page-header">
+						<div class="row">
+							<div class="col-md-6 col-sm-12">
+								<div class="title">
+									<h4>Jadwal Kuliah</h4>
+								</div>
+								<nav aria-label="breadcrumb" role="navigation">
+									<ol class="breadcrumb">
+										<li class="breadcrumb-item">
+											<a href="{{ route('mahasiswa.dashboard') }}">Dashboard</a>
+										</li>
+										<li class="breadcrumb-item">
+											<a href="{{ route('mahasiswa.krs.index') }}">KRS</a>
+										</li>
+										<li class="breadcrumb-item active" aria-current="page">
+											Jadwal Kuliah
+										</li>
+									</ol>
+								</nav>
+							</div>
+							<div class="col-md-6 col-sm-12 text-right">
+								<div class="pd-20">
+									<h4 class="text-blue h4">NIM: {{ $mahasiswa->NIM }}</h4>
+									<p class="mb-0">Semester {{ $mahasiswa->Semester }}</p>
+								</div>
+							</div>
+						</div>
+					</div>
 
-            <!-- Action Buttons -->
-            <div class="row mt-4">
-                <div class="col-md-12 text-center">
-                    <a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-outline-primary me-2">
-                        <i class="bi bi-arrow-left me-1"></i>Kembali ke KRS
-                    </a>
-                    <a href="{{ route('mahasiswa.krs.cetak') }}" class="btn btn-primary me-2">
-                        <i class="bi bi-printer me-1"></i>Cetak Jadwal
-                    </a>
-                    <button class="btn btn-success" onclick="window.print()">
-                        <i class="bi bi-download me-1"></i>Print Jadwal
-                    </button>
-                </div>
-            </div>
+					@if($krsData->count() > 0)
+						<!-- Jadwal Hari ini -->
+						<div class="row pb-10">
+							<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-30">
+								<div class="card-box pd-20">
+									<div class="d-flex justify-content-between align-items-center mb-20">
+										<h4 class="text-blue h4">Jadwal Hari Ini - {{ \Carbon\Carbon::now()->format('l, d F Y') }}</h4>
+										<div>
+											<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-outline-primary btn-sm">
+												<i class="fa fa-arrow-left"></i> Kembali ke KRS
+											</a>
+											<a href="{{ route('mahasiswa.krs.cetak') }}" class="btn btn-primary btn-sm">
+												<i class="fa fa-print"></i> Cetak Jadwal
+											</a>
+										</div>
+									</div>
+									
+									@php
+										$hariIni = \Carbon\Carbon::now()->format('l');
+										$jadwalHariIni = collect();
+										foreach($krsData as $krs) {
+											if($krs->matakuliah->jadwalAkademik->isNotEmpty()) {
+												foreach($krs->matakuliah->jadwalAkademik as $jadwal) {
+													if($jadwal->id_Gol == $mahasiswa->id_Gol && $jadwal->hari == $hariIni) {
+														$jadwalHariIni->push((object)[
+															'krs' => $krs,
+															'jadwal' => $jadwal
+														]);
+													}
+												}
+											}
+										}
+										$jadwalHariIni = $jadwalHariIni->sortBy('jadwal.waktu');
+									@endphp
+									
+									@if($jadwalHariIni->count() > 0)
+										<div class="row">
+											@foreach($jadwalHariIni as $item)
+												<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-20">
+													<div class="card-box pd-20" style="border-left: 4px solid #007bff;">
+														<h5 class="text-blue h5">{{ $item->krs->matakuliah->Nama_mk }}</h5>
+														<p class="mb-0"><span class="badge badge-primary">{{ $item->krs->Kode_mk }}</span></p>
+														<hr class="my-2">
+														<div class="d-flex align-items-center mb-2">
+															<i class="fa fa-clock-o text-primary mr-2"></i>
+															<span>{{ $item->jadwal->waktu }}</span>
+														</div>
+														<div class="d-flex align-items-center mb-2">
+															<i class="fa fa-map-marker text-danger mr-2"></i>
+															<span>{{ $item->jadwal->ruang->nama_ruang ?? 'TBA' }}</span>
+														</div>
+														<div class="d-flex align-items-center">
+															<i class="fa fa-graduation-cap text-success mr-2"></i>
+															<span>{{ $item->krs->matakuliah->sks }} SKS</span>
+														</div>
+													</div>
+												</div>
+											@endforeach
+										</div>
+									@else
+										<div class="alert alert-info" role="alert">
+											<i class="fa fa-info-circle"></i> Tidak ada jadwal kuliah hari ini.
+										</div>
+									@endif
+								</div>
+							</div>
+						</div>
 
-        @else
-            <!-- Tidak Ada Jadwal -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card card-custom">
-                        <div class="card-body text-center py-5">
-                            <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
-                            <h4 class="text-muted mt-3">Belum Ada Jadwal Kuliah</h4>
-                            <p class="text-muted mb-4">
-                                Anda belum mengambil mata kuliah atau mata kuliah yang diambil belum dijadwalkan.
-                            </p>
-                            <a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-primary btn-lg">
-                                <i class="bi bi-plus-circle me-2"></i>Ambil Mata Kuliah
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-    </div>
+						<!-- Jadwal Mingguan -->
+						<div class="row">
+							<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-30">
+								<div class="card-box pd-20">
+									<h4 class="text-blue h4">Jadwal Mingguan</h4>
+									<div class="pb-20">
+										@php
+											$hari = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+											$hariIndonesia = [
+												'Monday' => 'Senin',
+												'Tuesday' => 'Selasa', 
+												'Wednesday' => 'Rabu',
+												'Thursday' => 'Kamis',
+												'Friday' => 'Jumat',
+												'Saturday' => 'Sabtu',
+												'Sunday' => 'Minggu'
+											];
+										@endphp
+										
+										@foreach($hari as $hariEng)
+											@php
+												$jadwalHari = collect();
+												foreach($krsData as $krs) {
+													if($krs->matakuliah->jadwalAkademik->isNotEmpty()) {
+														foreach($krs->matakuliah->jadwalAkademik as $jadwal) {
+															if($jadwal->id_Gol == $mahasiswa->id_Gol && $jadwal->hari == $hariEng) {
+																$jadwalHari->push((object)[
+																	'krs' => $krs,
+																	'jadwal' => $jadwal
+																]);
+															}
+														}
+													}
+												}
+												$jadwalHari = $jadwalHari->sortBy('jadwal.waktu');
+											@endphp
+											
+											@if($jadwalHari->count() > 0)
+												<div class="mb-30">
+													<div class="bg-primary text-white pd-10 border-radius-4 mb-20">
+														<h5 class="text-white h5 mb-0">{{ $hariIndonesia[$hariEng] }}</h5>
+													</div>
+													<div class="row">
+														@foreach($jadwalHari as $item)
+															<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-20">
+																<div class="card-box pd-20" style="border-left: 4px solid #28a745;">
+																	<div class="d-flex justify-content-between align-items-start">
+																		<div class="flex-grow-1">
+																			<h6 class="text-blue h6">{{ $item->krs->matakuliah->Nama_mk }}</h6>
+																			<p class="mb-2"><span class="badge badge-primary">{{ $item->krs->Kode_mk }}</span></p>
+																		</div>
+																		<span class="badge badge-success">{{ $item->krs->matakuliah->sks }} SKS</span>
+																	</div>
+																	<hr class="my-2">
+																	<div class="row">
+																		<div class="col-6">
+																			<small class="text-muted">
+																				<i class="fa fa-clock-o"></i> {{ $item->jadwal->waktu }}
+																			</small>
+																		</div>
+																		<div class="col-6">
+																			<small class="text-muted">
+																				<i class="fa fa-map-marker"></i> {{ $item->jadwal->ruang->nama_ruang ?? 'TBA' }}
+																			</small>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														@endforeach
+													</div>
+												</div>
+											@endif
+										@endforeach
+									</div>
+								</div>
+							</div>
+						</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Print Styles -->
-    <style media="print">
-        .navbar, .btn, .no-print {
-            display: none !important;
-        }
-        .container {
-            max-width: 100% !important;
-        }
-        .card {
-            border: 1px solid #000 !important;
-            box-shadow: none !important;
-        }
-        body {
-            background: white !important;
-        }
-    </style>
-</body>
+						<!-- Ringkasan Jadwal -->
+						<div class="row">
+							<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
+								<div class="card-box pd-20">
+									<h4 class="text-blue h4">Statistik Jadwal</h4>
+									<div class="pb-20">
+										@php
+											$totalJadwal = 0;
+											foreach($krsData as $krs) {
+												if($krs->matakuliah->jadwalAkademik->isNotEmpty()) {
+													foreach($krs->matakuliah->jadwalAkademik as $jadwal) {
+														if($jadwal->id_Gol == $mahasiswa->id_Gol) {
+															$totalJadwal++;
+														}
+													}
+												}
+											}
+										@endphp
+										<div class="d-flex align-items-center justify-content-between mb-10">
+											<span>Total Jadwal:</span>
+											<strong class="text-primary">{{ $totalJadwal }}</strong>
+										</div>
+										<div class="d-flex align-items-center justify-content-between mb-10">
+											<span>Mata Kuliah:</span>
+											<strong class="text-success">{{ $krsData->count() }}</strong>
+										</div>
+										<div class="d-flex align-items-center justify-content-between mb-10">
+											<span>Total SKS:</span>
+											<strong class="text-info">{{ $krsData->sum(fn($krs) => $krs->matakuliah->sks) }}</strong>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
+								<div class="card-box pd-20">
+									<h4 class="text-blue h4">Quick Actions</h4>
+									<div class="pb-20">
+										<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-outline-primary btn-block mb-10">
+											<i class="fa fa-arrow-left"></i> Kembali ke KRS
+										</a>
+										<a href="{{ route('mahasiswa.krs.cetak') }}" class="btn btn-primary btn-block mb-10">
+											<i class="fa fa-print"></i> Cetak Jadwal
+										</a>
+										<a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-outline-secondary btn-block">
+											<i class="fa fa-home"></i> Dashboard
+										</a>
+									</div>
+								</div>
+							</div>
+							
+							<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
+								<div class="card-box pd-20">
+									<h4 class="text-blue h4">Catatan Penting</h4>
+									<div class="pb-20">
+										<div class="alert alert-success" role="alert">
+											<i class="fa fa-check-circle"></i> <strong>Hadir Tepat Waktu</strong><br>
+											Pastikan Anda hadir 15 menit sebelum kelas dimulai
+										</div>
+										<div class="alert alert-info" role="alert">
+											<i class="fa fa-info-circle"></i> <strong>Perubahan Jadwal</strong><br>
+											Pantau pengumuman untuk perubahan jadwal
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					@else
+						<!-- Tidak ada jadwal -->
+						<div class="row">
+							<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-30">
+								<div class="card-box pd-20 text-center">
+									<i class="fa fa-calendar-times-o text-muted" style="font-size: 5rem;"></i>
+									<h4 class="text-blue h4 mt-20">Belum Ada Jadwal</h4>
+									<p class="text-muted mb-20">Anda belum mengambil mata kuliah atau jadwal belum tersedia</p>
+									<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-primary">
+										<i class="fa fa-plus"></i> Ambil Mata Kuliah
+									</a>
+								</div>
+							</div>
+						</div>
+					@endif
+				</div>
+				
+				<div class="footer-wrap pd-20 mb-20 card-box">
+					Sistem Informasi Akademik - © 2025
+				</div>
+			</div>
+		</div>
+
+		<script src="../../../bootstrap/vendors/scripts/core.js"></script>
+		<script src="../../../bootstrap/vendors/scripts/script.min.js"></script>
+		<script src="../../../bootstrap/vendors/scripts/process.js"></script>
+		<script src="../../../bootstrap/vendors/scripts/layout-settings.js"></script>
+		<script src="../../../bootstrap/src/plugins/datatables/js/jquery.dataTables.min.js"></script>
+		<script src="../../../bootstrap/src/plugins/datatables/js/dataTables.bootstrap4.min.js"></script>
+		<script src="../../../bootstrap/src/plugins/datatables/js/dataTables.responsive.min.js"></script>
+		<script src="../../../bootstrap/src/plugins/datatables/js/responsive.bootstrap4.min.js"></script>
+	</body>
 </html>
