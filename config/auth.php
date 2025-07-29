@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'mahasiswa', // Guard default saat membuka halaman login
+        'guard' => 'web', // Changed back to web guard to prevent conflicts
         'passwords' => 'users',
     ],
 

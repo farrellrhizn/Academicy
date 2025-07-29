@@ -19,7 +19,7 @@ use App\Http\Controllers\MataKuliahDiampuController;
 use Illuminate\Support\Facades\Auth;
 
 // Route untuk Guest (yang belum login)
-Route::middleware('guest')->group(function () {
+Route::middleware('guest:admin,dosen,mahasiswa')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']); // name dihapus karena sama
 });
