@@ -132,13 +132,24 @@ class KrsController extends Controller
     public function destroy(Request $request)
     {
         $request->validate([
-            'Kode_mk' => 'required|exists:matakuliah,Kode_mk'
+            'Kode_mk' => 'required|string|exists:matakuliah,Kode_mk'
         ]);
         
         $mahasiswa = Auth::guard('mahasiswa')->user();
         
+        if (!$mahasiswa) {
+            $message = 'Sesi login telah berakhir. Silakan login kembali.';
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 401);
+            }
+            
+            return redirect()->route('login')->with('error', $message);
+        }
+        
         $krs = Krs::where('NIM', $mahasiswa->NIM)
                   ->where('Kode_mk', $request->Kode_mk)
+                  ->with('matakuliah')
                   ->first();
         
         if (!$krs) {
@@ -153,6 +164,16 @@ class KrsController extends Controller
         
         // Get mata kuliah info for response
         $matakuliah = $krs->matakuliah;
+        
+        if (!$matakuliah) {
+            $message = 'Data mata kuliah tidak ditemukan.';
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 404);
+            }
+            
+            return redirect()->back()->with('error', $message);
+        }
         
         try {
             $krs->delete();
@@ -173,10 +194,20 @@ class KrsController extends Controller
             return redirect()->back()->with('success', $message);
             
         } catch (\Exception $e) {
+            // Log the actual error for debugging
+            \Log::error('KRS Delete Error: ' . $e->getMessage(), [
+                'nim' => $mahasiswa->NIM,
+                'kode_mk' => $request->Kode_mk,
+                'exception' => $e->getTraceAsString()
+            ]);
+            
             $message = 'Terjadi kesalahan saat menghapus mata kuliah dari KRS.';
             
             if ($request->expectsJson()) {
-                return response()->json(['message' => $message], 500);
+                return response()->json([
+                    'message' => $message,
+                    'error' => config('app.debug') ? $e->getMessage() : null
+                ], 500);
             }
             
             return redirect()->back()->with('error', $message);

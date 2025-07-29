@@ -11,9 +11,10 @@ class Krs extends Model
     use HasFactory;
     
     protected $table = 'krs';
-    public $incrementing = false;
-    public $timestamps = false;
-    protected $fillable = ['NIM', 'Kode_mk'];
+    protected $primaryKey = 'id_KRS';
+    public $incrementing = true;
+    public $timestamps = true;
+    protected $fillable = ['NIM', 'Kode_mk', 'Nilai', 'Grade'];
     
     public function mahasiswa()
     {
