@@ -125,7 +125,7 @@
 							</a>
 						</li>
 						<li>
-							<a href="matkul-diampu.html" class="dropdown-toggle no-arrow">
+							<a href="{{ route('dosen.mata-kuliah-diampu.index') }}" class="dropdown-toggle no-arrow">
 								<span class="micon bi bi-book"></span><span class="mtext">Mata Kuliah Diampu</span>
 							</a>
 						</li>

@@ -15,6 +15,7 @@ use App\Http\Controllers\BuatJadwalController;
 use App\Http\Controllers\KelolaJadwalController;
 use App\Http\Controllers\JadwalDosenController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\MataKuliahDiampuController;
 use Illuminate\Support\Facades\Auth;
 
 // Route untuk Guest (yang belum login)
@@ -72,6 +73,9 @@ Route::middleware('auth:dosen')->prefix('dosen')->name('dosen.')->group(function
     // Route presensi detail (pilih mata kuliah dan tanggal)
     Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi.index');
     Route::post('/presensi', [PresensiController::class, 'store'])->name('presensi.store');
+    
+    // Route mata kuliah diampu
+    Route::get('/mata-kuliah-diampu', [MataKuliahDiampuController::class, 'index'])->name('mata-kuliah-diampu.index');
 });
 
 
