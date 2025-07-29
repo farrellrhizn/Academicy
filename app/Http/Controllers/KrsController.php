@@ -53,7 +53,13 @@ class KrsController extends Controller
                          ->first();
         
         if ($existingKrs) {
-            return redirect()->back()->with('error', 'Mata kuliah sudah diambil sebelumnya.');
+            $message = 'Mata kuliah sudah diambil sebelumnya.';
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 400);
+            }
+            
+            return redirect()->back()->with('error', $message);
         }
         
         // Cek apakah mata kuliah sesuai semester mahasiswa
@@ -62,7 +68,13 @@ class KrsController extends Controller
                                ->first();
         
         if (!$matakuliah) {
-            return redirect()->back()->with('error', 'Mata kuliah tidak sesuai dengan semester Anda.');
+            $message = 'Mata kuliah tidak sesuai dengan semester Anda.';
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 400);
+            }
+            
+            return redirect()->back()->with('error', $message);
         }
         
         // Cek apakah ada jadwal untuk golongan mahasiswa
@@ -71,16 +83,47 @@ class KrsController extends Controller
                                ->first();
         
         if (!$jadwal) {
-            return redirect()->back()->with('error', 'Mata kuliah belum dijadwalkan untuk golongan Anda.');
+            $message = 'Mata kuliah belum dijadwalkan untuk golongan Anda.';
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 400);
+            }
+            
+            return redirect()->back()->with('error', $message);
         }
         
         // Tambahkan ke KRS
-        Krs::create([
-            'NIM' => $mahasiswa->NIM,
-            'Kode_mk' => $request->Kode_mk
-        ]);
-        
-        return redirect()->back()->with('success', 'Mata kuliah berhasil ditambahkan ke KRS.');
+        try {
+            Krs::create([
+                'NIM' => $mahasiswa->NIM,
+                'Kode_mk' => $request->Kode_mk
+            ]);
+            
+            $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil ditambahkan ke KRS.";
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => [
+                        'kode_mk' => $matakuliah->Kode_mk,
+                        'nama_mk' => $matakuliah->Nama_mk,
+                        'sks' => $matakuliah->sks
+                    ]
+                ]);
+            }
+            
+            return redirect()->back()->with('success', $message);
+            
+        } catch (\Exception $e) {
+            $message = 'Terjadi kesalahan saat menambahkan mata kuliah ke KRS.';
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 500);
+            }
+            
+            return redirect()->back()->with('error', $message);
+        }
     }
     
     /**
@@ -99,12 +142,45 @@ class KrsController extends Controller
                   ->first();
         
         if (!$krs) {
-            return redirect()->back()->with('error', 'Mata kuliah tidak ditemukan dalam KRS Anda.');
+            $message = 'Mata kuliah tidak ditemukan dalam KRS Anda.';
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 404);
+            }
+            
+            return redirect()->back()->with('error', $message);
         }
         
-        $krs->delete();
+        // Get mata kuliah info for response
+        $matakuliah = $krs->matakuliah;
         
-        return redirect()->back()->with('success', 'Mata kuliah berhasil dihapus dari KRS.');
+        try {
+            $krs->delete();
+            
+            $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil dihapus dari KRS.";
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => [
+                        'kode_mk' => $matakuliah->Kode_mk,
+                        'nama_mk' => $matakuliah->Nama_mk
+                    ]
+                ]);
+            }
+            
+            return redirect()->back()->with('success', $message);
+            
+        } catch (\Exception $e) {
+            $message = 'Terjadi kesalahan saat menghapus mata kuliah dari KRS.';
+            
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 500);
+            }
+            
+            return redirect()->back()->with('error', $message);
+        }
     }
     
     /**
