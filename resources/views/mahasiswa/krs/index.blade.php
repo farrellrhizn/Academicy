@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>KRS - Kartu Rencana Studi</title>
+		<meta name="csrf-token" content="{{ csrf_token() }}">
 
 		<link
 			rel="apple-touch-icon"
@@ -459,6 +460,13 @@
 		
 		<script>
 		$(document).ready(function() {
+			// Setup CSRF Token untuk semua request AJAX
+			$.ajaxSetup({
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				}
+			});
+			
 			// Check SKS limit before adding
 			function checkSksLimit(additionalSks) {
 				const currentSks = {{ $krsAmbil->sum(fn($krs) => $krs->matakuliah->sks) }};
@@ -507,7 +515,7 @@
 						// Submit form via AJAX
 						$.ajax({
 							url: form.attr('action'),
-							type: 'POST',
+							type: 'DELETE',
 							data: form.serialize(),
 							success: function(response) {
 								Swal.fire({
