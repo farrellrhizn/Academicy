@@ -1,333 +1,452 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KRS - Kartu Rencana Studi</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .navbar-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .card-custom {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease-in-out;
-        }
-        .card-custom:hover {
-            transform: translateY(-2px);
-        }
-        .btn-custom {
-            border-radius: 10px;
-            padding: 8px 20px;
-            font-weight: 500;
-        }
-        .table-custom {
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .badge-custom {
-            padding: 6px 12px;
-            border-radius: 20px;
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ route('mahasiswa.dashboard') }}">
-                <i class="bi bi-mortarboard-fill me-2"></i>SIAKAD
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('mahasiswa.dashboard') }}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ route('mahasiswa.krs.index') }}">KRS</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('mahasiswa.krs.jadwal') }}">Jadwal Kuliah</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i>{{ $mahasiswa->Nama }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profil</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>KRS - Kartu Rencana Studi</title>
 
-    <div class="container mt-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="card card-custom bg-primary text-white">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h3 class="card-title mb-1">
-                                    <i class="bi bi-journal-text me-2"></i>Kartu Rencana Studi (KRS)
-                                </h3>
-                                <p class="card-text mb-0">Kelola mata kuliah yang akan Anda ambil pada semester ini</p>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <div class="bg-white text-primary rounded p-3">
-                                    <h5 class="mb-1">{{ $mahasiswa->NIM }}</h5>
-                                    <small>Semester {{ $mahasiswa->Semester }}</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+		<link
+			rel="apple-touch-icon"
+			sizes="180x180"
+			href="../../../bootstrap/vendors/images/apple-touch-icon.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="../../../bootstrap/vendors/images/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="../../../bootstrap/vendors/images/favicon-16x16.png"
+		/>
 
-        <!-- Alert Messages -->
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1"
+		/>
 
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" type="text/css" href="../../../bootstrap/vendors/styles/core.css" />
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="../../../bootstrap/vendors/styles/icon-font.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="../../../bootstrap/src/plugins/datatables/css/dataTables.bootstrap4.min.css"
+		/>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="../../../bootstrap/src/plugins/datatables/css/responsive.bootstrap4.min.css"
+		/>
+		<link rel="stylesheet" type="text/css" href="../../../bootstrap/vendors/styles/style.css" />
+	</head>
+	<body>
+		<div class="pre-loader">
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
+			</div>
+		</div>
 
-        <div class="row">
-            <!-- Mata Kuliah yang Sudah Diambil -->
-            <div class="col-lg-6 mb-4">
-                <div class="card card-custom">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-check-square me-2"></i>Mata Kuliah Diambil
-                            <span class="badge bg-light text-success ms-2">{{ $krsAmbil->count() }}</span>
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @if($krsAmbil->count() > 0)
-                            <div class="mb-3 d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    Total SKS: <strong>{{ $krsAmbil->sum(fn($krs) => $krs->matakuliah->sks) }}</strong>
-                                </small>
-                                <a href="{{ route('mahasiswa.krs.cetak') }}" class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-printer me-1"></i>Cetak KRS
-                                </a>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-custom table-sm">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Kode</th>
-                                            <th>Mata Kuliah</th>
-                                            <th>SKS</th>
-                                            <th>Jadwal</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($krsAmbil as $krs)
-                                            <tr>
-                                                <td><code>{{ $krs->Kode_mk }}</code></td>
-                                                <td>
-                                                    <strong>{{ $krs->matakuliah->Nama_mk }}</strong>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-custom bg-primary">{{ $krs->matakuliah->sks }} SKS</span>
-                                                </td>
-                                                <td>
-                                                    @if($krs->matakuliah->jadwalAkademik->isNotEmpty())
-                                                        @foreach($krs->matakuliah->jadwalAkademik as $jadwal)
-                                                            @if($jadwal->id_Gol == $mahasiswa->id_Gol)
-                                                                <small class="text-muted">
-                                                                    {{ $jadwal->hari }}, {{ $jadwal->waktu }}<br>
-                                                                    <i class="bi bi-geo-alt"></i> {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}
-                                                                </small>
-                                                            @endif
-                                                        @endforeach
-                                                    @else
-                                                        <small class="text-warning">Belum dijadwalkan</small>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <form action="{{ route('mahasiswa.krs.destroy') }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <input type="hidden" name="Kode_mk" value="{{ $krs->Kode_mk }}">
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm" 
-                                                                onclick="return confirm('Yakin ingin menghapus mata kuliah ini dari KRS?')">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="text-center py-4">
-                                <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted mt-2">Belum ada mata kuliah yang diambil</p>
-                                <small class="text-muted">Pilih mata kuliah dari daftar sebelah kanan</small>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
+		<div class="header">
+			<div class="header-left">
+				<div class="menu-icon bi bi-list"></div>
+			</div>
+			<div class="header-right">
+				<div class="user-notification">
+					<div class="dropdown">
+						<a
+							class="dropdown-toggle no-arrow"
+							href="#"
+							role="button"
+							data-toggle="dropdown"
+						>
+							<i class="icon-copy dw dw-notification"></i>
+							<span class="badge notification-active"></span>
+						</a>
+						<div class="dropdown-menu dropdown-menu-right">
+							<div class="notification-list mx-h-350 customscroll">
+								<ul>
+									<li>
+										<a href="#">
+											<img src="../../../bootstrap/vendors/images/img.jpg" alt="" />
+											<h3>Info Akademik</h3>
+											<p>
+												Batas akhir pengisian KRS adalah tanggal 30 Agustus 2025.
+											</p>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="user-info-dropdown">
+					<div class="dropdown">
+						<a
+							class="dropdown-toggle"
+							href="#"
+							role="button"
+							data-toggle="dropdown"
+						>
+							<span class="user-icon">
+								<img src="../../../bootstrap/vendors/images/photo1.jpg" alt="" />
+							</span>
+							<span class="user-name">{{ $mahasiswa->Nama }}</span>
+						</a>
+						<div
+							class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
+						>
+							<a class="dropdown-item" href="#"
+								><i class="dw dw-user1"></i> Profile</a
+							>
+							<form method="POST" action="{{ route('logout') }}" style="display: inline;">
+								@csrf
+								<button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+									<i class="dw dw-logout"></i> Log Out
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="left-side-bar">
+			<div class="brand-logo">
+				<a href="{{ route('mahasiswa.dashboard') }}">
+					<img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
+					<img
+						src="../../../bootstrap/vendors/images/deskapp-logo-white.svg"
+						alt=""
+						class="light-logo"
+					/>
+				</a>
+				<div class="close-sidebar" data-toggle="left-sidebar-close">
+					<i class="ion-close-round"></i>
+				</div>
+			</div>
+			<div class="menu-block customscroll">
+				<div class="sidebar-menu">
+					<ul id="accordion-menu">
+						<li>
+							<a href="{{ route('mahasiswa.dashboard') }}" class="dropdown-toggle no-arrow">
+								<span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
+							</a>
+						</li>
+						<li>
+							<a href="{{ route('mahasiswa.krs.index') }}" class="dropdown-toggle no-arrow active">
+								<span class="micon bi bi-card-list"></span><span class="mtext">KRS</span>
+							</a>
+						</li>
+						<li>
+							<a href="{{ route('mahasiswa.krs.jadwal') }}" class="dropdown-toggle no-arrow">
+								<span class="micon bi bi-calendar-week"></span><span class="mtext">Jadwal Kuliah</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" class="dropdown-toggle no-arrow">
+								<span class="micon bi bi-check2-square"></span><span class="mtext">Riwayat Presensi</span>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="mobile-menu-overlay"></div>
 
-            <!-- Mata Kuliah Tersedia -->
-            <div class="col-lg-6 mb-4">
-                <div class="card card-custom">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-plus-square me-2"></i>Mata Kuliah Tersedia
-                            <span class="badge bg-light text-info ms-2">{{ $matakuliahTersedia->count() }}</span>
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        @if($matakuliahTersedia->count() > 0)
-                            <div class="mb-3">
-                                <small class="text-muted">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Mata kuliah untuk semester {{ $mahasiswa->Semester }} dan golongan {{ $mahasiswa->golongan->nama_Gol ?? 'Anda' }}
-                                </small>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-custom table-sm">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Kode</th>
-                                            <th>Mata Kuliah</th>
-                                            <th>SKS</th>
-                                            <th>Jadwal</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($matakuliahTersedia as $mk)
-                                            <tr>
-                                                <td><code>{{ $mk->Kode_mk }}</code></td>
-                                                <td>
-                                                    <strong>{{ $mk->Nama_mk }}</strong>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-custom bg-secondary">{{ $mk->sks }} SKS</span>
-                                                </td>
-                                                <td>
-                                                    @if($mk->jadwalAkademik->isNotEmpty())
-                                                        @foreach($mk->jadwalAkademik as $jadwal)
-                                                            @if($jadwal->id_Gol == $mahasiswa->id_Gol)
-                                                                <small class="text-muted">
-                                                                    {{ $jadwal->hari }}, {{ $jadwal->waktu }}<br>
-                                                                    <i class="bi bi-geo-alt"></i> {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}
-                                                                </small>
-                                                            @endif
-                                                        @endforeach
-                                                    @else
-                                                        <small class="text-warning">Belum dijadwalkan</small>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <form action="{{ route('mahasiswa.krs.store') }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        <input type="hidden" name="Kode_mk" value="{{ $mk->Kode_mk }}">
-                                                        <button type="submit" class="btn btn-outline-success btn-sm">
-                                                            <i class="bi bi-plus"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @else
-                            <div class="text-center py-4">
-                                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
-                                <p class="text-muted mt-2">Semua mata kuliah sudah diambil</p>
-                                <small class="text-muted">Atau belum ada mata kuliah yang tersedia untuk semester Anda</small>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
+		<div class="main-container">
+			<div class="pd-ltr-20 xs-pd-20-10">
+				<div class="min-height-200px">
+					<!-- Page Header -->
+					<div class="page-header">
+						<div class="row">
+							<div class="col-md-6 col-sm-12">
+								<div class="title">
+									<h4>Kartu Rencana Studi (KRS)</h4>
+								</div>
+								<nav aria-label="breadcrumb" role="navigation">
+									<ol class="breadcrumb">
+										<li class="breadcrumb-item">
+											<a href="{{ route('mahasiswa.dashboard') }}">Dashboard</a>
+										</li>
+										<li class="breadcrumb-item active" aria-current="page">
+											KRS
+										</li>
+									</ol>
+								</nav>
+							</div>
+							<div class="col-md-6 col-sm-12 text-right">
+								<div class="pd-20">
+									<h4 class="text-blue h4">NIM: {{ $mahasiswa->NIM }}</h4>
+									<p class="mb-0">Semester {{ $mahasiswa->Semester }}</p>
+								</div>
+							</div>
+						</div>
+					</div>
 
-        <!-- Informasi Tambahan -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card card-custom">
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-person-badge text-primary me-2" style="font-size: 1.5rem;"></i>
-                                    <div>
-                                        <h6 class="mb-0">{{ $mahasiswa->NIM }}</h6>
-                                        <small class="text-muted">NIM</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-calendar-event text-success me-2" style="font-size: 1.5rem;"></i>
-                                    <div>
-                                        <h6 class="mb-0">Semester {{ $mahasiswa->Semester }}</h6>
-                                        <small class="text-muted">Semester Aktif</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-people text-info me-2" style="font-size: 1.5rem;"></i>
-                                    <div>
-                                        <h6 class="mb-0">{{ $mahasiswa->golongan->nama_Gol ?? 'N/A' }}</h6>
-                                        <small class="text-muted">Golongan</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-award text-warning me-2" style="font-size: 1.5rem;"></i>
-                                    <div>
-                                        <h6 class="mb-0">{{ $krsAmbil->sum(fn($krs) => $krs->matakuliah->sks) }} SKS</h6>
-                                        <small class="text-muted">Total SKS</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+					<!-- Alert Messages -->
+					@if(session('success'))
+						<div class="alert alert-success alert-dismissible fade show" role="alert">
+							<i class="fa fa-check-circle"></i> {{ session('success') }}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+					@endif
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+					@if(session('error'))
+						<div class="alert alert-danger alert-dismissible fade show" role="alert">
+							<i class="fa fa-exclamation-triangle"></i> {{ session('error') }}
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+					@endif
+
+					<div class="row">
+						<!-- Mata Kuliah yang Sudah Diambil -->
+						<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-30">
+							<div class="card-box pd-20 height-100-p">
+								<div class="d-flex justify-content-between">
+									<h4 class="text-blue h4">Mata Kuliah Diambil</h4>
+									<div class="dropdown">
+										<a href="{{ route('mahasiswa.krs.cetak') }}" class="btn btn-outline-primary btn-sm">
+											<i class="fa fa-print"></i> Cetak KRS
+										</a>
+									</div>
+								</div>
+								<div class="pb-20">
+									<div class="d-flex align-items-center justify-content-between mb-20">
+										<div>
+											<span class="badge badge-pill badge-success">{{ $krsAmbil->count() }} Mata Kuliah</span>
+											<span class="badge badge-pill badge-primary ml-1">{{ $krsAmbil->sum(fn($krs) => $krs->matakuliah->sks) }} SKS</span>
+										</div>
+									</div>
+									
+									@if($krsAmbil->count() > 0)
+										<div class="table-responsive">
+											<table class="table table-striped">
+												<thead>
+													<tr>
+														<th>Kode</th>
+														<th>Mata Kuliah</th>
+														<th>SKS</th>
+														<th>Jadwal</th>
+														<th>Aksi</th>
+													</tr>
+												</thead>
+												<tbody>
+													@foreach($krsAmbil as $krs)
+														<tr>
+															<td><span class="badge badge-primary">{{ $krs->Kode_mk }}</span></td>
+															<td><strong>{{ $krs->matakuliah->Nama_mk }}</strong></td>
+															<td>
+																<span class="badge badge-success">{{ $krs->matakuliah->sks }} SKS</span>
+															</td>
+															<td>
+																@if($krs->matakuliah->jadwalAkademik->isNotEmpty())
+																	@foreach($krs->matakuliah->jadwalAkademik as $jadwal)
+																		@if($jadwal->id_Gol == $mahasiswa->id_Gol)
+																			<small class="text-muted">
+																				{{ $jadwal->hari }}, {{ $jadwal->waktu }}<br>
+																				<i class="fa fa-map-marker"></i> {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}
+																			</small>
+																		@endif
+																	@endforeach
+																@else
+																	<small class="text-warning">Belum dijadwalkan</small>
+																@endif
+															</td>
+															<td>
+																<form action="{{ route('mahasiswa.krs.destroy') }}" method="POST" class="d-inline">
+																	@csrf
+																	@method('DELETE')
+																	<input type="hidden" name="Kode_mk" value="{{ $krs->Kode_mk }}">
+																	<button type="submit" class="btn btn-outline-danger btn-sm" 
+																			onclick="return confirm('Yakin ingin menghapus mata kuliah ini dari KRS?')">
+																		<i class="fa fa-trash"></i>
+																	</button>
+																</form>
+															</td>
+														</tr>
+													@endforeach
+												</tbody>
+											</table>
+										</div>
+									@else
+										<div class="text-center py-4">
+											<i class="fa fa-book text-muted" style="font-size: 3rem;"></i>
+											<p class="text-muted mt-2">Belum ada mata kuliah yang diambil</p>
+											<small class="text-muted">Pilih mata kuliah dari daftar sebelah kanan</small>
+										</div>
+									@endif
+								</div>
+							</div>
+						</div>
+
+						<!-- Mata Kuliah Tersedia -->
+						<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-30">
+							<div class="card-box pd-20 height-100-p">
+								<h4 class="text-blue h4">Mata Kuliah Tersedia</h4>
+								<div class="pb-20">
+									<p class="mb-20">Semester {{ $mahasiswa->Semester }}</p>
+									
+									@if($matakuliahTersedia->count() > 0)
+										<div class="table-responsive">
+											<table class="table table-striped">
+												<thead>
+													<tr>
+														<th>Kode</th>
+														<th>Mata Kuliah</th>
+														<th>SKS</th>
+														<th>Jadwal</th>
+														<th>Aksi</th>
+													</tr>
+												</thead>
+												<tbody>
+													@foreach($matakuliahTersedia as $matkul)
+														<tr>
+															<td><span class="badge badge-primary">{{ $matkul->Kode_mk }}</span></td>
+															<td><strong>{{ $matkul->Nama_mk }}</strong></td>
+															<td>
+																<span class="badge badge-info">{{ $matkul->sks }} SKS</span>
+															</td>
+															<td>
+																@if($matkul->jadwalAkademik->isNotEmpty())
+																	@foreach($matkul->jadwalAkademik as $jadwal)
+																		@if($jadwal->id_Gol == $mahasiswa->id_Gol)
+																			<small class="text-muted">
+																				{{ $jadwal->hari }}, {{ $jadwal->waktu }}<br>
+																				<i class="fa fa-map-marker"></i> {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}
+																			</small>
+																		@endif
+																	@endforeach
+																@else
+																	<small class="text-warning">Belum dijadwalkan</small>
+																@endif
+															</td>
+															<td>
+																<form action="{{ route('mahasiswa.krs.store') }}" method="POST" class="d-inline">
+																	@csrf
+																	<input type="hidden" name="Kode_mk" value="{{ $matkul->Kode_mk }}">
+																	<button type="submit" class="btn btn-outline-success btn-sm">
+																		<i class="fa fa-plus"></i> Ambil
+																	</button>
+																</form>
+															</td>
+														</tr>
+													@endforeach
+												</tbody>
+											</table>
+										</div>
+									@else
+										<div class="text-center py-4">
+											<i class="fa fa-info-circle text-info" style="font-size: 3rem;"></i>
+											<p class="text-muted mt-2">Tidak ada mata kuliah tersedia</p>
+											<small class="text-muted">Semua mata kuliah sudah diambil atau belum ada yang dibuka</small>
+										</div>
+									@endif
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Summary Card -->
+					<div class="row">
+						<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
+							<div class="card-box pd-20">
+								<h4 class="text-blue h4">Ringkasan KRS</h4>
+								<div class="pb-20">
+									<div class="d-flex align-items-center justify-content-between mb-10">
+										<span>Total Mata Kuliah:</span>
+										<strong class="text-primary">{{ $krsAmbil->count() }}</strong>
+									</div>
+									<div class="d-flex align-items-center justify-content-between mb-10">
+										<span>Total SKS:</span>
+										<strong class="text-success">{{ $krsAmbil->sum(fn($krs) => $krs->matakuliah->sks) }}</strong>
+									</div>
+									<div class="d-flex align-items-center justify-content-between mb-10">
+										<span>SKS Maksimal:</span>
+										<strong class="text-info">24</strong>
+									</div>
+									<div class="progress mb-10">
+										<div class="progress-bar bg-success" role="progressbar" 
+											 style="width: {{ ($krsAmbil->sum(fn($krs) => $krs->matakuliah->sks) / 24) * 100 }}%">
+										</div>
+									</div>
+									<small class="text-muted">
+										{{ 24 - $krsAmbil->sum(fn($krs) => $krs->matakuliah->sks) }} SKS tersisa
+									</small>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
+							<div class="card-box pd-20">
+								<h4 class="text-blue h4">Quick Actions</h4>
+								<div class="pb-20">
+									<a href="{{ route('mahasiswa.krs.jadwal') }}" class="btn btn-primary btn-block mb-10">
+										<i class="fa fa-calendar"></i> Lihat Jadwal Kuliah
+									</a>
+									@if($krsAmbil->count() > 0)
+										<a href="{{ route('mahasiswa.krs.cetak') }}" class="btn btn-outline-primary btn-block mb-10">
+											<i class="fa fa-print"></i> Cetak KRS
+										</a>
+									@endif
+									<a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-outline-secondary btn-block">
+										<i class="fa fa-arrow-left"></i> Kembali ke Dashboard
+									</a>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
+							<div class="card-box pd-20">
+								<h4 class="text-blue h4">Informasi Penting</h4>
+								<div class="pb-20">
+									<div class="alert alert-info" role="alert">
+										<i class="fa fa-info-circle"></i> <strong>Batas Akhir KRS</strong><br>
+										Pengisian KRS semester ini ditutup pada <strong>30 Agustus 2025</strong>
+									</div>
+									<div class="alert alert-warning" role="alert">
+										<i class="fa fa-exclamation-triangle"></i> <strong>Perhatian</strong><br>
+										Pastikan total SKS tidak melebihi 24 SKS
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="footer-wrap pd-20 mb-20 card-box">
+					Sistem Informasi Akademik - © 2025
+				</div>
+			</div>
+		</div>
+
+		<script src="../../../bootstrap/vendors/scripts/core.js"></script>
+		<script src="../../../bootstrap/vendors/scripts/script.min.js"></script>
+		<script src="../../../bootstrap/vendors/scripts/process.js"></script>
+		<script src="../../../bootstrap/vendors/scripts/layout-settings.js"></script>
+		<script src="../../../bootstrap/src/plugins/datatables/js/jquery.dataTables.min.js"></script>
+		<script src="../../../bootstrap/src/plugins/datatables/js/dataTables.bootstrap4.min.js"></script>
+		<script src="../../../bootstrap/src/plugins/datatables/js/dataTables.responsive.min.js"></script>
+		<script src="../../../bootstrap/src/plugins/datatables/js/responsive.bootstrap4.min.js"></script>
+	</body>
 </html>
