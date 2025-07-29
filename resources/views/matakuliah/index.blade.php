@@ -69,7 +69,12 @@
 					<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
 						<a class="dropdown-item" href="#"><i class="dw dw-user1"></i> Profile</a>
 						<a class="dropdown-item" href="#"><i class="dw dw-settings2"></i> Setting</a>
-						<a class="dropdown-item" href="#"><i class="dw dw-logout"></i> Log Out</a>
+						<form method="POST" action="{{ route('logout') }}" style="display: inline;">
+							@csrf
+							<button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+								<i class="dw dw-logout"></i> Log Out
+							</button>
+						</form>
 					</div>
 				</div>
 			</div>
