@@ -147,25 +147,42 @@
                         <h4 class="text-blue h4">Daftar Jadwal Akademik</h4>
                     </div>
                     <div class="pb-20">
-                        {{-- Tambahkan filter di sini jika perlu --}}
-                        <div class="px-20 form-inline">
-                            <label class="mr-2">Filter Hari: </label>
-                            <select id="filterHari" class="form-control col-md-3">
-                                <option value="">Semua Hari</option>
-                                <option>Senin</option>
-                                <option>Selasa</option>
-                                <option>Rabu</option>
-                                <option>Kamis</option>
-                                <option>Jumat</option>
-                            </select>
+                        {{-- Filter Section --}}
+                        <div class="px-20">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filter Semester:</label>
+                                        <select id="filterSemester" class="form-control">
+                                            <option value="all" {{ ($semesterFilter == 'all' || !$semesterFilter) ? 'selected' : '' }}>-- Semua Semester --</option>
+                                            @for($i = 1; $i <= 8; $i++)
+                                            <option value="{{ $i }}" {{ $semesterFilter == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filter Hari:</label>
+                                        <select id="filterHari" class="form-control">
+                                            <option value="">Semua Hari</option>
+                                            <option>Senin</option>
+                                            <option>Selasa</option>
+                                            <option>Rabu</option>
+                                            <option>Kamis</option>
+                                            <option>Jumat</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <br>
                         <table class="data-table table stripe hover nowrap" id="jadwalTable">
                             <thead>
                                 <tr>
                                     <th class="table-plus datatable-nosort">No</th>
                                     <th>Hari</th>
                                     <th>Mata Kuliah</th>
+                                    <th>Semester</th>
                                     <th>Dosen</th>
                                     <th>Ruangan</th>
                                     <th>Golongan</th>
@@ -178,6 +195,7 @@
                                         <td class="table-plus">{{ $index + 1 }}</td>
                                         <td>{{ $item->hari }}</td>
                                         <td>{{ $item->matakuliah->Nama_mk ?? 'N/A' }}</td>
+                                        <td><span class="badge badge-primary">Sem {{ $item->matakuliah->semester ?? 'N/A' }}</span></td>
                                         {{-- Mengambil nama dosen dari relasi --}}
                                         <td>{{ $item->matakuliah?->pengampu?->first()?->dosen?->Nama ?? 'Belum Ditentukan' }}
                                         </td>
@@ -231,7 +249,18 @@
                         <input type="hidden" name="id_jadwal" id="edit_id_jadwal">
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Semester Filter</label>
+                                    <select class="form-control" id="edit_semester_filter">
+                                        <option value="all">-- Semua Semester --</option>
+                                        @for($i = 1; $i <= 8; $i++)
+                                        <option value="{{ $i }}">Semester {{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Hari</label>
                                     <select class="form-control" name="hari" required>
@@ -244,13 +273,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Mata Kuliah</label>
-                                    <select class="form-control" name="Kode_mk" required>
+                                    <select class="form-control" name="Kode_mk" id="edit_matakuliah_dropdown" required>
                                         <option value="">-- Pilih Mata Kuliah --</option>
                                         @foreach($matakuliah as $mk)
-                                            <option value="{{ $mk->Kode_mk }}">{{ $mk->Nama_mk }}</option>
+                                            <option value="{{ $mk->Kode_mk }}" data-semester="{{ $mk->semester }}">{{ $mk->Nama_mk }} (Sem {{ $mk->semester }})</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -329,9 +358,42 @@
             // Opsi DataTable Anda bisa ditambahkan di sini
         });
 
+        // FUNGSI FILTER MATA KULIAH BERDASARKAN SEMESTER (untuk modal edit)
+        function filterEditMataKuliah(semester) {
+            const matakuliahDropdown = $('#edit_matakuliah_dropdown');
+            const options = matakuliahDropdown.find('option');
+            
+            options.each(function() {
+                const option = $(this);
+                const optionSemester = option.data('semester');
+                
+                if (semester === 'all' || semester === '' || optionSemester == semester || option.val() === '') {
+                    option.show();
+                } else {
+                    option.hide();
+                }
+            });
+        }
+
+        // HANDLE PERUBAHAN SEMESTER FILTER UNTUK MODAL EDIT
+        $('#edit_semester_filter').on('change', function() {
+            const semester = $(this).val();
+            filterEditMataKuliah(semester);
+            // Reset mata kuliah selection when semester changes
+            $('#edit_matakuliah_dropdown').val('');
+        });
+
+        // HANDLE FILTER SEMESTER UNTUK TABEL
+        $('#filterSemester').on('change', function() {
+            const semester = $(this).val();
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('semester', semester);
+            window.location.href = currentUrl.toString();
+        });
+
         // Filter tabel berdasarkan hari
         $('#filterHari').on('change', function () {
-            table.column(1).search(this.value).draw();
+            table.column(2).search(this.value).draw(); // Updated column index due to new semester column
         });
 
         // FUNGSI EDIT: Mengisi modal saat tombol edit diklik
@@ -339,12 +401,26 @@
             var id = $(this).data('id');
             $('#edit_id_jadwal').val(id);
 
+            // Reset semester filter to show all options first
+            $('#edit_semester_filter').val('all');
+            filterEditMataKuliah('all');
+
             // Mengisi form di dalam modal dengan data dari tombol
             $('#editForm select[name="hari"]').val($(this).data('hari'));
             $('#editForm select[name="Kode_mk"]').val($(this).data('kodemk'));
             $('#editForm select[name="NIP"]').val($(this).data('nip'));
             $('#editForm select[name="id_ruang"]').val($(this).data('idruang'));
             $('#editForm select[name="id_Gol"]').val($(this).data('idgol'));
+            
+            // Set semester filter based on selected mata kuliah
+            const selectedMK = $('#editForm select[name="Kode_mk"]').val();
+            if (selectedMK) {
+                const mkSemester = $('#editForm select[name="Kode_mk"] option:selected').data('semester');
+                if (mkSemester) {
+                    $('#edit_semester_filter').val(mkSemester);
+                    filterEditMataKuliah(mkSemester);
+                }
+            }
             
             $('#editModal').modal('show');
         });

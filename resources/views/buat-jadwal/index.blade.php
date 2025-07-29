@@ -147,7 +147,18 @@
                 <form id="jadwalForm">
                     @csrf
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Semester</label>
+                                <select class="form-control" name="semester_filter" id="semester_filter">
+                                    <option value="all">-- Semua Semester --</option>
+                                    @for($i = 1; $i <= 8; $i++)
+                                    <option value="{{ $i }}">Semester {{ $i }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>Hari</label>
                                 <select class="form-control" name="hari" required>
@@ -160,19 +171,19 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>Waktu</label>
                                 <input type="time" class="form-control" name="waktu" required>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label>Mata Kuliah</label>
-                                <select class="form-control" name="Kode_mk" required>
+                                <select class="form-control" name="Kode_mk" id="matakuliah_dropdown" required>
                                     <option value="">-- Pilih --</option>
                                     @foreach($matakuliah as $mk)
-                                    <option value="{{ $mk->Kode_mk }}">{{ $mk->Nama_mk }}</option>
+                                    <option value="{{ $mk->Kode_mk }}" data-semester="{{ $mk->semester }}">{{ $mk->Nama_mk }} (Sem {{ $mk->semester }})</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -209,6 +220,19 @@
             <div class="card-box mb-30">
                 <div class="pd-20">
                     <h4 class="text-blue h4">Daftar Jadwal Akademik</h4>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Filter Semester:</label>
+                                <select class="form-control" id="table_semester_filter">
+                                    <option value="all" {{ ($semesterFilter == 'all' || !$semesterFilter) ? 'selected' : '' }}>-- Semua Semester --</option>
+                                    @for($i = 1; $i <= 8; $i++)
+                                    <option value="{{ $i }}" {{ $semesterFilter == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="pb-20">
                     <div class="table-responsive">
@@ -218,6 +242,7 @@
                                     <th>Hari</th>
                                     <th>Waktu</th>
                                     <th>Mata Kuliah</th>
+                                    <th>Semester</th>
                                     <th>Dosen</th>
                                     <th>Ruang</th>
                                     <th>Golongan</th>
@@ -230,6 +255,7 @@
                                     <td>{{ $item->hari }}</td>
                                     <td>{{ date('H:i', strtotime($item->waktu)) }}</td>
                                     <td>{{ $item->matakuliah->Nama_mk ?? 'N/A' }}</td>
+                                    <td><span class="badge badge-primary">Sem {{ $item->matakuliah->semester ?? 'N/A' }}</span></td>
                                     <td>{{ $item->matakuliah?->pengampu->first()?->dosen?->Nama ?? 'N/A' }}</td>
                                     <td>{{ $item->ruang->nama_ruang ?? 'N/A' }}</td>
                                     <td>{{ $item->golongan->nama_Gol ?? 'N/A' }}</td>
@@ -342,6 +368,40 @@
             });
         }
 
+        // FUNGSI FILTER MATA KULIAH BERDASARKAN SEMESTER
+        function filterMataKuliah(semester) {
+            const matakuliahDropdown = $('#matakuliah_dropdown');
+            const options = matakuliahDropdown.find('option');
+            
+            // Reset dropdown
+            matakuliahDropdown.val('');
+            
+            options.each(function() {
+                const option = $(this);
+                const optionSemester = option.data('semester');
+                
+                if (semester === 'all' || semester === '' || optionSemester == semester || option.val() === '') {
+                    option.show();
+                } else {
+                    option.hide();
+                }
+            });
+        }
+
+        // HANDLE PERUBAHAN SEMESTER FILTER
+        $('#semester_filter').on('change', function() {
+            const semester = $(this).val();
+            filterMataKuliah(semester);
+        });
+
+        // HANDLE FILTER SEMESTER UNTUK TABEL
+        $('#table_semester_filter').on('change', function() {
+            const semester = $(this).val();
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('semester', semester);
+            window.location.href = currentUrl.toString();
+        });
+
         // CREATE
         $('#jadwalForm').on('submit', function (e) {
             e.preventDefault();
@@ -452,12 +512,14 @@
             function createTableRow(data) {
                 var dosenName = data.matakuliah?.pengampu?.[0]?.dosen?.Nama ?? 'N/A';
                 var formattedTime = data.waktu.substring(0, 5);
+                var semester = data.matakuliah?.semester ?? 'N/A';
 
                 return `
             <tr id="row-${data.id_jadwal}">
                 <td>${data.hari}</td>
                 <td>${formattedTime}</td>
                 <td>${data.matakuliah.Nama_mk}</td>
+                <td><span class="badge badge-primary">Sem ${semester}</span></td>
                 <td>${dosenName}</td>
                 <td>${data.ruang.nama_ruang}</td>
                 <td>${data.golongan.nama_Gol}</td>
