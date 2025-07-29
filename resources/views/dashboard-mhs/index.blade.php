@@ -148,12 +148,12 @@
 							</a>
 						</li>
 						<li>
-							<a href="krs.html" class="dropdown-toggle no-arrow">
+							<a href="{{ route('mahasiswa.krs.index') }}" class="dropdown-toggle no-arrow">
 								<span class="micon bi bi-card-list"></span><span class="mtext">KRS</span>
 							</a>
 						</li>
 						<li>
-							<a href="jadwal.html" class="dropdown-toggle no-arrow">
+							<a href="{{ route('mahasiswa.krs.jadwal') }}" class="dropdown-toggle no-arrow">
 								<span class="micon bi bi-calendar-week"></span><span class="mtext">Jadwal Kuliah</span>
 							</a>
 						</li>
