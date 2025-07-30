@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('mahasiswa', function (Blueprint $table) {
             $table->string('NIM')->primary();
             $table->string('Nama');
+            $table->string('password'); // Added password field
             $table->text('Alamat');
+            $table->string('Nohp')->nullable(); // Added Nohp field
             $table->integer('Semester');
             $table->string('id_Gol');
             $table->unsignedBigInteger('user_id')->nullable();
