@@ -17,7 +17,7 @@ class Dosen extends Authenticatable
     public $timestamps = false;
 
     protected $fillable = [
-        'NIP', 'Nama', 'password', 'Alamat', 'Nohp'
+        'NIP', 'Nama', 'password', 'Alamat', 'Nohp', 'profile_photo'
     ];
 
     protected $hidden = [
