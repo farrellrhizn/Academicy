@@ -4,21 +4,21 @@
 <head>
     <meta charset="utf-8" />
     <title>Dashboard Admin</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="../../../bootstrap/vendors/images/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="../../../bootstrap/vendors/images/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="../../../bootstrap/vendors/images/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('bootstrap/vendors/images/apple-touch-icon.png') }}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('bootstrap/vendors/images/favicon-32x32.png') }}" />
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('bootstrap/vendors/images/favicon-16x16.png') }}" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;808&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="../../../bootstrap/vendors/styles/core.css" />
-    <link rel="stylesheet" type="text/css" href="../../../bootstrap/vendors/styles/icon-font.min.css" />
-    <link rel="stylesheet" type="text/css" href="../../../bootstrap/vendors/styles/style.css" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/core.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/icon-font.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/style.css') }}" />
 </head>
 
 <body>
     <div class="pre-loader">
         <div class="pre-loader-box">
             <div class="loader-logo">
-                <img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" />
             </div>
             <div class="loader-progress" id="progress_div">
                 <div class="bar" id="bar1"></div>
@@ -37,9 +37,9 @@
                 <div class="dropdown">
                     <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
                         <span class="user-icon">
-                            <img src="../../../bootstrap/vendors/images/photo1.jpg" alt="" />
+                            <img src="{{ asset('bootstrap/vendors/images/photo1.jpg') }}" alt="" />
                         </span>
-                        <span class="user-name">Administrator</span>
+                        <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
                         <a class="dropdown-item" href="profil-admin.html"><i class="dw dw-user1"></i> Profil</a>
@@ -57,9 +57,9 @@
 
     <div class="left-side-bar">
         <div class="brand-logo">
-            <a href="index.html">
-                <img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
-                <img src="../../../bootstrap/vendors/images/deskapp-logo-white.svg" alt="" class="light-logo" />
+            <a href="{{ route('admin.dashboard') }}">
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>
@@ -123,12 +123,12 @@
             <div class="card-box pd-20 height-100-p mb-30">
                 <div class="row align-items-center">
                     <div class="col-md-4">
-                        <img src="../../../bootstrap/vendors/images/banner-img.png" alt="" />
+                        <img src="{{ asset('bootstrap/vendors/images/banner-img.png') }}" alt="" />
                     </div>
                     <div class="col-md-8">
                         <h4 class="font-20 weight-500 mb-10 text-capitalize">
                             Selamat Datang,
-                            <div class="weight-600 font-30 text-blue">Administrator!</div>
+                            <div class="weight-600 font-30 text-blue">{{ $userData->nama_lengkap ?? 'Administrator' }}!</div>
                         </h4>
                         <p class="font-18 max-width-600">
                             Kelola sistem akademik dengan mudah. Berikut adalah ringkasan data sistem.
@@ -142,7 +142,7 @@
                     <div class="card-box height-100-p widget-style3">
                         <div class="d-flex flex-wrap">
                             <div class="widget-data">
-                                <div class="weight-700 font-24 text-dark">45</div>
+                                <div class="weight-700 font-24 text-dark">{{ $totalMataKuliah }}</div>
                                 <div class="font-14 text-secondary weight-500">Total Mata Kuliah</div>
                             </div>
                             <div class="widget-icon">
@@ -155,7 +155,7 @@
                     <div class="card-box height-100-p widget-style3">
                         <div class="d-flex flex-wrap">
                             <div class="widget-data">
-                                <div class="weight-700 font-24 text-dark">28</div>
+                                <div class="weight-700 font-24 text-dark">{{ $totalDosen }}</div>
                                 <div class="font-14 text-secondary weight-500">Total Dosen</div>
                             </div>
                             <div class="widget-icon">
@@ -168,7 +168,7 @@
                     <div class="card-box height-100-p widget-style3">
                         <div class="d-flex flex-wrap">
                             <div class="widget-data">
-                                <div class="weight-700 font-24 text-dark">1,245</div>
+                                <div class="weight-700 font-24 text-dark">{{ $totalMahasiswa }}</div>
                                 <div class="font-14 text-secondary weight-500">Total Mahasiswa</div>
                             </div>
                             <div class="widget-icon">
@@ -181,7 +181,7 @@
                     <div class="card-box height-100-p widget-style3">
                         <div class="d-flex flex-wrap">
                             <div class="widget-data">
-                                <div class="weight-700 font-24 text-dark">15</div>
+                                <div class="weight-700 font-24 text-dark">{{ $totalRuang }}</div>
                                 <div class="font-14 text-secondary weight-500">Total Ruang</div>
                             </div>
                             <div class="widget-icon">
@@ -194,37 +194,33 @@
 
             <div class="card-box mb-30">
                 <div class="pd-20">
-                    <h4 class="text-blue h4">Aktivitas Terbaru 📊</h4>
+                    <h4 class="text-blue h4">Jadwal Terbaru 📊</h4>
                 </div>
                 <div class="pb-20">
                     <table class="data-table table stripe hover nowrap">
                         <thead>
                             <tr>
+                                <th>Hari</th>
                                 <th>Waktu</th>
-                                <th>Aktivitas</th>
-                                <th>User</th>
-                                <th>Status</th>
+                                <th>Mata Kuliah</th>
+                                <th>Ruang</th>
+                                <th>Kelas</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($aktivitasTerbaru as $jadwal)
                             <tr>
-                                <td>08:30</td>
-                                <td>Input data mata kuliah baru</td>
-                                <td>Admin</td>
-                                <td><span class="badge badge-success">Berhasil</span></td>
+                                <td>{{ $jadwal->hari }}</td>
+                                <td>{{ $jadwal->waktu }}</td>
+                                <td>{{ $jadwal->matakuliah->Nama_mk ?? 'N/A' }}</td>
+                                <td>{{ $jadwal->ruang->nama_ruang ?? 'N/A' }}</td>
+                                <td>{{ $jadwal->golongan->nama_Gol ?? 'N/A' }}</td>
                             </tr>
+                            @empty
                             <tr>
-                                <td>09:15</td>
-                                <td>Update profil dosen</td>
-                                <td>Dr. Andi, M.Kom</td>
-                                <td><span class="badge badge-success">Berhasil</span></td>
+                                <td colspan="5" class="text-center">Tidak ada data jadwal</td>
                             </tr>
-                            <tr>
-                                <td>10:00</td>
-                                <td>Penyusunan jadwal semester</td>
-                                <td>Admin</td>
-                                <td><span class="badge badge-warning">Proses</span></td>
-                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -236,10 +232,10 @@
         </div>
     </div>
 
-    <script src="../../../bootstrap/vendors/scripts/core.js"></script>
-    <script src="../../../bootstrap/vendors/scripts/script.min.js"></script>
-    <script src="../../../bootstrap/vendors/scripts/process.js"></script>
-    <script src="../../../bootstrap/vendors/scripts/layout-settings.js"></script>
+    <script src="{{ asset('bootstrap/vendors/scripts/core.js') }}"></script>
+    <script src="{{ asset('bootstrap/vendors/scripts/script.min.js') }}"></script>
+    <script src="{{ asset('bootstrap/vendors/scripts/process.js') }}"></script>
+    <script src="{{ asset('bootstrap/vendors/scripts/layout-settings.js') }}"></script>
 </body>
 
 </html>

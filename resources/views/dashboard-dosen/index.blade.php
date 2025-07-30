@@ -7,19 +7,19 @@
 		<link
 			rel="apple-touch-icon"
 			sizes="180x180"
-			href="../../bootstrap/vendors/images/apple-touch-icon.png"
+			href="{{ asset('bootstrap/vendors/images/apple-touch-icon.png') }}"
 		/>
 		<link
 			rel="icon"
 			type="image/png"
 			sizes="32x32"
-			href="../../bootstrap/vendors/images/favicon-32x32.png"
+			href="{{ asset('bootstrap/vendors/images/favicon-32x32.png') }}"
 		/>
 		<link
 			rel="icon"
 			type="image/png"
 			sizes="16x16"
-			href="../../bootstrap/vendors/images/favicon-16x16.png"
+			href="{{ asset('bootstrap/vendors/images/favicon-16x16.png') }}"
 		/>
 
 		<meta
@@ -31,20 +31,20 @@
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
-		<link rel="stylesheet" type="text/css" href="../../bootstrap/vendors/styles/core.css" />
+		<link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/core.css') }}" />
 		<link
 			rel="stylesheet"
 			type="text/css"
-			href="../../bootstrap/vendors/styles/icon-font.min.css"
+			href="{{ asset('bootstrap/vendors/styles/icon-font.min.css') }}"
 		/>
-		<link rel="stylesheet" type="text/css" href="../../bootstrap/vendors/styles/style.css" />
+		<link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/style.css') }}" />
 
 	</head>
 	<body>
 		<div class="pre-loader">
 			<div class="pre-loader-box">
 				<div class="loader-logo">
-					<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+					<img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" />
 				</div>
 				<div class="loader-progress" id="progress_div">
 					<div class="bar" id="bar1"></div>
@@ -68,9 +68,9 @@
 							data-toggle="dropdown"
 						>
 							<span class="user-icon">
-								<img src="../../bootstrap/vendors/images/photo1.jpg" alt="" />
+								<img src="{{ asset('bootstrap/vendors/images/photo1.jpg') }}" alt="" />
 							</span>
-							<span class="user-name">[Nama Dosen]</span>
+							<span class="user-name">{{ $userData->Nama ?? 'Dosen' }}</span>
 						</a>
 						<div
 							class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
@@ -92,10 +92,10 @@
 		
 		<div class="left-side-bar">
 			<div class="brand-logo">
-				<a href="index.html">
-					<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
+				<a href="{{ route('dosen.dashboard') }}">
+					<img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
 					<img
-						src="../../bootstrap/vendors/images/deskapp-logo-white.svg"
+						src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}"
 						alt=""
 						class="light-logo"
 					/>
@@ -139,12 +139,12 @@
 				<div class="card-box pd-20 height-100-p mb-30">
 					<div class="row align-items-center">
 						<div class="col-md-4">
-							<img src="../../bootstrap/vendors/images/banner-img.png" alt="" />
+							<img src="{{ asset('bootstrap/vendors/images/banner-img.png') }}" alt="" />
 						</div>
 						<div class="col-md-8">
 							<h4 class="font-20 weight-500 mb-10 text-capitalize">
 								Selamat Datang Kembali,
-								<div class="weight-600 font-30 text-blue">Prof. Dr. Budi Santoso, M.Kom!</div>
+								<div class="weight-600 font-30 text-blue">{{ $userData->Nama ?? 'Dosen' }}!</div>
 							</h4>
 							<p class="font-18 max-width-600">
 								Semoga hari Anda menyenangkan. Berikut adalah ringkasan aktivitas mengajar Anda.
@@ -158,7 +158,7 @@
 						<div class="card-box height-100-p widget-style3">
 							<div class="d-flex flex-wrap">
 								<div class="widget-data">
-									<div class="weight-700 font-24 text-dark">4</div>
+									<div class="weight-700 font-24 text-dark">{{ $totalMataKuliahDiampu }}</div>
 									<div class="font-14 text-secondary weight-500">Mata Kuliah Diampu</div>
 								</div>
 								<div class="widget-icon">
@@ -171,7 +171,7 @@
 						<div class="card-box height-100-p widget-style3">
 							<div class="d-flex flex-wrap">
 								<div class="widget-data">
-									<div class="weight-700 font-24 text-dark">12 SKS</div>
+									<div class="weight-700 font-24 text-dark">{{ $totalSks }} SKS</div>
 									<div class="font-14 text-secondary weight-500">Total SKS Mengajar</div>
 								</div>
 								<div class="widget-icon">
@@ -184,7 +184,7 @@
 						<div class="card-box height-100-p widget-style3">
 							<div class="d-flex flex-wrap">
 								<div class="widget-data">
-									<div class="weight-700 font-24 text-dark">125</div>
+									<div class="weight-700 font-24 text-dark">{{ $totalMahasiswa }}</div>
 									<div class="font-14 text-secondary weight-500">Total Mahasiswa</div>
 								</div>
 								<div class="widget-icon">
@@ -197,7 +197,7 @@
 						<div class="card-box height-100-p widget-style3">
 							<div class="d-flex flex-wrap">
 								<div class="widget-data">
-									<div class="weight-700 font-24 text-dark">2 Kelas</div>
+									<div class="weight-700 font-24 text-dark">{{ count($jadwalHariIni) }} Kelas</div>
 									<div class="font-14 text-secondary weight-500">Jadwal Hari Ini</div>
 								</div>
 								<div class="widget-icon">
@@ -210,7 +210,7 @@
 
 				<div class="card-box mb-30">
 					<div class="pd-20">
-						<h4 class="text-blue h4">Jadwal Mengajar Hari Ini (Senin, 28 Juli 2025) 🗓️</h4>
+						<h4 class="text-blue h4">Jadwal Mengajar Hari Ini ({{ ucfirst(\Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y')) }}) 🗓️</h4>
 					</div>
 					<div class="pb-20">
 						<table class="data-table table stripe hover nowrap">
@@ -224,33 +224,21 @@
 								</tr>
 							</thead>
 							<tbody>
+								@forelse($jadwalHariIni as $jadwal)
 								<tr>
-									<td>08:00 - 09:40</td>
-									<td>Dasar Pemrograman</td>
-									<td>IF-1A</td>
-									<td>Lab Komputer 1</td>
+									<td>{{ $jadwal->waktu }}</td>
+									<td>{{ $jadwal->matakuliah->Nama_mk ?? 'N/A' }}</td>
+									<td>{{ $jadwal->golongan->nama_Gol ?? 'N/A' }}</td>
+									<td>{{ $jadwal->ruang->nama_ruang ?? 'N/A' }}</td>
 									<td>
-										<a href="#" class="btn btn-primary btn-sm">Input Presensi</a>
+										<a href="{{ route('dosen.presensi.simple') }}" class="btn btn-primary btn-sm">Input Presensi</a>
 									</td>
 								</tr>
+								@empty
 								<tr>
-									<td>10:00 - 11:40</td>
-									<td>Struktur Data</td>
-									<td>IF-2B</td>
-									<td>Gedung A R.105</td>
-									<td>
-										<a href="#" class="btn btn-primary btn-sm">Input Presensi</a>
-									</td>
+									<td colspan="5" class="text-center">Tidak ada jadwal hari ini</td>
 								</tr>
-								<tr>
-									<td>Selesai</td>
-									<td>Algoritma</td>
-									<td>IF-3C</td>
-									<td>Gedung C R.301</td>
-									<td>
-										<button class="btn btn-success btn-sm" disabled>Sudah Diisi</button>
-									</td>
-								</tr>
+								@endforelse
 							</tbody>
 						</table>
 					</div>
@@ -262,9 +250,9 @@
 			</div>
 		</div>
 
-		<script src="../../bootstrap/vendors/scripts/core.js"></script>
-		<script src="../../bootstrap/vendors/scripts/script.min.js"></script>
-		<script src="../../bootstrap/vendors/scripts/process.js"></script>
-		<script src="../../bootstrap/vendors/scripts/layout-settings.js"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/core.js') }}"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/script.min.js') }}"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/process.js') }}"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/layout-settings.js') }}"></script>
 	</body>
 </html>

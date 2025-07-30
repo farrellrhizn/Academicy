@@ -34,4 +34,20 @@ class Golongan extends Model
     protected $fillable = [
         'nama_Gol'
     ];
+
+    /**
+     * Relasi ke mahasiswa
+     */
+    public function mahasiswa()
+    {
+        return $this->hasMany(Mahasiswa::class, 'id_Gol', 'id_Gol');
+    }
+
+    /**
+     * Relasi ke jadwal akademik
+     */
+    public function jadwalAkademik()
+    {
+        return $this->hasMany(JadwalAkademik::class, 'id_Gol', 'id_Gol');
+    }
 }
