@@ -178,7 +178,7 @@
 						<div class="row">
 							<div class="col-md-6 col-sm-12">
 								<div class="title">
-									<h4>Jadwal Kuliah</h4>
+									<h4>Jadwal Kuliah Mingguan</h4>
 								</div>
 								<nav aria-label="breadcrumb" role="navigation">
 									<ol class="breadcrumb">
@@ -190,6 +190,9 @@
 										</li>
 									</ol>
 								</nav>
+								<p class="text-muted mb-0">
+									<i class="fa fa-info-circle"></i> Jadwal berdasarkan hari dalam minggu, bukan tanggal spesifik
+								</p>
 							</div>
 							<div class="col-md-6 col-sm-12 text-right">
 								<div class="pd-20">
@@ -206,18 +209,27 @@
 							<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-30">
 								<div class="card-box pd-20">
 									<div class="d-flex justify-content-between align-items-center mb-20">
-										<h4 class="text-blue h4">Jadwal Hari Ini - {{ \Carbon\Carbon::now()->format('l, d F Y') }}</h4>
+										<h4 class="text-blue h4">Jadwal Hari {{ $hariIndonesia[\Carbon\Carbon::now()->format('l')] ?? \Carbon\Carbon::now()->format('l') }} - {{ \Carbon\Carbon::now()->format('d F Y') }}</h4>
 										<div>
 											<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-outline-primary btn-sm">
 												<i class="fa fa-arrow-left"></i> Kembali ke KRS
 											</a>
 										</div>
 									</div>
+									<div class="alert alert-info alert-dismissible fade show" role="alert">
+										<i class="fa fa-calendar"></i> 
+										<strong>Jadwal Mingguan:</strong> Sistem menampilkan jadwal berdasarkan hari dalam seminggu. 
+										Jika ada mata kuliah yang dijadwalkan pada hari {{ $hariIndonesia[\Carbon\Carbon::now()->format('l')] ?? \Carbon\Carbon::now()->format('l') }}, 
+										maka akan ditampilkan di bawah ini tanpa mempertimbangkan tanggal spesifik.
+										<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
 									
 									@php
-										$hariIni = \Carbon\Carbon::now()->format('l');
+										$hariIni = \Carbon\Carbon::now()->format('l'); // Format: Monday, Tuesday, etc.
 										$jadwalHariIni = $jadwalKuliah->filter(function($jadwal) use ($hariIni) {
-											return $jadwal['hari'] == $hariIni;
+											return strtolower($jadwal['hari']) == strtolower($hariIni);
 										});
 									@endphp
 									
@@ -250,7 +262,7 @@
 										</div>
 									@else
 										<div class="alert alert-info" role="alert">
-											<i class="fa fa-info-circle"></i> Tidak ada jadwal kuliah hari ini. Anda bisa beristirahat! 😊
+											<i class="fa fa-info-circle"></i> Tidak ada jadwal kuliah pada hari {{ $hariIndonesia[\Carbon\Carbon::now()->format('l')] ?? \Carbon\Carbon::now()->format('l') }}. Anda bisa beristirahat! 😊
 										</div>
 									@endif
 								</div>
@@ -290,7 +302,7 @@
 										@foreach($hari as $index => $hariEng)
 											@php
 												$jadwalHari = $jadwalKuliah->filter(function($jadwal) use ($hariEng) {
-													return $jadwal['hari'] == $hariEng;
+													return strtolower($jadwal['hari']) == strtolower($hariEng);
 												});
 											@endphp
 											@if($jadwalHari->count() > 0)
@@ -315,7 +327,7 @@
 										@foreach($hari as $index => $hariEng)
 											@php
 												$jadwalHari = $jadwalKuliah->filter(function($jadwal) use ($hariEng) {
-													return $jadwal['hari'] == $hariEng;
+													return strtolower($jadwal['hari']) == strtolower($hariEng);
 												})->sortBy('waktu');
 											@endphp
 											@if($jadwalHari->count() > 0)

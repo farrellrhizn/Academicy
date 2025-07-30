@@ -11,9 +11,28 @@ use App\Models\Ruang;
 use App\Models\Golongan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class KrsController extends Controller
 {
+    /**
+     * Helper method untuk menormalisasi nama hari
+     */
+    private function normalizeDay($day)
+    {
+        $dayMapping = [
+            'senin' => 'Monday',
+            'selasa' => 'Tuesday', 
+            'rabu' => 'Wednesday',
+            'kamis' => 'Thursday',
+            'jumat' => 'Friday',
+            'sabtu' => 'Saturday',
+            'minggu' => 'Sunday'
+        ];
+        
+        $normalizedDay = strtolower(trim($day));
+        return $dayMapping[$normalizedDay] ?? ucfirst($normalizedDay);
+    }
     /**
      * Tampilkan halaman KRS utama dengan mata kuliah tersedia
      */
@@ -360,7 +379,12 @@ class KrsController extends Controller
     }
     
     /**
-     * Tampilkan jadwal kuliah berdasarkan KRS
+     * Tampilkan jadwal kuliah berdasarkan KRS (filter berdasarkan hari saja, bukan tanggal)
+     * 
+     * Sistem ini akan menampilkan jadwal kuliah berdasarkan hari dalam seminggu,
+     * contohnya jika ada mata kuliah yang dijadwalkan pada hari Rabu,
+     * maka akan muncul di tabel jadwal kuliah setiap hari Rabu
+     * tanpa mempertimbangkan tanggal spesifik.
      */
     public function jadwal()
     {
@@ -370,32 +394,51 @@ class KrsController extends Controller
             return redirect()->route('login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
         }
         
+        // Mapping urutan hari untuk sorting yang benar
+        $urutanHari = [
+            'Monday' => 1,
+            'Tuesday' => 2, 
+            'Wednesday' => 3,
+            'Thursday' => 4,
+            'Friday' => 5,
+            'Saturday' => 6,
+            'Sunday' => 7
+        ];
+        
         $jadwalKuliah = Krs::where('NIM', $mahasiswa->NIM)
                           ->with([
                               'matakuliah',
                               'matakuliah.jadwalAkademik' => function($query) use ($mahasiswa) {
-                                  $query->where('id_Gol', $mahasiswa->id_Gol)
-                                        ->with(['ruang', 'golongan'])
-                                        ->orderBy('hari')
-                                        ->orderBy('waktu');
+                                  $query->forGolongan($mahasiswa->id_Gol)
+                                        ->weeklySchedule()
+                                        ->with(['ruang', 'golongan']);
                               }
                           ])
                           ->get()
                           ->map(function($krs) use ($mahasiswa) {
                               $jadwal = $krs->matakuliah->jadwalAkademik->where('id_Gol', $mahasiswa->id_Gol)->first();
                               
+                              // Pastikan jadwal ada dan memiliki hari yang valid
+                              if (!$jadwal || empty($jadwal->hari)) {
+                                  return null;
+                              }
+                              
                               return [
+                                  'id_jadwal' => $jadwal->id_jadwal,
                                   'Kode_mk' => $krs->matakuliah->Kode_mk,
                                   'Nama_mk' => $krs->matakuliah->Nama_mk,
                                   'sks' => $krs->matakuliah->sks,
-                                  'hari' => $jadwal->hari ?? '',
+                                  'hari' => $this->normalizeDay($jadwal->hari),
                                   'waktu' => $jadwal->waktu ?? '',
                                   'nama_ruang' => $jadwal->ruang->nama_ruang ?? 'TBA',
-                                  'nama_Gol' => $jadwal->golongan->nama_Gol ?? ''
+                                  'nama_Gol' => $jadwal->golongan->nama_Gol ?? 'TBA'
                               ];
                           })
-                          ->sortBy('hari')
-                          ->sortBy('waktu');
+                          ->filter() // Hapus item null
+                          ->sortBy(function($jadwal) use ($urutanHari) {
+                              // Sort berdasarkan urutan hari kemudian waktu
+                              return ($urutanHari[$jadwal['hari']] ?? 8) . $jadwal['waktu'];
+                          });
         
         return view('mahasiswa.jadwal.index', compact('jadwalKuliah', 'mahasiswa'));
     }

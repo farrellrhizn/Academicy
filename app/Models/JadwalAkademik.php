@@ -14,8 +14,8 @@ class JadwalAkademik extends Model
     public $timestamps = false;
     protected $fillable = [
         'hari',
-        'tanggal', // <-- TAMBAHKAN INI
-        'waktu',   // <-- TAMBAHKAN INI
+        'tanggal', // Field opsional untuk referensi tanggal spesifik (tidak digunakan untuk filtering)
+        'waktu',
         'Kode_mk',
         'id_ruang',
         'id_Gol'
@@ -37,5 +37,34 @@ class JadwalAkademik extends Model
     public function golongan()
     {
         return $this->belongsTo(Golongan::class, 'id_Gol', 'id_Gol');
+    }
+
+    // Scope untuk filter berdasarkan hari tanpa mempertimbangkan tanggal
+    public function scopeByDay($query, $day)
+    {
+        return $query->where('hari', $day);
+    }
+
+    // Scope untuk filter berdasarkan golongan
+    public function scopeForGolongan($query, $idGol)
+    {
+        return $query->where('id_Gol', $idGol);
+    }
+
+    // Scope untuk mendapatkan jadwal mingguan (berdasarkan hari saja)
+    public function scopeWeeklySchedule($query)
+    {
+        return $query->orderByRaw("
+            CASE hari 
+                WHEN 'Monday' THEN 1
+                WHEN 'Tuesday' THEN 2  
+                WHEN 'Wednesday' THEN 3
+                WHEN 'Thursday' THEN 4
+                WHEN 'Friday' THEN 5
+                WHEN 'Saturday' THEN 6
+                WHEN 'Sunday' THEN 7
+                ELSE 8
+            END
+        ")->orderBy('waktu');
     }
 }
