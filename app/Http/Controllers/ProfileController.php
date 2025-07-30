@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\Golongan;
 use App\Services\ImageService;
+use Exception;
 
 class ProfileController extends Controller
 {
@@ -26,8 +28,19 @@ class ProfileController extends Controller
      */
     public function editDosen()
     {
-        $dosen = Auth::guard('dosen')->user();
-        return view('profile.edit-dosen', compact('dosen'));
+        try {
+            $dosen = Auth::guard('dosen')->user();
+            
+            if (!$dosen) {
+                Log::warning('Unauthenticated user trying to access dosen profile edit');
+                return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+            }
+
+            return view('profile.edit-dosen', compact('dosen'));
+        } catch (Exception $e) {
+            Log::error('Error accessing dosen profile edit: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengakses halaman profile.');
+        }
     }
 
     /**
@@ -37,49 +50,64 @@ class ProfileController extends Controller
     {
         try {
             $dosen = Auth::guard('dosen')->user();
+            
+            if (!$dosen) {
+                Log::warning('Unauthenticated user trying to update dosen profile');
+                return $this->sendResponse(false, 'Sesi login telah berakhir. Silakan login kembali.', 401);
+            }
 
-            $request->validate([
-                'Nama' => 'required|string|max:255',
-                'Alamat' => 'required|string',
+            // Enhanced validation
+            $validatedData = $request->validate([
+                'Nama' => 'required|string|max:100',
+                'Alamat' => 'required|string|max:255',
                 'Nohp' => 'required|string|max:20',
                 'password' => 'nullable|string|min:6|confirmed',
                 'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            ], [
+                'Nama.required' => 'Nama harus diisi',
+                'Nama.max' => 'Nama maksimal 100 karakter',
+                'Alamat.required' => 'Alamat harus diisi',
+                'Alamat.max' => 'Alamat maksimal 255 karakter',
+                'Nohp.required' => 'Nomor HP harus diisi',
+                'Nohp.max' => 'Nomor HP maksimal 20 karakter',
+                'password.min' => 'Password minimal 6 karakter',
+                'password.confirmed' => 'Konfirmasi password tidak sesuai',
+                'profile_photo.image' => 'File harus berupa gambar',
+                'profile_photo.mimes' => 'Format gambar harus JPEG, PNG, JPG, atau GIF',
+                'profile_photo.max' => 'Ukuran gambar maksimal 2MB'
             ]);
 
-            $data = [
-                'Nama' => $request->Nama,
-                'Alamat' => $request->Alamat,
-                'Nohp' => $request->Nohp,
+            DB::beginTransaction();
+
+            $updateData = [
+                'Nama' => $validatedData['Nama'],
+                'Alamat' => $validatedData['Alamat'],
+                'Nohp' => $validatedData['Nohp'],
             ];
 
             $newPhotoUrl = null;
 
             // Handle password update
-            if ($request->filled('password')) {
-                $data['password'] = Hash::make($request->password);
+            if (!empty($validatedData['password'])) {
+                $updateData['password'] = Hash::make($validatedData['password']);
+                Log::info('Password updated for dosen: ' . $dosen->NIP);
             }
 
             // Handle profile photo upload
             if ($request->hasFile('profile_photo')) {
                 try {
-                    // Ensure directory exists and has proper permissions
                     $this->ensureDirectoryExists();
                     
-                    // Validate file is actually an image
                     $file = $request->file('profile_photo');
+                    
+                    // Validate file
                     if (!$file->isValid()) {
-                        throw new \Exception('File upload tidak valid. Silakan coba lagi.');
+                        throw new Exception('File upload tidak valid.');
                     }
                     
                     // Delete old photo if exists
                     if ($dosen->profile_photo) {
                         $this->imageService->deleteProfilePhoto($dosen->profile_photo);
-                    }
-                    
-                    // Validate file type more strictly
-                    $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-                    if (!in_array($file->getMimeType(), $allowedMimes)) {
-                        throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
                     }
                     
                     // Generate unique filename
@@ -88,66 +116,49 @@ class ProfileController extends Controller
                     // Resize and save the image
                     $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
                     
-                    // Verify file was actually saved
-                    $savedPath = storage_path('app/public/profile_photos/' . $savedFileName);
-                    if (!file_exists($savedPath)) {
-                        throw new \Exception('Gagal menyimpan file gambar. Silakan coba lagi.');
-                    }
-                    
-                    $data['profile_photo'] = $savedFileName;
+                    $updateData['profile_photo'] = $savedFileName;
                     $newPhotoUrl = asset('storage/profile_photos/' . $savedFileName);
                     
                     Log::info('Profile photo uploaded successfully for dosen: ' . $dosen->NIP, [
-                        'file_name' => $savedFileName,
-                        'file_size' => $file->getSize(),
-                        'saved_path' => $savedPath
+                        'file_name' => $savedFileName
                     ]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
+                    DB::rollBack();
                     Log::error('Failed to upload profile photo for dosen: ' . $dosen->NIP, [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
+                        'error' => $e->getMessage()
                     ]);
                     
-                    if ($request->ajax()) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Gagal mengupload foto: ' . $e->getMessage()
-                        ]);
-                    }
-                    
-                    return redirect()->back()->with('error', 'Gagal mengupload foto: ' . $e->getMessage());
+                    return $this->sendResponse(false, 'Gagal mengupload foto: ' . $e->getMessage());
                 }
             }
 
-            $dosen->update($data);
+            // Update dosen data
+            $updated = Dosen::where('NIP', $dosen->NIP)->update($updateData);
+            
+            if (!$updated) {
+                throw new Exception('Gagal memperbarui data dosen di database');
+            }
+
+            DB::commit();
             
             Log::info('Profile updated successfully for dosen: ' . $dosen->NIP);
 
-            // Return JSON response if AJAX request
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Profile berhasil diperbarui!',
-                    'profile_photo_url' => $newPhotoUrl,
-                    'user_name' => $dosen->Nama
-                ]);
-            }
+            return $this->sendResponse(true, 'Profile berhasil diperbarui!', 200, [
+                'profile_photo_url' => $newPhotoUrl,
+                'user_name' => $updateData['Nama']
+            ]);
 
-            return redirect()->back()->with('success', 'Profile berhasil diperbarui!');
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return $this->sendResponse(false, 'Validasi gagal', 422, null, $e->errors());
+        } catch (Exception $e) {
+            DB::rollBack();
             Log::error('Error updating dosen profile: ' . $e->getMessage(), [
-                'dosen_id' => Auth::guard('dosen')->id(),
+                'dosen_nip' => $dosen->NIP ?? 'unknown',
                 'trace' => $e->getTraceAsString()
             ]);
             
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat memperbarui profile: ' . $e->getMessage()
-                ]);
-            }
-            
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui profile.');
+            return $this->sendResponse(false, 'Terjadi kesalahan saat memperbarui profile: ' . $e->getMessage());
         }
     }
 
@@ -156,9 +167,20 @@ class ProfileController extends Controller
      */
     public function editMahasiswa()
     {
-        $mahasiswa = Auth::guard('mahasiswa')->user();
-        $golongan = Golongan::all();
-        return view('profile.edit-mahasiswa', compact('mahasiswa', 'golongan'));
+        try {
+            $mahasiswa = Auth::guard('mahasiswa')->user();
+            
+            if (!$mahasiswa) {
+                Log::warning('Unauthenticated user trying to access mahasiswa profile edit');
+                return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+            }
+
+            $golongan = Golongan::all();
+            return view('profile.edit-mahasiswa', compact('mahasiswa', 'golongan'));
+        } catch (Exception $e) {
+            Log::error('Error accessing mahasiswa profile edit: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengakses halaman profile.');
+        }
     }
 
     /**
@@ -168,49 +190,63 @@ class ProfileController extends Controller
     {
         try {
             $mahasiswa = Auth::guard('mahasiswa')->user();
+            
+            if (!$mahasiswa) {
+                Log::warning('Unauthenticated user trying to update mahasiswa profile');
+                return $this->sendResponse(false, 'Sesi login telah berakhir. Silakan login kembali.', 401);
+            }
 
-            $request->validate([
-                'Nama' => 'required|string|max:255',
-                'Alamat' => 'required|string',
+            // Enhanced validation for mahasiswa
+            $validatedData = $request->validate([
+                'Nama' => 'required|string|max:100',
+                'Alamat' => 'required|string|max:255',
                 'Nohp' => 'nullable|string|max:20',
                 'password' => 'nullable|string|min:6|confirmed',
                 'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            ], [
+                'Nama.required' => 'Nama harus diisi',
+                'Nama.max' => 'Nama maksimal 100 karakter',
+                'Alamat.required' => 'Alamat harus diisi',
+                'Alamat.max' => 'Alamat maksimal 255 karakter',
+                'Nohp.max' => 'Nomor HP maksimal 20 karakter',
+                'password.min' => 'Password minimal 6 karakter',
+                'password.confirmed' => 'Konfirmasi password tidak sesuai',
+                'profile_photo.image' => 'File harus berupa gambar',
+                'profile_photo.mimes' => 'Format gambar harus JPEG, PNG, JPG, atau GIF',
+                'profile_photo.max' => 'Ukuran gambar maksimal 2MB'
             ]);
 
-            $data = [
-                'Nama' => $request->Nama,
-                'Alamat' => $request->Alamat,
-                'Nohp' => $request->Nohp,
+            DB::beginTransaction();
+
+            $updateData = [
+                'Nama' => $validatedData['Nama'],
+                'Alamat' => $validatedData['Alamat'],
+                'Nohp' => $validatedData['Nohp'] ?? null,
             ];
 
             $newPhotoUrl = null;
 
             // Handle password update
-            if ($request->filled('password')) {
-                $data['password'] = Hash::make($request->password);
+            if (!empty($validatedData['password'])) {
+                $updateData['password'] = Hash::make($validatedData['password']);
+                Log::info('Password updated for mahasiswa: ' . $mahasiswa->NIM);
             }
 
             // Handle profile photo upload
             if ($request->hasFile('profile_photo')) {
                 try {
-                    // Ensure directory exists and has proper permissions
                     $this->ensureDirectoryExists();
                     
-                    // Validate file is actually an image
                     $file = $request->file('profile_photo');
+                    
+                    // Validate file
                     if (!$file->isValid()) {
-                        throw new \Exception('File upload tidak valid. Silakan coba lagi.');
+                        throw new Exception('File upload tidak valid.');
                     }
                     
                     // Delete old photo if exists
                     if ($mahasiswa->profile_photo) {
                         $this->imageService->deleteProfilePhoto($mahasiswa->profile_photo);
-                    }
-                    
-                    // Validate file type more strictly
-                    $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-                    if (!in_array($file->getMimeType(), $allowedMimes)) {
-                        throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
                     }
                     
                     // Generate unique filename
@@ -219,66 +255,49 @@ class ProfileController extends Controller
                     // Resize and save the image
                     $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
                     
-                    // Verify file was actually saved
-                    $savedPath = storage_path('app/public/profile_photos/' . $savedFileName);
-                    if (!file_exists($savedPath)) {
-                        throw new \Exception('Gagal menyimpan file gambar. Silakan coba lagi.');
-                    }
-                    
-                    $data['profile_photo'] = $savedFileName;
+                    $updateData['profile_photo'] = $savedFileName;
                     $newPhotoUrl = asset('storage/profile_photos/' . $savedFileName);
                     
                     Log::info('Profile photo uploaded successfully for mahasiswa: ' . $mahasiswa->NIM, [
-                        'file_name' => $savedFileName,
-                        'file_size' => $file->getSize(),
-                        'saved_path' => $savedPath
+                        'file_name' => $savedFileName
                     ]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
+                    DB::rollBack();
                     Log::error('Failed to upload profile photo for mahasiswa: ' . $mahasiswa->NIM, [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
+                        'error' => $e->getMessage()
                     ]);
                     
-                    if ($request->ajax()) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Gagal mengupload foto: ' . $e->getMessage()
-                        ]);
-                    }
-                    
-                    return redirect()->back()->with('error', 'Gagal mengupload foto: ' . $e->getMessage());
+                    return $this->sendResponse(false, 'Gagal mengupload foto: ' . $e->getMessage());
                 }
             }
 
-            $mahasiswa->update($data);
+            // Update mahasiswa data
+            $updated = Mahasiswa::where('NIM', $mahasiswa->NIM)->update($updateData);
+            
+            if (!$updated) {
+                throw new Exception('Gagal memperbarui data mahasiswa di database');
+            }
+
+            DB::commit();
             
             Log::info('Profile updated successfully for mahasiswa: ' . $mahasiswa->NIM);
 
-            // Return JSON response if AJAX request
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Profile berhasil diperbarui!',
-                    'profile_photo_url' => $newPhotoUrl,
-                    'user_name' => $mahasiswa->Nama
-                ]);
-            }
+            return $this->sendResponse(true, 'Profile berhasil diperbarui!', 200, [
+                'profile_photo_url' => $newPhotoUrl,
+                'user_name' => $updateData['Nama']
+            ]);
 
-            return redirect()->back()->with('success', 'Profile berhasil diperbarui!');
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return $this->sendResponse(false, 'Validasi gagal', 422, null, $e->errors());
+        } catch (Exception $e) {
+            DB::rollBack();
             Log::error('Error updating mahasiswa profile: ' . $e->getMessage(), [
-                'mahasiswa_id' => Auth::guard('mahasiswa')->id(),
+                'mahasiswa_nim' => $mahasiswa->NIM ?? 'unknown',
                 'trace' => $e->getTraceAsString()
             ]);
             
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat memperbarui profile: ' . $e->getMessage()
-                ]);
-            }
-            
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui profile.');
+            return $this->sendResponse(false, 'Terjadi kesalahan saat memperbarui profile: ' . $e->getMessage());
         }
     }
 
@@ -302,27 +321,26 @@ class ProfileController extends Controller
                 $user = Auth::guard('mahasiswa')->user();
                 $prefix = 'mahasiswa_' . $user->NIM;
             } else {
-                return response()->json(['success' => false, 'message' => 'Invalid user type']);
+                return $this->sendResponse(false, 'Tipe user tidak valid');
             }
 
-            // Ensure directory exists and has proper permissions
+            if (!$user) {
+                return $this->sendResponse(false, 'User tidak ditemukan', 401);
+            }
+
+            DB::beginTransaction();
+
+            // Ensure directory exists
             $this->ensureDirectoryExists();
             
-            // Validate file is actually an image
             $file = $request->file('profile_photo');
             if (!$file->isValid()) {
-                throw new \Exception('File upload tidak valid. Silakan coba lagi.');
+                throw new Exception('File upload tidak valid.');
             }
 
             // Delete old photo if exists
             if ($user->profile_photo) {
                 $this->imageService->deleteProfilePhoto($user->profile_photo);
-            }
-            
-            // Validate file type more strictly
-            $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-            if (!in_array($file->getMimeType(), $allowedMimes)) {
-                throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
             }
             
             // Generate unique filename
@@ -331,39 +349,34 @@ class ProfileController extends Controller
             // Resize and save the image
             $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
             
-            // Verify file was actually saved
-            $savedPath = storage_path('app/public/profile_photos/' . $savedFileName);
-            if (!file_exists($savedPath)) {
-                throw new \Exception('Gagal menyimpan file gambar. Silakan coba lagi.');
-            }
-            
             // Update user profile_photo
-            $user->update(['profile_photo' => $savedFileName]);
+            if ($userType === 'dosen') {
+                Dosen::where('NIP', $user->NIP)->update(['profile_photo' => $savedFileName]);
+            } else {
+                Mahasiswa::where('NIM', $user->NIM)->update(['profile_photo' => $savedFileName]);
+            }
             
             $photoUrl = asset('storage/profile_photos/' . $savedFileName);
             
+            DB::commit();
+            
             Log::info('Profile photo uploaded via dedicated endpoint', [
                 'user_type' => $userType,
-                'user_id' => $user->id,
-                'file_name' => $savedFileName,
-                'saved_path' => $savedPath
+                'user_id' => $userType === 'dosen' ? $user->NIP : $user->NIM,
+                'file_name' => $savedFileName
             ]);
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Foto profil berhasil diupload!',
+            return $this->sendResponse(true, 'Foto profil berhasil diupload!', 200, [
                 'profile_photo_url' => $photoUrl
             ]);
-        } catch (\Exception $e) {
-            Log::error('Error uploading profile photo: ' . $e->getMessage(), [
-                'user_type' => $request->input('user_type'),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupload foto: ' . $e->getMessage()
-            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return $this->sendResponse(false, 'Validasi gagal', 422, null, $e->errors());
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error uploading profile photo: ' . $e->getMessage());
+            return $this->sendResponse(false, 'Gagal mengupload foto: ' . $e->getMessage());
         }
     }
 
@@ -380,37 +393,39 @@ class ProfileController extends Controller
             } elseif ($userType === 'mahasiswa') {
                 $user = Auth::guard('mahasiswa')->user();
             } else {
-                return response()->json(['success' => false, 'message' => 'Invalid user type']);
+                return $this->sendResponse(false, 'Tipe user tidak valid');
             }
 
+            if (!$user) {
+                return $this->sendResponse(false, 'User tidak ditemukan', 401);
+            }
+
+            DB::beginTransaction();
+
             if ($user->profile_photo && $this->imageService->deleteProfilePhoto($user->profile_photo)) {
-                $user->update(['profile_photo' => null]);
+                if ($userType === 'dosen') {
+                    Dosen::where('NIP', $user->NIP)->update(['profile_photo' => null]);
+                } else {
+                    Mahasiswa::where('NIM', $user->NIM)->update(['profile_photo' => null]);
+                }
+                
+                DB::commit();
                 
                 Log::info('Profile photo deleted successfully', [
                     'user_type' => $userType,
-                    'user_id' => $user->id
+                    'user_id' => $userType === 'dosen' ? $user->NIP : $user->NIM
                 ]);
                 
-                return response()->json([
-                    'success' => true, 
-                    'message' => 'Foto profil berhasil dihapus'
-                ]);
+                return $this->sendResponse(true, 'Foto profil berhasil dihapus');
             }
 
-            return response()->json([
-                'success' => false, 
-                'message' => 'Foto profil tidak ditemukan atau gagal dihapus'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error deleting profile photo: ' . $e->getMessage(), [
-                'user_type' => $request->input('user_type'),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ]);
+            DB::rollBack();
+            return $this->sendResponse(false, 'Foto profil tidak ditemukan atau gagal dihapus');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting profile photo: ' . $e->getMessage());
+            return $this->sendResponse(false, 'Error: ' . $e->getMessage());
         }
     }
 
@@ -427,7 +442,11 @@ class ProfileController extends Controller
             } elseif ($userType === 'mahasiswa') {
                 $user = Auth::guard('mahasiswa')->user();
             } else {
-                return response()->json(['success' => false, 'message' => 'Invalid user type']);
+                return $this->sendResponse(false, 'Tipe user tidak valid');
+            }
+
+            if (!$user) {
+                return $this->sendResponse(false, 'User tidak ditemukan', 401);
             }
 
             $photoUrl = null;
@@ -435,21 +454,14 @@ class ProfileController extends Controller
                 $photoUrl = asset('storage/profile_photos/' . $user->profile_photo);
             }
 
-            return response()->json([
-                'success' => true,
+            return $this->sendResponse(true, 'Profile photo retrieved', 200, [
                 'profile_photo_url' => $photoUrl,
                 'has_photo' => !is_null($photoUrl)
             ]);
-        } catch (\Exception $e) {
-            Log::error('Error getting profile photo: ' . $e->getMessage(), [
-                'user_type' => $request->input('user_type'),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ]);
+
+        } catch (Exception $e) {
+            Log::error('Error getting profile photo: ' . $e->getMessage());
+            return $this->sendResponse(false, 'Error: ' . $e->getMessage());
         }
     }
 
@@ -478,6 +490,35 @@ class ProfileController extends Controller
                 symlink($storagePath, $publicStorageLink);
                 Log::info('Created storage symlink: ' . $publicStorageLink);
             }
+        }
+    }
+
+    /**
+     * Send unified response
+     */
+    private function sendResponse($success, $message, $statusCode = 200, $data = null, $errors = null)
+    {
+        $response = [
+            'success' => $success,
+            'message' => $message
+        ];
+
+        if ($data) {
+            $response = array_merge($response, $data);
+        }
+
+        if ($errors) {
+            $response['errors'] = $errors;
+        }
+
+        if (request()->ajax()) {
+            return response()->json($response, $statusCode);
+        }
+
+        if ($success) {
+            return redirect()->back()->with('success', $message);
+        } else {
+            return redirect()->back()->with('error', $message);
         }
     }
 }
