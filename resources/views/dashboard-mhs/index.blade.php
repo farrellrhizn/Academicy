@@ -156,12 +156,12 @@
 							</a>
 						</li>
 						<li>
-							<a href="{{ route('mahasiswa.krs.jadwal') }}" class="dropdown-toggle no-arrow">
+							<a href="{{ route('mahasiswa.jadwal.index') }}" class="dropdown-toggle no-arrow">
 								<span class="micon bi bi-calendar-week"></span><span class="mtext">Jadwal Kuliah</span>
 							</a>
 						</li>
 						<li>
-							<a href="presensi.html" class="dropdown-toggle no-arrow">
+							<a href="{{ route('mahasiswa.presensi.riwayat') }}" class="dropdown-toggle no-arrow">
 								<span class="micon bi bi-check2-square"></span><span class="mtext">Riwayat Presensi</span>
 							</a>
 						</li>
