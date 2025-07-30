@@ -16,6 +16,7 @@ use App\Http\Controllers\KelolaJadwalController;
 use App\Http\Controllers\JadwalDosenController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\MataKuliahDiampuController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 
 // Route untuk Guest (yang belum login)
@@ -32,6 +33,9 @@ Route::get('/', function () {
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth:admin,dosen,mahasiswa');
 Route::get('/forgot-pass', [ForgotController::class, 'showForgotForm'])->name('forgot-pass');
 Route::post('/forgot-pass', [ForgotController::class, 'forgotPass']);
+
+// Route untuk delete profile photo (dapat diakses oleh dosen dan mahasiswa)
+Route::post('/profile/delete-photo', [ProfileController::class, 'deletePhoto'])->name('profile.delete-photo')->middleware('auth:dosen,mahasiswa');
 
 
 // == KELOMPOK ROUTE BERDASARKAN PERAN ==
@@ -77,6 +81,10 @@ Route::middleware('auth:dosen')->prefix('dosen')->name('dosen.')->group(function
     
     // Route mata kuliah diampu
     Route::get('/mata-kuliah-diampu', [MataKuliahDiampuController::class, 'index'])->name('mata-kuliah-diampu.index');
+    
+    // Route profile
+    Route::get('/profile', [ProfileController::class, 'editDosen'])->name('profile.edit');
+    Route::post('/profile', [ProfileController::class, 'updateDosen'])->name('profile.update');
 });
 
 
@@ -97,6 +105,10 @@ Route::middleware('auth:mahasiswa')->prefix('mahasiswa')->name('mahasiswa.')->gr
     
     // Route Presensi Mahasiswa
     Route::get('/presensi/riwayat', [App\Http\Controllers\KrsController::class, 'riwayatPresensi'])->name('presensi.riwayat');
+    
+    // Route profile
+    Route::get('/profile', [ProfileController::class, 'editMahasiswa'])->name('profile.edit');
+    Route::post('/profile', [ProfileController::class, 'updateMahasiswa'])->name('profile.update');
 });
 
 // Route::get('/', function () {
