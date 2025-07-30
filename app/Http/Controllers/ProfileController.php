@@ -42,6 +42,8 @@ class ProfileController extends Controller
             'Nohp' => $request->Nohp,
         ];
 
+        $newPhotoUrl = null;
+
         // Handle password update
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
@@ -58,9 +60,19 @@ class ProfileController extends Controller
             $fileName = 'dosen_' . $dosen->NIP . '_' . time() . '.' . $file->getClientOriginalExtension();
             $file->storeAs('public/profile_photos', $fileName);
             $data['profile_photo'] = $fileName;
+            $newPhotoUrl = asset('storage/profile_photos/' . $fileName);
         }
 
         $dosen->update($data);
+
+        // Return JSON response if AJAX request
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile berhasil diperbarui!',
+                'profile_photo_url' => $newPhotoUrl
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Profile berhasil diperbarui!');
     }
@@ -96,6 +108,8 @@ class ProfileController extends Controller
             'Nohp' => $request->Nohp,
         ];
 
+        $newPhotoUrl = null;
+
         // Handle password update
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
@@ -112,9 +126,19 @@ class ProfileController extends Controller
             $fileName = 'mahasiswa_' . $mahasiswa->NIM . '_' . time() . '.' . $file->getClientOriginalExtension();
             $file->storeAs('public/profile_photos', $fileName);
             $data['profile_photo'] = $fileName;
+            $newPhotoUrl = asset('storage/profile_photos/' . $fileName);
         }
 
         $mahasiswa->update($data);
+
+        // Return JSON response if AJAX request
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile berhasil diperbarui!',
+                'profile_photo_url' => $newPhotoUrl
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Profile berhasil diperbarui!');
     }
