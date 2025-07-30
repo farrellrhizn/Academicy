@@ -24,7 +24,7 @@ class JadwalAkademik extends Model
     // Relasi ke tabel matakuliah
     public function matakuliah()
     {
-        return $this->belongsTo(Matakuliah::class, 'Kode_mk', 'Kode_mk');
+        return $this->belongsTo(MataKuliah::class, 'Kode_mk', 'Kode_mk');
     }
 
     // Relasi ke tabel ruang
