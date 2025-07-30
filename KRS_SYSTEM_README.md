@@ -3,208 +3,163 @@
 ## Overview
 Sistem KRS yang telah dibuat memungkinkan mahasiswa untuk mengambil mata kuliah yang telah dijadwalkan oleh admin dan terintegrasi dengan sistem presensi dosen.
 
+## Perubahan Terbaru (Update Database)
+
+### Perubahan Database
+1. **Primary Key KRS**: Telah diperbaiki dari `id_KRS` menjadi `id_krs` untuk konsistensi penamaan
+2. **Penghapusan KRS**: Sistem sekarang menggunakan `id_krs` sebagai identifier utama untuk operasi penghapusan
+3. **Backward Compatibility**: Sistem masih mendukung penghapusan berdasarkan `Kode_mk` sebagai fallback
+
+### Perubahan File
+1. **Model**: `app/Models/Krs.php`
+   - Primary key diubah ke `id_krs`
+   
+2. **Controller**: `app/Http/Controllers/KrsController.php`
+   - Method `destroy()` diperbarui untuk menerima `id_krs` atau `Kode_mk`
+   - Prioritas diberikan pada `id_krs` jika tersedia
+   
+3. **View**: `resources/views/mahasiswa/krs/index.blade.php`
+   - Tombol hapus sekarang mengirim `id_krs` dan `Kode_mk`
+   - JavaScript diperbarui untuk menggunakan `id_krs` sebagai identifier
+   
+4. **Migration**: `database/migrations/create_krs_table.php`
+   - Primary key diubah dari `id_KRS` ke `id_krs`
+
 ## Fitur Utama
 
 ### 1. Halaman KRS Mahasiswa (`/mahasiswa/krs`)
-- **Daftar Mata Kuliah Diambil**: Menampilkan mata kuliah yang sudah diambil mahasiswa
-- **Daftar Mata Kuliah Tersedia**: Menampilkan mata kuliah yang bisa diambil sesuai semester dan golongan
-- **Validasi Otomatis**: 
-  - Mata kuliah sesuai semester mahasiswa
-  - Mata kuliah yang sudah dijadwalkan untuk golongan mahasiswa
-  - Tidak dapat mengambil mata kuliah yang sudah diambil
-- **Total SKS**: Perhitungan otomatis total SKS yang diambil
+- **Mata Kuliah yang Sudah Diambil**: Daftar mata kuliah yang sudah dipilih mahasiswa
+- **Mata Kuliah Tersedia**: Daftar mata kuliah yang bisa diambil sesuai semester dan golongan
+- **Aksi**: Tambah dan hapus mata kuliah dari KRS
+- **Validasi**: Pengecekan batas maksimal 24 SKS
+- **Real-time Update**: Interface diperbarui tanpa reload halaman
 
 ### 2. Halaman Jadwal Kuliah (`/mahasiswa/krs/jadwal`)
-- **Jadwal per Hari**: Tampilan jadwal yang terorganisir per hari
-- **Informasi Lengkap**: Waktu, ruang, SKS, dan golongan
-- **Ringkasan**: Total mata kuliah, SKS, dan hari kuliah
-- **Print-friendly**: Dapat dicetak langsung
+- Menampilkan jadwal kuliah berdasarkan KRS yang sudah diambil
+- Filter berdasarkan golongan mahasiswa
+- Informasi ruang dan waktu kuliah
 
 ### 3. Halaman Cetak KRS (`/mahasiswa/krs/cetak`)
-- **Format Resmi**: Kop surat universitas dan format akademik
-- **Informasi Mahasiswa**: NIM, nama, semester, golongan, total SKS
-- **Tanda Tangan**: Area untuk tanda tangan Kaprodi, Dosen PA, dan Mahasiswa
-- **Print-ready**: Optimized untuk pencetakan
+- Format cetak untuk administrasi
+- Total SKS dan mata kuliah
+- Layout yang rapi untuk pencetakan
 
 ## Struktur Database
 
-### Tabel yang Terlibat:
-1. **krs**: NIM, Kode_mk
-2. **mahasiswa**: NIM, Nama, Semester, id_Gol, dll
-3. **matakuliah**: Kode_mk, Nama_mk, sks, semester
-4. **jadwal_akademik**: id_jadwal, hari, waktu, Kode_mk, id_ruang, id_Gol
-5. **ruang**: id_ruang, nama_ruang
-6. **golongan**: id_Gol, nama_Gol
+### Tabel Utama
+1. **krs**: id_krs (PK), NIM, Kode_mk, Nilai, Grade
+2. **mahasiswa**: Data mahasiswa dengan semester dan golongan
+3. **matakuliah**: Data mata kuliah dengan SKS dan semester
+4. **jadwal_akademik**: Jadwal kuliah per golongan
 
-### Relasi:
+### Relasi
 - KRS → Mahasiswa (belongsTo)
 - KRS → MataKuliah (belongsTo)
-- MataKuliah → JadwalAkademik (hasMany)
-- Mahasiswa → Golongan (belongsTo)
+- Mahasiswa → KRS (hasMany)
+- MataKuliah → KRS (hasMany)
 
-## File yang Dibuat/Dimodifikasi
+## File yang Dimodifikasi
 
-### Controllers:
+### Backend (Laravel)
 - `app/Http/Controllers/KrsController.php` - Controller utama untuk KRS
-
-### Models:
-- `app/Models/Krs.php` - Ditambahkan relasi dan konfigurasi
 - `app/Models/Mahasiswa.php` - Ditambahkan relasi ke KRS
+- `app/Models/MataKuliah.php` - Ditambahkan relasi ke KRS
+- `app/Models/Krs.php` - Ditambahkan relasi dan konfigurasi
+- `database/migrations/create_krs_table.php` - Struktur tabel KRS
 
-### Views:
+### Frontend (Blade Templates)
 - `resources/views/mahasiswa/krs/index.blade.php` - Halaman utama KRS
-- `resources/views/mahasiswa/krs/jadwal.blade.php` - Halaman jadwal kuliah  
+- `resources/views/mahasiswa/krs/jadwal.blade.php` - Halaman jadwal kuliah
 - `resources/views/mahasiswa/krs/cetak.blade.php` - Halaman cetak KRS
 
-### Routes:
-- `routes/web.php` - Ditambahkan route group untuk KRS mahasiswa
+### Route
+- `routes/web.php` - Route untuk KRS mahasiswa
 
-### Dashboard:
-- `resources/views/dashboard-mhs/index.blade.php` - Diperbarui link menu
+## API Endpoints
 
-## Alur Kerja Sistem
+### KRS Management
+- `GET /mahasiswa/krs` - Halaman utama KRS
+- `POST /mahasiswa/krs` - Tambah mata kuliah ke KRS
+- `DELETE /mahasiswa/krs` - Hapus mata kuliah dari KRS (menggunakan id_krs atau Kode_mk)
+- `GET /mahasiswa/krs/available` - Get available courses via AJAX
 
-### 1. Admin:
-1. Mengelola data mata kuliah di semester tertentu
-2. Membuat jadwal akademik untuk mata kuliah per golongan
-3. Menentukan ruang dan waktu kuliah
+### Additional Features
+- `GET /mahasiswa/krs/jadwal` - Lihat jadwal kuliah
+- `GET /mahasiswa/krs/cetak` - Cetak KRS
 
-### 2. Mahasiswa:
-1. Login ke sistem
-2. Mengakses halaman KRS
-3. Melihat mata kuliah tersedia (sesuai semester dan golongan)
-4. Mengambil mata kuliah yang diinginkan
-5. Melihat jadwal kuliah berdasarkan KRS
-6. Mencetak KRS untuk keperluan administrasi
+## Validasi dan Error Handling
 
-### 3. Dosen:
-1. Sistem presensi otomatis menampilkan mahasiswa yang mengambil mata kuliah (berdasarkan KRS)
-2. Dosen dapat melakukan presensi hanya untuk mahasiswa yang terdaftar di KRS
+### Validasi Input
+1. **Tambah KRS**:
+   - Mata kuliah harus exist
+   - Sesuai semester mahasiswa
+   - Belum diambil sebelumnya
+   - Ada jadwal untuk golongan mahasiswa
+   - Total SKS tidak melebihi 24
 
-## Integrasi dengan Sistem Presensi
+2. **Hapus KRS**:
+   - `id_krs` atau `Kode_mk` harus valid
+   - Mata kuliah harus milik mahasiswa yang login
 
-### PresensiController (`app/Http/Controllers/PresensiController.php`):
-- Line 38: `$nimMahasiswa = Krs::where('Kode_mk', $selectedMk)->pluck('NIM');`
-- Line 39-42: Mengambil data mahasiswa berdasarkan KRS untuk mata kuliah tertentu
-- Dosen hanya bisa mengabsen mahasiswa yang terdaftar di KRS
+### Error Handling
+- Validasi input dengan pesan error yang jelas
+- Logging untuk debugging
+- Rollback database transaction jika terjadi error
+- Response JSON untuk AJAX request
 
-## Validasi dan Keamanan
+## Fitur AJAX
 
-### 1. Validasi KRS:
-- Mata kuliah harus sesuai semester mahasiswa
-- Mata kuliah harus sudah dijadwalkan untuk golongan mahasiswa  
-- Tidak boleh duplikasi mata kuliah
-- Mata kuliah harus exist di database
+### Real-time Updates
+- Tambah/hapus mata kuliah tanpa reload halaman
+- Update counter SKS secara otomatis
+- Animasi smooth untuk perubahan UI
+- SweetAlert untuk konfirmasi dan notifikasi
 
-### 2. Authorization:
-- Hanya mahasiswa yang login dapat mengakses halaman KRS
-- Mahasiswa hanya bisa mengelola KRS mereka sendiri
-- Menggunakan middleware `auth:mahasiswa`
+### Progressive Enhancement
+- Form tetap berfungsi tanpa JavaScript
+- Fallback ke reload halaman jika AJAX gagal
+- Graceful degradation untuk browser lama
 
-## UI/UX Features
+## Security Features
 
-### 1. Responsive Design:
-- Bootstrap 5.3.2 untuk layout responsif
-- Mobile-friendly interface
+### Authentication & Authorization
+- Guard terpisah untuk mahasiswa (`mahasiswa`)
+- Setiap mahasiswa hanya bisa akses KRS sendiri
+- CSRF protection untuk semua form
 
-### 2. Interactive Elements:
-- Hover effects pada card
-- Alert messages untuk feedback
-- Confirmation dialog untuk hapus mata kuliah
+### Data Validation
+- Server-side validation untuk semua input
+- Sanitasi data sebelum disimpan
+- Foreign key constraints di database
 
-### 3. Visual Indicators:
-- Badge untuk SKS dan golongan
-- Color coding untuk hari kuliah
-- Icons untuk setiap section
+## Performance Considerations
 
-### 4. Print Optimization:
-- CSS khusus untuk pencetakan
-- Hide navigasi saat print
-- Format dokumen resmi
+### Database
+- Index pada foreign key (NIM, Kode_mk)
+- Unique constraint untuk mencegah duplikasi
+- Eager loading untuk mengurangi query N+1
 
-## Routes yang Tersedia
-
-```php
-// Mahasiswa Routes (middleware: auth:mahasiswa)
-GET  /mahasiswa/krs              // Halaman utama KRS
-POST /mahasiswa/krs              // Tambah mata kuliah ke KRS  
-DELETE /mahasiswa/krs            // Hapus mata kuliah dari KRS
-GET  /mahasiswa/krs/jadwal       // Halaman jadwal kuliah
-GET  /mahasiswa/krs/cetak        // Halaman cetak KRS
-```
-
-## Cara Penggunaan
-
-### 1. Setup Database:
-Pastikan tabel-tabel berikut sudah ada dan terisi:
-- mahasiswa (dengan data semester dan id_Gol)
-- matakuliah (dengan data semester)
-- jadwal_akademik (dengan relasi ke matakuliah dan golongan)
-- ruang
-- golongan
-
-### 2. Login sebagai Mahasiswa:
-- Akses `/login`
-- Login dengan kredensial mahasiswa
-- Redirect ke dashboard mahasiswa
-
-### 3. Menggunakan KRS:
-- Klik menu "KRS" di sidebar
-- Pilih mata kuliah dari daftar "Mata Kuliah Tersedia"
-- Klik tombol "+" untuk menambahkan
-- Lihat mata kuliah yang sudah diambil di "Mata Kuliah Diambil"
-- Klik tombol trash untuk menghapus jika perlu
-
-### 4. Melihat Jadwal:
-- Klik menu "Jadwal Kuliah" di sidebar
-- Lihat jadwal per hari dan ringkasan
-- Print jadwal jika diperlukan
-
-### 5. Cetak KRS:
-- Dari halaman KRS, klik "Cetak KRS"
-- Dokumen siap untuk dicetak dengan format resmi
+### Frontend
+- AJAX untuk mengurangi full page reload
+- Caching static assets
+- Optimized JavaScript untuk manipulasi DOM
 
 ## Troubleshooting
 
-### 1. Mata Kuliah Tidak Muncul:
-- Pastikan mata kuliah sesuai semester mahasiswa
-- Pastikan ada jadwal untuk golongan mahasiswa
-- Pastikan mata kuliah belum diambil sebelumnya
+### Common Issues
+1. **Mata kuliah tidak muncul**: Cek jadwal untuk golongan mahasiswa
+2. **Error hapus KRS**: Pastikan `id_krs` atau `Kode_mk` valid
+3. **SKS limit**: Maksimal 24 SKS per semester
 
-### 2. Error saat Tambah KRS:
-- Check validasi server-side
-- Pastikan mahasiswa login
-- Pastikan mata kuliah valid
+### Debug Mode
+- Set `APP_DEBUG=true` di `.env` untuk melihat error detail
+- Log file di `storage/logs/laravel.log`
+- Browser developer tools untuk AJAX errors
 
-### 3. Jadwal Tidak Tampil:
-- Pastikan sudah mengambil mata kuliah di KRS
-- Pastikan jadwal_akademik sudah diset admin
-- Check relasi database
+## Future Enhancements
 
-## Pengembangan Selanjutnya
-
-### 1. Enhancement yang Disarankan:
-- Batas maksimal SKS per semester
-- Periode KRS (buka/tutup)
-- Approval workflow (Dosen PA)
-- Conflict detection untuk jadwal bentrok
-- History KRS per semester
-
-### 2. Integrasi Lanjutan:
-- Sistem pembayaran
-- Prasyarat mata kuliah
-- Notifikasi real-time
-- Export ke PDF/Excel
-- Mobile app
-
-## Kesimpulan
-
-Sistem KRS yang telah dibuat menyediakan:
-✅ Interface yang user-friendly untuk mahasiswa
-✅ Validasi otomatis sesuai business rules
-✅ Integrasi dengan sistem presensi dosen
-✅ Format cetak yang sesuai standar akademik
-✅ Responsive design untuk berbagai device
-✅ Security dan authorization yang tepat
-
-Sistem ini siap digunakan dan dapat dikembangkan lebih lanjut sesuai kebutuhan institusi.
+1. **Batch Operations**: Tambah/hapus multiple mata kuliah sekaligus
+2. **KRS History**: Track perubahan KRS mahasiswa
+3. **Email Notifications**: Notifikasi perubahan KRS
+4. **Mobile Responsive**: Optimasi untuk device mobile
+5. **Export Features**: Export KRS ke PDF/Excel
