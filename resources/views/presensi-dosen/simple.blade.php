@@ -12,6 +12,50 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/core.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/icon-font.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/style.css') }}" />
+    <style>
+        .attendance-group {
+            display: flex;
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+        .attendance-btn {
+            border-radius: 0 !important;
+            border-right: 1px solid #dee2e6;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            position: relative;
+        }
+        .attendance-btn:last-child {
+            border-right: none;
+        }
+        .attendance-btn:first-child {
+            border-top-left-radius: 0.375rem !important;
+            border-bottom-left-radius: 0.375rem !important;
+        }
+        .attendance-btn:last-child {
+            border-top-right-radius: 0.375rem !important;
+            border-bottom-right-radius: 0.375rem !important;
+        }
+        .attendance-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .attendance-btn:active {
+            transform: translateY(0);
+        }
+        .btn-success:hover {
+            background-color: #198754 !important;
+            border-color: #146c43 !important;
+        }
+        .btn-warning:hover {
+            background-color: #ffc107 !important;
+            border-color: #ffca2c !important;
+        }
+        .btn-danger:hover {
+            background-color: #dc3545 !important;
+            border-color: #bb2d3b !important;
+        }
+    </style>
 </head>
 <body>
     <div class="pre-loader">
@@ -206,16 +250,16 @@
                                             <td>{{ $mhs->golongan->nama_Gol ?? '-' }}</td>
                                             <td>
                                                 <input type="hidden" name="mahasiswa[{{ $index }}][nim]" value="{{ $mhs->NIM }}">
-                                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                                    <label class="btn btn-outline-success btn-sm">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Hadir" autocomplete="off"> Hadir
-                                                    </label>
-                                                    <label class="btn btn-outline-warning btn-sm">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Izin" autocomplete="off"> Izin
-                                                    </label>
-                                                    <label class="btn btn-outline-danger btn-sm">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Alpa" autocomplete="off"> Alpa
-                                                    </label>
+                                                <div class="btn-group attendance-group" data-nim="{{ $mhs->NIM }}">
+                                                    <button type="button" class="btn btn-outline-success btn-sm attendance-btn" data-status="Hadir">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Hadir" style="display: none;"> Hadir
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-warning btn-sm attendance-btn" data-status="Izin">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Izin" style="display: none;"> Izin
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm attendance-btn" data-status="Alpa">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Alpa" style="display: none;"> Alpa
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -293,11 +337,52 @@
                 window.location.href = "{{ route('dosen.presensi.simple') }}?kode_mk=" + kodeMk;
             });
 
+            // Attendance button click handler
+            $(document).on('click', '.attendance-btn', function() {
+                var $button = $(this);
+                var $group = $button.closest('.attendance-group');
+                var status = $button.data('status');
+                var $radio = $button.find('input[type="radio"]');
+                
+                // Remove active class from all buttons in this group
+                $group.find('.attendance-btn').removeClass('btn-success btn-warning btn-danger').addClass(function() {
+                    if ($(this).data('status') === 'Hadir') return 'btn-outline-success';
+                    if ($(this).data('status') === 'Izin') return 'btn-outline-warning';
+                    if ($(this).data('status') === 'Alpa') return 'btn-outline-danger';
+                });
+                
+                // Add active class to clicked button
+                $button.removeClass('btn-outline-success btn-outline-warning btn-outline-danger');
+                if (status === 'Hadir') {
+                    $button.addClass('btn-success');
+                } else if (status === 'Izin') {
+                    $button.addClass('btn-warning');
+                } else if (status === 'Alpa') {
+                    $button.addClass('btn-danger');
+                }
+                
+                // Check the corresponding radio button
+                $radio.prop('checked', true);
+            });
+
             // Mark All Hadir
             $('#markAllHadir').on('click', function() {
-                $('input[type="radio"][value="Hadir"]').prop('checked', true);
-                $('.btn-group label').removeClass('active');
-                $('.btn-group label:has(input[value="Hadir"])').addClass('active');
+                $('.attendance-group').each(function() {
+                    var $group = $(this);
+                    var $hadirBtn = $group.find('[data-status="Hadir"]');
+                    
+                    // Reset all buttons in group
+                    $group.find('.attendance-btn').removeClass('btn-success btn-warning btn-danger')
+                          .addClass(function() {
+                              if ($(this).data('status') === 'Hadir') return 'btn-outline-success';
+                              if ($(this).data('status') === 'Izin') return 'btn-outline-warning';
+                              if ($(this).data('status') === 'Alpa') return 'btn-outline-danger';
+                          });
+                    
+                    // Activate hadir button
+                    $hadirBtn.removeClass('btn-outline-success').addClass('btn-success');
+                    $hadirBtn.find('input[type="radio"]').prop('checked', true);
+                });
                 
                 Swal.fire({
                     icon: 'success',
@@ -310,8 +395,20 @@
 
             // Reset Form
             $('#resetForm').on('click', function() {
-                $('input[type="radio"]').prop('checked', false);
-                $('.btn-group label').removeClass('active');
+                $('.attendance-group').each(function() {
+                    var $group = $(this);
+                    
+                    // Reset all buttons to outline style
+                    $group.find('.attendance-btn').removeClass('btn-success btn-warning btn-danger')
+                          .addClass(function() {
+                              if ($(this).data('status') === 'Hadir') return 'btn-outline-success';
+                              if ($(this).data('status') === 'Izin') return 'btn-outline-warning';
+                              if ($(this).data('status') === 'Alpa') return 'btn-outline-danger';
+                          });
+                    
+                    // Uncheck all radio buttons
+                    $group.find('input[type="radio"]').prop('checked', false);
+                });
             });
 
             // Submit Presensi Form
@@ -395,18 +492,6 @@
                         });
                     }
                 });
-            });
-
-            // Button group radio styling
-            $('.btn-group input[type="radio"]').on('change', function() {
-                var $this = $(this);
-                var $btnGroup = $this.closest('.btn-group');
-                
-                // Remove active class from all labels in this group
-                $btnGroup.find('label').removeClass('active');
-                
-                // Add active class to the selected label
-                $this.closest('label').addClass('active');
             });
         });
     </script>
