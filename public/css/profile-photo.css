@@ -1,0 +1,101 @@
+/* Profile Photo Enhancements */
+.user-icon img {
+    width: 35px !important;
+    height: 35px !important;
+    object-fit: cover !important;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-icon img:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Ensure consistent styling for profile photos across all header types */
+.header .user-icon img,
+.navbar .user-icon img,
+.dropdown-toggle .user-icon img {
+    width: 35px !important;
+    height: 35px !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+}
+
+/* Profile edit page photo preview enhancements */
+#imagePreview {
+    border-radius: 50% !important;
+    border: 3px solid #f8f9fa;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+#imagePreview:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Loading state for profile photos */
+.user-icon .loading-photo {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Fallback icon styling */
+.user-icon i.dw-user1 {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.user-icon i.dw-user1:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-icon img,
+    .user-icon i.dw-user1 {
+        width: 30px !important;
+        height: 30px !important;
+    }
+    
+    .user-icon i.dw-user1 {
+        font-size: 16px;
+    }
+}
+
+/* Accessibility improvements */
+.user-icon img[alt="Profile"],
+.user-icon i.dw-user1 {
+    outline: none;
+}
+
+.dropdown-toggle:focus .user-icon img,
+.dropdown-toggle:focus .user-icon i.dw-user1 {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
