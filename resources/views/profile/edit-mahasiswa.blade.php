@@ -19,32 +19,27 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <style>
-        /* Enhanced Profile Page Styling */
+        /* Profile Page Styling - Consistent with Dashboard */
         .main-container {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
         }
         
         .profile-header-card {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(79, 172, 254, 0.2);
-            color: white;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(34, 41, 47, 0.1);
+            color: #495057;
             padding: 2rem;
             margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
+            border: 1px solid #e3e6f0;
         }
         
-        .profile-header-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            transform: rotate(45deg);
+        .profile-title {
+            color: #5a5c69;
+            font-weight: 600;
+            margin-bottom: 1rem;
         }
         
         .profile-photo-container {
@@ -75,7 +70,7 @@
             height: 45px;
             margin-bottom: 0;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
+            background: #858796;
             border: 3px solid #fff;
             box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
             cursor: pointer;
@@ -84,12 +79,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #4facfe;
+            color: #fff;
             font-size: 18px;
         }
         
         .avatar-upload .avatar-edit input + label:hover {
-            background: #fff;
+            background: #5a5c69;
             transform: scale(1.1);
             box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3);
         }
@@ -121,100 +116,101 @@
         }
         
         .profile-info-section h2 {
-            color: white;
-            font-weight: 700;
+            color: #5a5c69;
+            font-weight: 600;
             margin-bottom: 1rem;
-            font-size: 2.2rem;
+            font-size: 1.75rem;
         }
         
         .profile-info-item {
             display: flex;
             align-items: center;
             margin-bottom: 0.8rem;
-            color: rgba(255, 255, 255, 0.95);
-            font-size: 1.1rem;
+            color: #5a5c69;
+            font-size: 0.875rem;
         }
         
         .profile-info-item i {
             margin-right: 0.8rem;
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.8);
-            width: 24px;
+            font-size: 1rem;
+            color: #858796;
+            width: 20px;
         }
         
         .edit-form-card {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: none;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border: 1px solid #e3e6f0;
             margin-bottom: 2rem;
         }
         
         .card-header-custom {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border-radius: 20px 20px 0 0 !important;
-            padding: 1.5rem 2rem;
-            border: none;
+            background-color: #f8f9fc;
+            color: #5a5c69;
+            border-radius: 0.35rem 0.35rem 0 0 !important;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e3e6f0;
         }
         
         .card-header-custom h5 {
             margin: 0;
             font-weight: 600;
-            font-size: 1.3rem;
+            font-size: 1rem;
         }
         
         .card-body-custom {
-            padding: 2rem;
+            padding: 1.25rem;
         }
         
         .section-divider {
             border: none;
-            height: 2px;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            margin: 2rem 0;
-            border-radius: 2px;
+            height: 1px;
+            background: #e3e6f0;
+            margin: 1.5rem 0;
+            border-radius: 1px;
         }
         
         .section-title {
-            color: #4facfe;
+            color: #5a5c69;
             font-weight: 600;
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
         }
         
         .section-title i {
-            margin-right: 0.8rem;
-            font-size: 1.3rem;
+            margin-right: 0.5rem;
+            font-size: 1rem;
         }
         
         .form-group label {
             font-weight: 600;
-            color: #2c3e50;
+            color: #5a5c69;
             margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
+            font-size: 0.875rem;
         }
         
         .form-group label i {
             margin-right: 0.5rem;
-            color: #4facfe;
+            color: #858796;
         }
         
         .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 0.8rem 1rem;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #fafbfc;
+            border: 1px solid #d1d3e2;
+            border-radius: 0.35rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.15s ease-in-out;
+            background: #fff;
         }
         
         .form-control:focus {
-            border-color: #4facfe;
-            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.2);
+            border-color: #bac8f3;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
             background: white;
         }
         
@@ -225,48 +221,50 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border: none;
-            border-radius: 12px;
-            padding: 1rem 2rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            background-color: #4e73df;
+            border-color: #4e73df;
+            border-radius: 0.35rem;
+            padding: 0.75rem 1rem;
+            font-weight: 400;
+            font-size: 0.875rem;
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+            background-color: #2e59d9;
+            border-color: #2653d4;
         }
         
         .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-            border: none;
-            border-radius: 12px;
-            padding: 1rem 2rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
+            background-color: #858796;
+            border-color: #858796;
+            border-radius: 0.35rem;
+            padding: 0.75rem 1rem;
+            font-weight: 400;
+            font-size: 0.875rem;
+            transition: all 0.15s ease-in-out;
         }
         
         .btn-secondary:hover {
-            transform: translateY(-2px);
+            background-color: #717384;
+            border-color: #6b6d7d;
         }
         
         .btn-danger {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            border: none;
-            border-radius: 12px;
-            padding: 0.6rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            background-color: #e74a3b;
+            border-color: #e74a3b;
+            border-radius: 0.35rem;
+            padding: 0.75rem 1rem;
+            font-weight: 400;
+            font-size: 0.875rem;
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
         
         .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+            background-color: #d63031;
+            border-color: #c13029;
         }
         
         .alert {
@@ -287,16 +285,17 @@
         }
         
         .upload-info {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
+            background: #f8f9fc;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
             padding: 1rem;
             margin-top: 1rem;
             text-align: center;
         }
         
         .upload-info small {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.9rem;
+            color: #858796;
+            font-size: 0.75rem;
         }
         
         /* Loading States */
