@@ -302,46 +302,156 @@
     </style>
 
     <script>
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#imagePreview').css('background-image', 'url('+e.target.result +')');
-                    $('#imagePreview').hide();
-                    $('#imagePreview').fadeIn(650);
+        $(document).ready(function() {
+            // Profile photo preview functionality
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#imagePreview').css('background-image', 'url('+e.target.result +')');
+                        $('#imagePreview').hide();
+                        $('#imagePreview').fadeIn(650);
+                        
+                        // Show delete button if hidden
+                        if ($('.btn-danger').is(':hidden')) {
+                            $('.btn-danger').show();
+                        }
+                    }
+                    reader.readAsDataURL(input.files[0]);
                 }
-                reader.readAsDataURL(input.files[0]);
             }
-        }
-        $("#imageUpload").change(function() {
-            readURL(this);
-        });
+            
+            $("#imageUpload").change(function() {
+                var file = this.files[0];
+                if (file) {
+                    // Validate file type
+                    var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('Hanya file gambar (JPEG, PNG, GIF) yang diizinkan!');
+                        $(this).val('');
+                        return;
+                    }
+                    
+                    // Validate file size (2MB max)
+                    var maxSize = 2 * 1024 * 1024; // 2MB in bytes
+                    if (file.size > maxSize) {
+                        alert('Ukuran file terlalu besar! Maksimal 2MB.');
+                        $(this).val('');
+                        return;
+                    }
+                    
+                    readURL(this);
+                }
+            });
 
-        function deletePhoto() {
-            if (confirm('Apakah Anda yakin ingin menghapus foto profil?')) {
+            // Enhanced form submission with AJAX
+            $('form').on('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+                
+                var form = $(this);
+                var submitBtn = form.find('button[type="submit"]');
+                var originalText = submitBtn.text();
+                var formData = new FormData(this);
+                
+                // Show loading state
+                submitBtn.prop('disabled', true).text('Menyimpan...');
+                
                 $.ajax({
-                    url: '{{ route("profile.delete-photo") }}',
+                    url: form.attr('action'),
                     type: 'POST',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        user_type: 'mahasiswa'
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
                         if (response.success) {
-                            $('#imagePreview').css('background-image', 'url({{ asset('bootstrap/vendors/images/photo2.jpg') }})');
-                            $('.btn-danger').hide();
-                            alert('Foto profil berhasil dihapus');
-                            location.reload();
+                            // Update navbar avatar if new photo was uploaded
+                            if (response.profile_photo_url) {
+                                var navbarImg = $('.user-icon img');
+                                if (navbarImg.length) {
+                                    navbarImg.attr('src', response.profile_photo_url);
+                                } else {
+                                    $('.user-icon').html('<img src="' + response.profile_photo_url + '" alt="Profile" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">');
+                                }
+                            }
+                            
+                            // Show success message
+                            alert(response.message);
+                            
+                            // Show delete button if photo was uploaded and it's hidden
+                            if (response.profile_photo_url && $('.btn-danger').is(':hidden')) {
+                                $('.btn-danger').show();
+                            }
                         } else {
-                            alert('Gagal menghapus foto profil');
+                            alert('Gagal memperbarui profile');
                         }
                     },
-                    error: function() {
-                        alert('Terjadi kesalahan saat menghapus foto profil');
+                    error: function(xhr, status, error) {
+                        console.error('Error:', xhr.responseText);
+                        if (xhr.status === 422) {
+                            // Validation errors
+                            var errors = xhr.responseJSON.errors;
+                            var errorMessage = 'Validation errors:\n';
+                            for (var field in errors) {
+                                errorMessage += '- ' + errors[field][0] + '\n';
+                            }
+                            alert(errorMessage);
+                        } else {
+                            alert('Terjadi kesalahan saat memperbarui profile');
+                        }
+                    },
+                    complete: function() {
+                        // Re-enable button
+                        submitBtn.prop('disabled', false).text(originalText);
                     }
                 });
+            });
+
+            // Delete photo functionality
+            window.deletePhoto = function() {
+                if (confirm('Apakah Anda yakin ingin menghapus foto profil?')) {
+                    $.ajax({
+                        url: '{{ route("profile.delete-photo") }}',
+                        type: 'POST',
+                        data: {
+                            _token: $('meta[name="csrf-token"]').attr('content'),
+                            user_type: 'mahasiswa'
+                        },
+                        beforeSend: function() {
+                            $('.btn-danger').prop('disabled', true).text('Menghapus...');
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Update preview image
+                                $('#imagePreview').css('background-image', 'url({{ asset('bootstrap/vendors/images/photo2.jpg') }})');
+                                
+                                // Update navbar avatar
+                                $('.user-icon img').remove();
+                                $('.user-icon').html('<i class="dw dw-user1"></i>');
+                                
+                                // Hide delete button
+                                $('.btn-danger').hide();
+                                
+                                // Reset file input
+                                $('#imageUpload').val('');
+                                
+                                alert('Foto profil berhasil dihapus');
+                            } else {
+                                alert('Gagal menghapus foto profil: ' + response.message);
+                                $('.btn-danger').prop('disabled', false).text('Hapus Foto');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                            alert('Terjadi kesalahan saat menghapus foto profil');
+                            $('.btn-danger').prop('disabled', false).text('Hapus Foto');
+                        }
+                    });
+                }
             }
-        }
+        });
     </script>
 </body>
 </html>
