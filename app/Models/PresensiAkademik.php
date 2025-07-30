@@ -12,6 +12,8 @@ class PresensiAkademik extends Model
 
     protected $table = 'presensi_akademik';
     public $timestamps = false; // Karena tidak ada created_at, updated_at di tabel
+    protected $primaryKey = null; // Composite primary key
+    public $incrementing = false; // Non-incrementing key
     
     protected $fillable = [
         'hari',
@@ -24,6 +26,35 @@ class PresensiAkademik extends Model
     protected $dates = [
         'tanggal'
     ];
+
+    /**
+     * Update attendance status using composite key
+     */
+    public static function updateAttendanceStatus($nim, $kodeMk, $tanggal, $statusKehadiran)
+    {
+        return self::where('NIM', $nim)
+                  ->where('Kode_mk', $kodeMk)
+                  ->where('tanggal', $tanggal)
+                  ->update(['status_kehadiran' => $statusKehadiran]);
+    }
+
+    /**
+     * Update or create attendance record with proper composite key handling
+     */
+    public static function updateOrCreateAttendance($nim, $kodeMk, $tanggal, $hari, $statusKehadiran)
+    {
+        return self::updateOrCreate(
+            [
+                'NIM' => $nim,
+                'Kode_mk' => $kodeMk,
+                'tanggal' => $tanggal,
+            ],
+            [
+                'hari' => $hari,
+                'status_kehadiran' => $statusKehadiran,
+            ]
+        );
+    }
 
     /**
      * Relasi ke model Mahasiswa
@@ -84,7 +115,7 @@ class PresensiAkademik extends Model
         switch($this->status_kehadiran) {
             case 'Hadir':
                 return 'badge-success';
-            case 'Ijin':
+            case 'Izin':
                 return 'badge-warning';
             case 'Alpa':
                 return 'badge-danger';

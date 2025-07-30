@@ -170,26 +170,26 @@
                 <div class="pd-20 card-box mb-30">
                     <div class="clearfix">
                         <div class="pull-left">
-                            <h4 class="text-blue h4">Presensi Otomatis Hari Ini</h4>
-                            <p class="mb-20">Pilih mata kuliah dan langsung input presensi. Tanggal akan tersimpan otomatis untuk hari ini ({{ date('d F Y') }}).</p>
+                            <h4 class="text-blue h4">Input Presensi dengan Pilihan Tanggal</h4>
+                            <p class="mb-20">Pilih mata kuliah dan tanggal untuk input atau edit presensi mahasiswa.</p>
                         </div>
                     </div>
                     <div class="alert alert-info">
-                        <strong>Informasi:</strong> Sistem akan otomatis menyimpan presensi dengan tanggal hari ini. Anda tidak perlu menentukan tanggal secara manual.
+                        <strong>Informasi:</strong> Anda dapat memilih tanggal tertentu untuk input presensi atau mengedit presensi yang sudah ada sebelumnya.
                     </div>
                 </div>
 
-                {{-- FORM PILIH MATA KULIAH --}}
+                {{-- FORM PILIH MATA KULIAH DAN TANGGAL --}}
                 <div class="pd-20 card-box mb-30">
                     <div class="clearfix">
                         <div class="pull-left">
-                            <h4 class="text-blue h4">Pilih Mata Kuliah</h4>
-                            <p class="mb-30">Silakan pilih mata kuliah yang akan diisi presensinya</p>
+                            <h4 class="text-blue h4">Pilih Mata Kuliah dan Tanggal</h4>
+                            <p class="mb-30">Silakan pilih mata kuliah dan tanggal untuk input/edit presensi</p>
                         </div>
                     </div>
                     <form id="filterForm">
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-5">
                                 <div class="form-group">
                                     <label>Mata Kuliah <span class="text-danger">*</span></label>
                                     <select class="form-control" name="kode_mk" id="kode_mk" required>
@@ -203,6 +203,12 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Tanggal <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" name="tanggal" id="tanggal" value="{{ $selectedDate }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>&nbsp;</label>
                                     <button type="submit" class="btn btn-primary btn-block">
@@ -221,14 +227,15 @@
                         <h4 class="text-blue h4">Input Presensi Mahasiswa</h4>
                         <p class="mb-30">
                             Mata Kuliah: <strong>{{ $selectedMkName }}</strong> | 
-                            Tanggal: <strong>{{ date('d F Y') }}</strong> |
-                            Hari: <strong>{{ date('l') }}</strong>
+                            Tanggal: <strong>{{ \Carbon\Carbon::parse($selectedDate)->format('d F Y') }}</strong> |
+                            Hari: <strong>{{ \Carbon\Carbon::parse($selectedDate)->format('l') }}</strong>
                         </p>
                     </div>
                     <div class="pb-20">
                         <form id="presensiForm">
                             @csrf
                             <input type="hidden" name="kode_mk" value="{{ $selectedMk }}">
+                            <input type="hidden" name="tanggal" value="{{ $selectedDate }}">
                             
                             <div class="table-responsive">
                                 <table class="table table-striped">
@@ -250,15 +257,18 @@
                                             <td>{{ $mhs->golongan->nama_Gol ?? '-' }}</td>
                                             <td>
                                                 <input type="hidden" name="mahasiswa[{{ $index }}][nim]" value="{{ $mhs->NIM }}">
+                                                @php
+                                                    $currentStatus = $existingPresensi[$mhs->NIM] ?? null;
+                                                @endphp
                                                 <div class="btn-group attendance-group" data-nim="{{ $mhs->NIM }}">
-                                                    <button type="button" class="btn btn-outline-success btn-sm attendance-btn" data-status="Hadir">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Hadir" style="display: none;"> Hadir
+                                                    <button type="button" class="btn {{ $currentStatus == 'Hadir' ? 'btn-success' : 'btn-outline-success' }} btn-sm attendance-btn" data-status="Hadir">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Hadir" {{ $currentStatus == 'Hadir' ? 'checked' : '' }} style="display: none;"> Hadir
                                                     </button>
-                                                    <button type="button" class="btn btn-outline-warning btn-sm attendance-btn" data-status="Izin">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Izin" style="display: none;"> Izin
+                                                    <button type="button" class="btn {{ $currentStatus == 'Izin' ? 'btn-warning' : 'btn-outline-warning' }} btn-sm attendance-btn" data-status="Izin">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Izin" {{ $currentStatus == 'Izin' ? 'checked' : '' }} style="display: none;"> Izin
                                                     </button>
-                                                    <button type="button" class="btn btn-outline-danger btn-sm attendance-btn" data-status="Alpa">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Alpa" style="display: none;"> Alpa
+                                                    <button type="button" class="btn {{ $currentStatus == 'Alpa' ? 'btn-danger' : 'btn-outline-danger' }} btn-sm attendance-btn" data-status="Alpa">
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Alpa" {{ $currentStatus == 'Alpa' ? 'checked' : '' }} style="display: none;"> Alpa
                                                     </button>
                                                 </div>
                                             </td>
@@ -280,7 +290,7 @@
                                     </div>
                                     <div class="col-md-6 text-right">
                                         <button type="submit" class="btn btn-primary btn-lg">
-                                            <i class="fa fa-save"></i> Simpan Presensi ({{ date('d/m/Y') }})
+                                            <i class="fa fa-save"></i> Simpan Presensi ({{ \Carbon\Carbon::parse($selectedDate)->format('d/m/Y') }})
                                         </button>
                                     </div>
                                 </div>
@@ -324,6 +334,7 @@
             $('#filterForm').on('submit', function (e) {
                 e.preventDefault();
                 var kodeMk = $('#kode_mk').val();
+                var tanggal = $('#tanggal').val();
                 
                 if (!kodeMk) {
                     Swal.fire({
@@ -334,7 +345,16 @@
                     return;
                 }
                 
-                window.location.href = "{{ route('dosen.presensi.simple') }}?kode_mk=" + kodeMk;
+                if (!tanggal) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Perhatian!',
+                        text: 'Silakan pilih tanggal terlebih dahulu.'
+                    });
+                    return;
+                }
+                
+                window.location.href = "{{ route('dosen.presensi.simple') }}?kode_mk=" + kodeMk + "&tanggal=" + tanggal;
             });
 
             // Attendance button click handler
@@ -431,7 +451,7 @@
                 // Konfirmasi sebelum menyimpan
                 Swal.fire({
                     title: 'Konfirmasi Simpan',
-                    text: 'Apakah Anda yakin ingin menyimpan data presensi untuk hari ini (' + '{{ date("d F Y") }}' + ')?',
+                    text: 'Apakah Anda yakin ingin menyimpan data presensi untuk tanggal ' + '{{ \Carbon\Carbon::parse($selectedDate)->format("d F Y") }}' + '?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',

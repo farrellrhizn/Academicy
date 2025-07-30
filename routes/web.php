@@ -68,9 +68,10 @@ Route::middleware('auth:dosen')->prefix('dosen')->name('dosen.')->group(function
 
     Route::get('/jadwal', [JadwalDosenController::class, 'index'])->name('jadwal.index');
 
-    // Route presensi cepat (hanya pilih mata kuliah, tanggal otomatis)
+    // Route presensi cepat dengan datepicker
     Route::get('/presensi-simple', [PresensiController::class, 'simple'])->name('presensi.simple');
     Route::post('/presensi-simple', [PresensiController::class, 'storeSimple'])->name('presensi.store-simple');
+    Route::post('/presensi-update-status', [PresensiController::class, 'updateStatus'])->name('presensi.update-status');
     
     // Route presensi detail (REMOVED as requested by user)
     
