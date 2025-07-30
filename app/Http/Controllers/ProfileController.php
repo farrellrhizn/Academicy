@@ -9,9 +9,17 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\Golongan;
+use App\Services\ImageService;
 
 class ProfileController extends Controller
 {
+    protected $imageService;
+
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     /**
      * Show profile edit form for dosen
      */
@@ -51,16 +59,25 @@ class ProfileController extends Controller
 
         // Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
-            // Delete old photo if exists
-            if ($dosen->profile_photo && Storage::exists('public/profile_photos/' . $dosen->profile_photo)) {
-                Storage::delete('public/profile_photos/' . $dosen->profile_photo);
-            }
+            try {
+                // Delete old photo if exists
+                if ($dosen->profile_photo) {
+                    $this->imageService->deleteProfilePhoto($dosen->profile_photo);
+                }
 
-            $file = $request->file('profile_photo');
-            $fileName = 'dosen_' . $dosen->NIP . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/profile_photos', $fileName);
-            $data['profile_photo'] = $fileName;
-            $newPhotoUrl = asset('storage/profile_photos/' . $fileName);
+                $file = $request->file('profile_photo');
+                $fileName = 'dosen_' . $dosen->NIP . '_' . time() . '.' . $file->getClientOriginalExtension();
+                
+                // Resize and save the image
+                $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
+                $data['profile_photo'] = $savedFileName;
+                $newPhotoUrl = asset('storage/profile_photos/' . $savedFileName);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengupload foto: ' . $e->getMessage()
+                ]);
+            }
         }
 
         $dosen->update($data);
@@ -117,16 +134,25 @@ class ProfileController extends Controller
 
         // Handle profile photo upload
         if ($request->hasFile('profile_photo')) {
-            // Delete old photo if exists
-            if ($mahasiswa->profile_photo && Storage::exists('public/profile_photos/' . $mahasiswa->profile_photo)) {
-                Storage::delete('public/profile_photos/' . $mahasiswa->profile_photo);
-            }
+            try {
+                // Delete old photo if exists
+                if ($mahasiswa->profile_photo) {
+                    $this->imageService->deleteProfilePhoto($mahasiswa->profile_photo);
+                }
 
-            $file = $request->file('profile_photo');
-            $fileName = 'mahasiswa_' . $mahasiswa->NIM . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/profile_photos', $fileName);
-            $data['profile_photo'] = $fileName;
-            $newPhotoUrl = asset('storage/profile_photos/' . $fileName);
+                $file = $request->file('profile_photo');
+                $fileName = 'mahasiswa_' . $mahasiswa->NIM . '_' . time() . '.' . $file->getClientOriginalExtension();
+                
+                // Resize and save the image
+                $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
+                $data['profile_photo'] = $savedFileName;
+                $newPhotoUrl = asset('storage/profile_photos/' . $savedFileName);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengupload foto: ' . $e->getMessage()
+                ]);
+            }
         }
 
         $mahasiswa->update($data);
@@ -158,8 +184,7 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'Invalid user type']);
         }
 
-        if ($user->profile_photo && Storage::exists('public/profile_photos/' . $user->profile_photo)) {
-            Storage::delete('public/profile_photos/' . $user->profile_photo);
+        if ($user->profile_photo && $this->imageService->deleteProfilePhoto($user->profile_photo)) {
             $user->update(['profile_photo' => null]);
             return response()->json(['success' => true, 'message' => 'Foto profil berhasil dihapus']);
         }

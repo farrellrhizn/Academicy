@@ -48,6 +48,7 @@
 			href="{{ asset('bootstrap/src/plugins/datatables/css/responsive.bootstrap4.min.css') }}"
 		/>
 		<link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/style.css') }}" />
+		<link rel="stylesheet" type="text/css" href="{{ asset('css/profile-photo.css') }}" />
 
 	</head>
 	<body>
