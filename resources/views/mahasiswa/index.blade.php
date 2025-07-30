@@ -57,9 +57,9 @@
 
     <div class="left-side-bar">
         <div class="brand-logo">
-            <a href="index.html">
-                <img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
-                <img src="../../../bootstrap/vendors/images/deskapp-logo-white.svg" alt="" class="light-logo" />
+            <a href="{{ route('admin.dashboard') }}">
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>
@@ -70,18 +70,18 @@
             <div class="sidebar-menu">
                 <ul id="accordion-menu">
                     <li>
-                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow active">
+                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow">
                             <span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
                         </a>
                     </li>
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="javascript:;" class="dropdown-toggle">
                             <span class="micon bi bi-mortarboard"></span><span class="mtext">Data Master</span>
                         </a>
                         <ul class="submenu">
                             <li><a href="{{ route('admin.matakuliah.index') }}">Mata Kuliah</a></li>
                             <li><a href="{{ route('admin.dosen.index') }}">Dosen</a></li>
-                            <li><a href="{{ route('admin.mahasiswa.index') }}">Mahasiswa</a></li>
+                            <li class="active"><a href="{{ route('admin.mahasiswa.index') }}">Mahasiswa</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -128,7 +128,7 @@
                             </div>
                             <nav aria-label="breadcrumb" role="navigation">
                                 <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="{{ route('dashboard-admin') }}">Home</a></li>
+                                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
                                     <li class="breadcrumb-item active" aria-current="page">Data Mahasiswa</li>
                                 </ol>
                             </nav>
