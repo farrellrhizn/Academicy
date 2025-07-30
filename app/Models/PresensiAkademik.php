@@ -22,7 +22,6 @@ class PresensiAkademik extends Model
     ];
 
     protected $dates = [
-        'hari',
         'tanggal'
     ];
 
