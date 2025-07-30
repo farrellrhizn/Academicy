@@ -252,38 +252,39 @@
 														<th>Aksi</th>
 													</tr>
 												</thead>
-																				<tbody>
-									@foreach($krsAmbil as $krs)
-										<tr id="krs-row-{{ $krs->Kode_mk }}">
-											<td><span class="badge badge-primary">{{ $krs->Kode_mk }}</span></td>
-											<td><strong>{{ $krs->matakuliah->Nama_mk }}</strong></td>
-											<td>
-												<span class="badge badge-success">{{ $krs->matakuliah->sks }} SKS</span>
-											</td>
-											<td>
-												@if($krs->matakuliah->jadwalAkademik->isNotEmpty())
-													@foreach($krs->matakuliah->jadwalAkademik as $jadwal)
-														@if($jadwal->id_Gol == $mahasiswa->id_Gol)
-															<small class="text-muted">
-																{{ $jadwal->hari }}, {{ $jadwal->waktu }}<br>
-																<i class="fa fa-map-marker"></i> {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}
-															</small>
-														@endif
-													@endforeach
-												@else
-													<small class="text-warning">Belum dijadwalkan</small>
-												@endif
-											</td>
-											<td>
-												<button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
-														data-kode="{{ $krs->Kode_mk }}" 
-														data-nama="{{ $krs->matakuliah->Nama_mk }}">
-													<i class="fa fa-trash"></i> Hapus
-												</button>
-											</td>
-										</tr>
+																												<tbody>
+					@foreach($krsAmbil as $krs)
+						<tr id="krs-row-{{ $krs->id_krs }}">
+							<td><span class="badge badge-primary">{{ $krs->Kode_mk }}</span></td>
+							<td><strong>{{ $krs->matakuliah->Nama_mk }}</strong></td>
+							<td>
+								<span class="badge badge-success">{{ $krs->matakuliah->sks }} SKS</span>
+							</td>
+							<td>
+								@if($krs->matakuliah->jadwalAkademik->isNotEmpty())
+									@foreach($krs->matakuliah->jadwalAkademik as $jadwal)
+										@if($jadwal->id_Gol == $mahasiswa->id_Gol)
+											<small class="text-muted">
+												{{ $jadwal->hari }}, {{ $jadwal->waktu }}<br>
+												<i class="fa fa-map-marker"></i> {{ $jadwal->ruang->nama_ruang ?? 'TBA' }}
+											</small>
+										@endif
 									@endforeach
-								</tbody>
+								@else
+									<small class="text-warning">Belum dijadwalkan</small>
+								@endif
+							</td>
+							<td>
+								<button type="button" class="btn btn-outline-danger btn-sm delete-btn" 
+										data-id-krs="{{ $krs->id_krs }}"
+										data-kode="{{ $krs->Kode_mk }}" 
+										data-nama="{{ $krs->matakuliah->Nama_mk }}">
+									<i class="fa fa-trash"></i> Hapus
+								</button>
+							</td>
+						</tr>
+					@endforeach
+				</tbody>
 											</table>
 										</div>
 									@else
@@ -481,6 +482,7 @@
 				e.preventDefault();
 				
 				const button = $(this);
+				const idKrs = button.data('id-krs');
 				const kodeMatkuliah = button.data('kode');
 				const namaMatkuliah = button.data('nama');
 				
@@ -511,6 +513,7 @@
 							url: '{{ route("mahasiswa.krs.destroy") }}',
 							type: 'DELETE',
 							data: {
+								'id_krs': idKrs,
 								'Kode_mk': kodeMatkuliah,
 								'_token': $('meta[name="csrf-token"]').attr('content')
 							},
@@ -528,7 +531,7 @@
 									showConfirmButton: false
 								}).then(() => {
 									// Remove the row instead of reloading
-									$('#krs-row-' + kodeMatkuliah).fadeOut(500, function() {
+									$('#krs-row-' + idKrs).fadeOut(500, function() {
 										$(this).remove();
 										// Add course back to available courses table
 										if (response.available_course) {

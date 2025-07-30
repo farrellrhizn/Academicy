@@ -140,8 +140,10 @@ class KrsController extends Controller
                 'expects_json' => $request->expectsJson()
             ]);
 
+            // Validasi input - sekarang menerima id_krs atau Kode_mk
             $request->validate([
-                'Kode_mk' => 'required|string|exists:matakuliah,Kode_mk'
+                'id_krs' => 'sometimes|integer|exists:krs,id_krs',
+                'Kode_mk' => 'sometimes|string|exists:matakuliah,Kode_mk'
             ]);
             
             $mahasiswa = Auth::guard('mahasiswa')->user();
@@ -156,11 +158,18 @@ class KrsController extends Controller
                 return redirect()->route('login')->with('error', $message);
             }
             
-            // Find KRS record with mata kuliah info
-            $krs = Krs::where('NIM', $mahasiswa->NIM)
-                      ->where('Kode_mk', $request->Kode_mk)
-                      ->with('matakuliah')
-                      ->first();
+            // Find KRS record - prioritas id_krs jika ada, fallback ke Kode_mk
+            if ($request->has('id_krs')) {
+                $krs = Krs::where('id_krs', $request->id_krs)
+                          ->where('NIM', $mahasiswa->NIM)
+                          ->with('matakuliah')
+                          ->first();
+            } else {
+                $krs = Krs::where('NIM', $mahasiswa->NIM)
+                          ->where('Kode_mk', $request->Kode_mk)
+                          ->with('matakuliah')
+                          ->first();
+            }
             
             if (!$krs) {
                 $message = 'Mata kuliah tidak ditemukan dalam KRS Anda.';
@@ -202,12 +211,13 @@ class KrsController extends Controller
                     $matakuliahTersedia = $this->getAvailableCourses($mahasiswa);
                     
                     // Find the course that was just deleted to return it
-                    $deletedCourse = $matakuliahTersedia->where('Kode_mk', $request->Kode_mk)->first();
+                    $deletedCourse = $matakuliahTersedia->where('Kode_mk', $matakuliah->Kode_mk)->first();
                     
                     return response()->json([
                         'success' => true,
                         'message' => $message,
                         'data' => [
+                            'id_krs' => $krs->id_krs,
                             'kode_mk' => $matakuliah->Kode_mk,
                             'nama_mk' => $matakuliah->Nama_mk,
                             'sks' => $matakuliah->sks
@@ -247,6 +257,7 @@ class KrsController extends Controller
             // Log the actual error for debugging
             \Log::error('KRS Delete Error: ' . $e->getMessage(), [
                 'nim' => $mahasiswa->NIM ?? 'unknown',
+                'id_krs' => $request->id_krs ?? 'unknown',
                 'kode_mk' => $request->Kode_mk ?? 'unknown',
                 'exception' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
