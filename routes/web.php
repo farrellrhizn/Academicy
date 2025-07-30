@@ -34,8 +34,10 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::get('/forgot-pass', [ForgotController::class, 'showForgotForm'])->name('forgot-pass');
 Route::post('/forgot-pass', [ForgotController::class, 'forgotPass']);
 
-// Route untuk delete profile photo (dapat diakses oleh dosen dan mahasiswa)
+// Route untuk profile photo management (dapat diakses oleh dosen dan mahasiswa)
 Route::post('/profile/delete-photo', [ProfileController::class, 'deletePhoto'])->name('profile.delete-photo')->middleware('auth:dosen,mahasiswa');
+Route::post('/profile/upload-photo', [ProfileController::class, 'uploadPhoto'])->name('profile.upload-photo')->middleware('auth:dosen,mahasiswa');
+Route::get('/profile/get-photo', [ProfileController::class, 'getProfilePhoto'])->name('profile.get-photo')->middleware('auth:dosen,mahasiswa');
 
 
 // == KELOMPOK ROUTE BERDASARKAN PERAN ==

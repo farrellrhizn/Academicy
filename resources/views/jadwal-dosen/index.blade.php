@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/icon-font.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/src/plugins/datatables/css/dataTables.bootstrap4.min.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/style.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/profile-photo.css') }}" />
 </head>
 <body>
     <div class="pre-loader">
@@ -44,7 +45,7 @@
 									<i class="dw dw-user1"></i>
 								@endif
 							</span>
-							<span class="user-name">[Nama Dosen]</span>
+							<span class="user-name">{{ $dosen->Nama ?? 'Dosen' }}</span>
 						</a>
 						<div
 							class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"

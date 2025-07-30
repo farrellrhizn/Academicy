@@ -18,11 +18,22 @@ class ImageService
      */
     public function resizeProfilePhoto(UploadedFile $file, string $filename, int $width = 200, int $height = 200): string
     {
+        // Validate file size (max 2MB)
+        if ($file->getSize() > 2048000) {
+            throw new \Exception('File terlalu besar. Maksimal 2MB.');
+        }
+
+        // Validate mime type
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+        if (!in_array($file->getMimeType(), $allowedMimes)) {
+            throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
+        }
+
         // Create image resource from uploaded file
         $sourceImage = $this->createImageFromFile($file);
         
         if (!$sourceImage) {
-            throw new \Exception('Unable to create image from uploaded file');
+            throw new \Exception('Unable to create image from uploaded file. File mungkin rusak atau format tidak valid.');
         }
         
         // Get original dimensions
@@ -138,10 +149,23 @@ class ImageService
      */
     public function deleteProfilePhoto(?string $filename): bool
     {
-        if (!$filename || !Storage::exists('public/profile_photos/' . $filename)) {
+        if (!$filename) {
             return false;
         }
+
+        $filePath = 'public/profile_photos/' . $filename;
         
-        return Storage::delete('public/profile_photos/' . $filename);
+        if (!Storage::exists($filePath)) {
+            // File already doesn't exist, consider it as successfully deleted
+            return true;
+        }
+        
+        try {
+            return Storage::delete($filePath);
+        } catch (\Exception $e) {
+            // Log error but don't throw exception
+            \Log::error('Failed to delete profile photo: ' . $e->getMessage());
+            return false;
+        }
     }
 }

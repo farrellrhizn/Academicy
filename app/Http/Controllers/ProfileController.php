@@ -66,6 +66,12 @@ class ProfileController extends Controller
                 }
 
                 $file = $request->file('profile_photo');
+                
+                // Validate file type
+                if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'])) {
+                    throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
+                }
+                
                 $fileName = 'dosen_' . $dosen->NIP . '_' . time() . '.' . $file->getClientOriginalExtension();
                 
                 // Resize and save the image
@@ -87,7 +93,8 @@ class ProfileController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Profile berhasil diperbarui!',
-                'profile_photo_url' => $newPhotoUrl
+                'profile_photo_url' => $newPhotoUrl,
+                'user_name' => $dosen->Nama
             ]);
         }
 
@@ -141,6 +148,12 @@ class ProfileController extends Controller
                 }
 
                 $file = $request->file('profile_photo');
+                
+                // Validate file type
+                if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'])) {
+                    throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
+                }
+                
                 $fileName = 'mahasiswa_' . $mahasiswa->NIM . '_' . time() . '.' . $file->getClientOriginalExtension();
                 
                 // Resize and save the image
@@ -162,11 +175,70 @@ class ProfileController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Profile berhasil diperbarui!',
-                'profile_photo_url' => $newPhotoUrl
+                'profile_photo_url' => $newPhotoUrl,
+                'user_name' => $mahasiswa->Nama
             ]);
         }
 
         return redirect()->back()->with('success', 'Profile berhasil diperbarui!');
+    }
+
+    /**
+     * Upload profile photo specifically
+     */
+    public function uploadPhoto(Request $request)
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'user_type' => 'required|in:dosen,mahasiswa'
+        ]);
+
+        $userType = $request->input('user_type');
+        
+        if ($userType === 'dosen') {
+            $user = Auth::guard('dosen')->user();
+            $prefix = 'dosen_' . $user->NIP;
+        } elseif ($userType === 'mahasiswa') {
+            $user = Auth::guard('mahasiswa')->user();
+            $prefix = 'mahasiswa_' . $user->NIM;
+        } else {
+            return response()->json(['success' => false, 'message' => 'Invalid user type']);
+        }
+
+        try {
+            // Delete old photo if exists
+            if ($user->profile_photo) {
+                $this->imageService->deleteProfilePhoto($user->profile_photo);
+            }
+
+            $file = $request->file('profile_photo');
+            
+            // Validate file type
+            if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'])) {
+                throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
+            }
+            
+            $fileName = $prefix . '_' . time() . '.' . $file->getClientOriginalExtension();
+            
+            // Resize and save the image
+            $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
+            
+            // Update user profile_photo
+            $user->update(['profile_photo' => $savedFileName]);
+            
+            $photoUrl = asset('storage/profile_photos/' . $savedFileName);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto profil berhasil diupload!',
+                'profile_photo_url' => $photoUrl
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupload foto: ' . $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -184,11 +256,51 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'Invalid user type']);
         }
 
-        if ($user->profile_photo && $this->imageService->deleteProfilePhoto($user->profile_photo)) {
-            $user->update(['profile_photo' => null]);
-            return response()->json(['success' => true, 'message' => 'Foto profil berhasil dihapus']);
+        try {
+            if ($user->profile_photo && $this->imageService->deleteProfilePhoto($user->profile_photo)) {
+                $user->update(['profile_photo' => null]);
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Foto profil berhasil dihapus'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false, 
+                'message' => 'Foto profil tidak ditemukan atau gagal dihapus'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Get current profile photo
+     */
+    public function getProfilePhoto(Request $request)
+    {
+        $userType = $request->input('user_type');
+        
+        if ($userType === 'dosen') {
+            $user = Auth::guard('dosen')->user();
+        } elseif ($userType === 'mahasiswa') {
+            $user = Auth::guard('mahasiswa')->user();
+        } else {
+            return response()->json(['success' => false, 'message' => 'Invalid user type']);
         }
 
-        return response()->json(['success' => false, 'message' => 'Foto profil tidak ditemukan']);
+        $photoUrl = null;
+        if ($user->profile_photo && Storage::exists('public/profile_photos/' . $user->profile_photo)) {
+            $photoUrl = asset('storage/profile_photos/' . $user->profile_photo);
+        }
+
+        return response()->json([
+            'success' => true,
+            'profile_photo_url' => $photoUrl,
+            'has_photo' => !is_null($photoUrl)
+        ]);
     }
 }
