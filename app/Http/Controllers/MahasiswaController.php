@@ -32,7 +32,7 @@ class MahasiswaController extends Controller
         $validatedData = $request->validate([
             'NIM'      => 'required|string|max:20|unique:mahasiswa,NIM',
             'Nama'     => 'required|string|max:100',
-            'Password' => 'required|string|min:8',
+            'password' => 'required|string|min:8',
             'Alamat'   => 'nullable|string|max:255',
             'Nohp'     => 'nullable|string|max:20',
             'Semester' => 'required|integer',
@@ -40,7 +40,7 @@ class MahasiswaController extends Controller
         ]);
 
         // Hash password sebelum disimpan
-        $validatedData['Password'] = Hash::make($validatedData['Password']);
+        $validatedData['password'] = Hash::make($validatedData['password']);
 
         $mahasiswa = Mahasiswa::create($validatedData);
         // Load relasi golongan agar bisa dikirim balik ke view
@@ -72,7 +72,7 @@ class MahasiswaController extends Controller
             'Nohp'     => 'nullable|string|max:20',
             'Semester' => 'required|integer',
             'id_Gol'   => 'required|integer|exists:golongan,id_Gol',
-            'Password' => 'nullable|string|min:8', // Password tidak wajib diisi saat update
+            'password' => 'nullable|string|min:8', // Password tidak wajib diisi saat update
         ]);
 
         // Update data mahasiswa
@@ -83,8 +83,8 @@ class MahasiswaController extends Controller
         $mahasiswa->id_Gol = $validatedData['id_Gol'];
         
         // Jika ada password baru yang diinput, hash dan perbarui
-        if (!empty($validatedData['Password'])) {
-            $mahasiswa->Password = Hash::make($validatedData['Password']);
+        if (!empty($validatedData['password'])) {
+            $mahasiswa->password = Hash::make($validatedData['password']);
         }
 
         $mahasiswa->save();

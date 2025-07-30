@@ -162,10 +162,10 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6 col-sm-12">
-                                <div class="form-group">
-                                    <label>Password <span class="text-danger">*</span></label>
-                                    <input class="form-control" name="Password" id="Password" type="password" placeholder="Minimal 8 karakter" required />
-                                </div>
+                                                            <div class="form-group">
+                                <label>Password <span class="text-danger">*</span></label>
+                                <input class="form-control" name="password" id="password" type="password" placeholder="Minimal 8 karakter" required />
+                            </div>
                             </div>
                             <div class="col-md-6 col-sm-12">
                                 <div class="form-group">
@@ -280,10 +280,10 @@
                         </div>
                          <div class="row">
                             <div class="col-md-6 col-sm-12">
-                                <div class="form-group">
-                                    <label>Password Baru (Opsional)</label>
-                                    <input class="form-control" name="Password" id="edit_Password" type="password" placeholder="Isi jika ingin mengubah password" />
-                                </div>
+                                                            <div class="form-group">
+                                <label>Password Baru (Opsional)</label>
+                                <input class="form-control" name="password" id="edit_password" type="password" placeholder="Isi jika ingin mengubah password" />
+                            </div>
                             </div>
                             <div class="col-md-6 col-sm-12">
                                 <div class="form-group">
@@ -345,7 +345,7 @@
             $('#mahasiswaForm').on('submit', function(e) {
                 e.preventDefault();
                 $.ajax({
-                    url: "{{ route('mahasiswa.store') }}",
+                    url: "{{ route('admin.mahasiswa.store') }}",
                     type: 'POST',
                     data: $(this).serialize(),
                     success: function(response) {
@@ -385,7 +385,7 @@
             // EDIT
             $('body').on('click', '.btn-edit', function() {
                 var nim = $(this).data('id');
-                $.get("/mahasiswa/" + nim + "/edit", function(data) {
+                $.get("/admin/mahasiswa/" + nim + "/edit", function(data) {
                     $('#editModal').modal('show');
                     $('#edit_NIM').val(data.NIM);
                     $('#edit_NIM_display').val(data.NIM);
@@ -394,7 +394,7 @@
                     $('#edit_Nohp').val(data.Nohp);
                     $('#edit_Semester').val(data.Semester);
                     $('#edit_id_Gol').val(data.id_Gol);
-                    $('#edit_Password').val('');
+                    $('#edit_password').val('');
                 });
             });
 
@@ -402,7 +402,7 @@
             $('#updateBtn').on('click', function() {
                 var nim = $('#edit_NIM').val();
                 $.ajax({
-                    url: "/mahasiswa/" + nim,
+                    url: "/admin/mahasiswa/" + nim,
                     type: 'PUT',
                     data: $('#editForm').serialize(),
                     success: function(response) {
@@ -448,7 +448,7 @@
                     if (result.isConfirmed) {
                         $.ajax({
                             type: "DELETE",
-                            url: "/mahasiswa/" + nim,
+                            url: "/admin/mahasiswa/" + nim,
                             success: function(response) {
                                 if (response.success) {
                                     Swal.fire('Dihapus!', response.message, 'success');
