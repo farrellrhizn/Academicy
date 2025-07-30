@@ -11,6 +11,66 @@ use Carbon\Carbon;
 
 class DashboardDsnController extends Controller
 {
+    /**
+     * Helper method untuk menormalisasi nama hari
+     */
+    private function normalizeDay($day)
+    {
+        $dayMapping = [
+            'senin' => 'Monday',
+            'selasa' => 'Tuesday', 
+            'rabu' => 'Wednesday',
+            'kamis' => 'Thursday',
+            'jumat' => 'Friday',
+            'sabtu' => 'Saturday',
+            'minggu' => 'Sunday'
+        ];
+        
+        $normalizedDay = strtolower(trim($day));
+        return $dayMapping[$normalizedDay] ?? ucfirst($normalizedDay);
+    }
+
+    /**
+     * Mendapatkan jadwal mengajar hari ini berdasarkan mata kuliah yang diampu dosen
+     */
+    private function getJadwalHariIni($nipDosen)
+    {
+        $hariIni = Carbon::now()->format('l'); // Format: Monday, Tuesday, etc.
+        
+        // Konversi ke format Indonesia yang digunakan di database
+        $hariIndonesia = [
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu', 
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu'
+        ];
+        
+        $hariIndo = $hariIndonesia[$hariIni] ?? $hariIni;
+        
+        // Ambil jadwal berdasarkan mata kuliah yang diampu dosen
+        $jadwalHariIni = JadwalAkademik::whereHas('matakuliah.pengampu', function($query) use ($nipDosen) {
+                $query->where('NIP', $nipDosen);
+            })
+            ->where(function($query) use ($hariIni, $hariIndo) {
+                // Cari berdasarkan format Indonesia (yang digunakan di database)
+                $query->where('hari', $hariIndo)
+                      ->orWhere('hari', strtolower($hariIndo))
+                      ->orWhere('hari', strtoupper($hariIndo))
+                      // Fallback ke format Inggris
+                      ->orWhere('hari', $hariIni)
+                      ->orWhere('hari', strtolower($hariIni))
+                      ->orWhere('hari', ucfirst(strtolower($hariIni)));
+            })
+            ->with(['matakuliah.pengampu.dosen', 'ruang', 'golongan'])
+            ->orderBy('waktu')
+            ->get();
+
+        return $jadwalHariIni;
+    }
+
     public function showDashboardDsn(): View
     {
         // Middleware 'auth:dosen' sudah memastikan hanya dosen yang bisa masuk.
@@ -30,16 +90,8 @@ class DashboardDsnController extends Controller
             return $pengampu->matakuliah->sks ?? 0;
         });
 
-        // Ambil jadwal hari ini
-        $hariIni = Carbon::now()->format('l'); // Mendapatkan nama hari dalam bahasa Inggris
-        
-        $jadwalHariIni = JadwalAkademik::whereHas('matakuliah.pengampu', function($query) use ($nipDosen) {
-                $query->where('NIP', $nipDosen);
-            })
-            ->where('hari', $hariIni)
-            ->with(['matakuliah', 'ruang', 'golongan'])
-            ->orderBy('waktu')
-            ->get();
+        // Ambil jadwal hari ini berdasarkan mata kuliah yang diampu
+        $jadwalHariIni = $this->getJadwalHariIni($nipDosen);
 
         // Hitung total mahasiswa dari semua kelas yang diajar
         $totalMahasiswa = 0;
