@@ -68,10 +68,10 @@
 							<i class="dw dw-settings2"></i>
 						</a>
 						<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-							<a class="dropdown-item" href="profile.html"
+							<a class="dropdown-item" href="{{ route('dosen.profile.edit') }}"
 								><i class="dw dw-user1"></i> Profile</a
 							>
-							<a class="dropdown-item" href="profile.html"
+							<a class="dropdown-item" href="{{ route('dosen.profile.edit') }}"
 								><i class="dw dw-settings2"></i> Setting</a
 							>
 							<form method="POST" action="{{ route('logout') }}" style="display: inline;">
@@ -99,10 +99,10 @@
 						<div
 							class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
 						>
-							<a class="dropdown-item" href="profile.html"
+							<a class="dropdown-item" href="{{ route('dosen.profile.edit') }}"
 								><i class="dw dw-user1"></i> Profile</a
 							>
-							<a class="dropdown-item" href="profile.html"
+							<a class="dropdown-item" href="{{ route('dosen.profile.edit') }}"
 								><i class="dw dw-settings2"></i> Setting</a
 							>
 							<form method="POST" action="{{ route('logout') }}" style="display: inline;">
