@@ -7,8 +7,12 @@ use App\Models\Krs;
 use App\Models\MataKuliah;
 use App\Models\JadwalAkademik;
 use App\Models\Mahasiswa;
+use App\Models\Ruang;
+use App\Models\Golongan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class KrsController extends Controller
 {
@@ -21,16 +25,32 @@ class KrsController extends Controller
         
         // Ambil mata kuliah yang sudah diambil mahasiswa
         $krsAmbil = Krs::where('NIM', $mahasiswa->NIM)
-                      ->with(['matakuliah', 'matakuliah.jadwalAkademik.ruang', 'matakuliah.jadwalAkademik.golongan'])
+                      ->with([
+                          'matakuliah', 
+                          'matakuliah.jadwalAkademik' => function($query) use ($mahasiswa) {
+                              $query->where('id_Gol', $mahasiswa->id_Gol);
+                          },
+                          'matakuliah.jadwalAkademik.ruang',
+                          'matakuliah.jadwalAkademik.golongan'
+                      ])
                       ->get();
+        
+        // Ambil kode mata kuliah yang sudah diambil untuk optimasi query
+        $krsKodeMk = $krsAmbil->pluck('Kode_mk')->toArray();
         
         // Ambil mata kuliah yang tersedia untuk semester mahasiswa
         $matakuliahTersedia = MataKuliah::where('semester', $mahasiswa->Semester)
-                                      ->with(['jadwalAkademik.ruang', 'jadwalAkademik.golongan'])
+                                      ->with([
+                                          'jadwalAkademik' => function($query) use ($mahasiswa) {
+                                              $query->where('id_Gol', $mahasiswa->id_Gol)
+                                                    ->with(['ruang', 'golongan']);
+                                          }
+                                      ])
                                       ->whereHas('jadwalAkademik', function($query) use ($mahasiswa) {
                                           $query->where('id_Gol', $mahasiswa->id_Gol);
                                       })
-                                      ->whereNotIn('Kode_mk', $krsAmbil->pluck('Kode_mk'))
+                                      ->whereNotIn('Kode_mk', $krsKodeMk)
+                                      ->orderBy('Nama_mk', 'asc')
                                       ->get();
         
         return view('mahasiswa.krs.index', compact('krsAmbil', 'matakuliahTersedia', 'mahasiswa'));
@@ -41,11 +61,22 @@ class KrsController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'Kode_mk' => 'required|exists:matakuliah,Kode_mk'
-        ]);
-        
-        $mahasiswa = Auth::guard('mahasiswa')->user();
+        try {
+            $request->validate([
+                'Kode_mk' => 'required|string|exists:matakuliah,Kode_mk'
+            ]);
+            
+            $mahasiswa = Auth::guard('mahasiswa')->user();
+            
+            if (!$mahasiswa) {
+                $message = 'Sesi login telah berakhir. Silakan login kembali.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 401);
+                }
+                
+                return redirect()->route('login')->with('error', $message);
+            }
         
         // Cek apakah mata kuliah sudah diambil
         $existingKrs = Krs::where('NIM', $mahasiswa->NIM)
@@ -116,13 +147,39 @@ class KrsController extends Controller
             return redirect()->back()->with('success', $message);
             
         } catch (\Exception $e) {
+            Log::error('KRS Store Error: ' . $e->getMessage(), [
+                'nim' => $mahasiswa->NIM ?? 'unknown',
+                'kode_mk' => $request->Kode_mk ?? 'unknown',
+                'exception' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
             $message = 'Terjadi kesalahan saat menambahkan mata kuliah ke KRS.';
             
             if ($request->expectsJson()) {
-                return response()->json(['message' => $message], 500);
+                return response()->json([
+                    'message' => $message,
+                    'error' => config('app.debug') ? $e->getMessage() : null
+                ], 500);
             }
             
             return redirect()->back()->with('error', $message);
+        } catch (ValidationException $e) {
+            Log::error('KRS Store Validation Error', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all(),
+                'nim' => $mahasiswa->NIM ?? 'unknown'
+            ]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Data yang dikirim tidak valid.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            
+            return redirect()->back()->withErrors($e->errors())->withInput();
         }
     }
     
@@ -283,15 +340,21 @@ class KrsController extends Controller
     private function getAvailableCourses($mahasiswa)
     {
         // Get current KRS courses
-        $krsAmbil = Krs::where('NIM', $mahasiswa->NIM)->pluck('Kode_mk');
+        $krsAmbil = Krs::where('NIM', $mahasiswa->NIM)->pluck('Kode_mk')->toArray();
         
         // Get available courses for student's semester and class
         return MataKuliah::where('semester', $mahasiswa->Semester)
-                         ->with(['jadwalAkademik.ruang', 'jadwalAkademik.golongan'])
+                         ->with([
+                             'jadwalAkademik' => function($query) use ($mahasiswa) {
+                                 $query->where('id_Gol', $mahasiswa->id_Gol)
+                                       ->with(['ruang', 'golongan']);
+                             }
+                         ])
                          ->whereHas('jadwalAkademik', function($query) use ($mahasiswa) {
                              $query->where('id_Gol', $mahasiswa->id_Gol);
                          })
                          ->whereNotIn('Kode_mk', $krsAmbil)
+                         ->orderBy('Nama_mk', 'asc')
                          ->get();
     }
 
@@ -336,25 +399,37 @@ class KrsController extends Controller
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
         
-        $jadwalKuliah = DB::table('krs')
-                         ->join('matakuliah', 'krs.Kode_mk', '=', 'matakuliah.Kode_mk')
-                         ->join('jadwal_akademik', 'matakuliah.Kode_mk', '=', 'jadwal_akademik.Kode_mk')
-                         ->join('ruang', 'jadwal_akademik.id_ruang', '=', 'ruang.id_ruang')
-                         ->join('golongan', 'jadwal_akademik.id_Gol', '=', 'golongan.id_Gol')
-                         ->where('krs.NIM', $mahasiswa->NIM)
-                         ->where('jadwal_akademik.id_Gol', $mahasiswa->id_Gol)
-                         ->select(
-                             'matakuliah.Kode_mk',
-                             'matakuliah.Nama_mk',
-                             'matakuliah.sks',
-                             'jadwal_akademik.hari',
-                             'jadwal_akademik.waktu',
-                             'ruang.nama_ruang',
-                             'golongan.nama_Gol'
-                         )
-                         ->orderBy('jadwal_akademik.hari')
-                         ->orderBy('jadwal_akademik.waktu')
-                         ->get();
+        if (!$mahasiswa) {
+            return redirect()->route('login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
+        // Menggunakan Eloquent untuk consistency dan lebih readable
+        $jadwalKuliah = Krs::where('NIM', $mahasiswa->NIM)
+                          ->with([
+                              'matakuliah',
+                              'matakuliah.jadwalAkademik' => function($query) use ($mahasiswa) {
+                                  $query->where('id_Gol', $mahasiswa->id_Gol)
+                                        ->with(['ruang', 'golongan'])
+                                        ->orderBy('hari')
+                                        ->orderBy('waktu');
+                              }
+                          ])
+                          ->get()
+                          ->map(function($krs) use ($mahasiswa) {
+                              $jadwal = $krs->matakuliah->jadwalAkademik->where('id_Gol', $mahasiswa->id_Gol)->first();
+                              
+                              return [
+                                  'Kode_mk' => $krs->matakuliah->Kode_mk,
+                                  'Nama_mk' => $krs->matakuliah->Nama_mk,
+                                  'sks' => $krs->matakuliah->sks,
+                                  'hari' => $jadwal->hari ?? '',
+                                  'waktu' => $jadwal->waktu ?? '',
+                                  'nama_ruang' => $jadwal->ruang->nama_ruang ?? 'TBA',
+                                  'nama_Gol' => $jadwal->golongan->nama_Gol ?? ''
+                              ];
+                          })
+                          ->sortBy('hari')
+                          ->sortBy('waktu');
         
         return view('mahasiswa.krs.jadwal', compact('jadwalKuliah', 'mahasiswa'));
     }
@@ -366,14 +441,23 @@ class KrsController extends Controller
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
         
+        if (!$mahasiswa) {
+            return redirect()->route('login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
         $krsData = Krs::where('NIM', $mahasiswa->NIM)
-                     ->with(['matakuliah', 'matakuliah.jadwalAkademik' => function($query) use ($mahasiswa) {
-                         $query->where('id_Gol', $mahasiswa->id_Gol);
-                     }, 'matakuliah.jadwalAkademik.ruang'])
+                     ->with([
+                         'matakuliah', 
+                         'matakuliah.jadwalAkademik' => function($query) use ($mahasiswa) {
+                             $query->where('id_Gol', $mahasiswa->id_Gol)
+                                   ->with(['ruang', 'golongan']);
+                         }
+                     ])
+                     ->orderBy('Kode_mk', 'asc')
                      ->get();
         
         $totalSks = $krsData->sum(function($krs) {
-            return $krs->matakuliah->sks;
+            return $krs->matakuliah->sks ?? 0;
         });
         
         return view('mahasiswa.krs.cetak', compact('krsData', 'mahasiswa', 'totalSks'));
