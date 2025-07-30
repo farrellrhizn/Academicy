@@ -13,7 +13,7 @@ class Krs extends Model
     protected $table = 'krs';
     protected $primaryKey = 'id_krs';
     public $incrementing = true;
-    public $timestamps = true;
+    public $timestamps = false;
     protected $fillable = ['NIM', 'Kode_mk', 'Nilai', 'Grade'];
     
     public function mahasiswa()
