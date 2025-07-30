@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Golongan; // Ganti model ke Golongan
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 
@@ -16,8 +17,9 @@ class GolonganController extends Controller
     {
         // Ambil data golongan, bukan ruang
         $golongan = Golongan::orderBy('nama_Gol')->get();
+        $userData = Auth::guard('admin')->user();
         // Arahkan ke view golongan.index dengan data golongan
-        return view('golongan.index', compact('golongan'));
+        return view('golongan.index', compact('golongan', 'userData'));
     }
 
     /**

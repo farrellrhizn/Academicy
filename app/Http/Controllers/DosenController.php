@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Dosen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 
 class DosenController extends Controller
@@ -12,7 +13,8 @@ class DosenController extends Controller
     public function index()
     {
         $dosen = Dosen::orderBy('Nama')->get();
-        return view('dosen.index', compact('dosen'));
+        $userData = Auth::guard('admin')->user();
+        return view('dosen.index', compact('dosen', 'userData'));
     }
 
     public function store(Request $request)

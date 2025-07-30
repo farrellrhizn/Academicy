@@ -80,9 +80,13 @@
             <div class="user-info-dropdown">
                 <div class="dropdown">
                     <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                        <span class="user-icon">
-                            <img src="../../bootstrap/vendors/images/photo1.jpg" alt="" />
-                        </span>
+                        							<span class="user-icon">
+								@if($dosen->profile_photo)
+									<img src="{{ asset('storage/profile_photos/' . $dosen->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
+								@else
+									<i class="dw dw-user1"></i>
+								@endif
+							</span>
                         <span class="user-name">{{ session('dosen_nama') ?? 'Dosen' }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">

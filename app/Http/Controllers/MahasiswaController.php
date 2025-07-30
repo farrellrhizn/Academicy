@@ -6,6 +6,7 @@ use App\Models\Mahasiswa;
 use App\Models\Golongan; // Tambahkan model Golongan
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 
 class MahasiswaController extends Controller
@@ -19,7 +20,8 @@ class MahasiswaController extends Controller
         $mahasiswa = Mahasiswa::with('golongan')->orderBy('Nama')->get();
         // Ambil semua data golongan untuk dropdown di form
         $golongan = Golongan::all();
-        return view('mahasiswa.index', compact('mahasiswa', 'golongan'));
+        $userData = Auth::guard('admin')->user();
+        return view('mahasiswa.index', compact('mahasiswa', 'golongan', 'userData'));
     }
 
     /**
