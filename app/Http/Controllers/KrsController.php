@@ -105,13 +105,13 @@ class KrsController extends Controller
         
         try {
             // Log the attempt for debugging
-            \Log::info('KRS Creation Attempt', [
-                'NIM' => $mahasiswa->NIM,
-                'Kode_mk' => $request->Kode_mk,
-                'matakuliah_name' => $matakuliah->Nama_mk,
-                'mahasiswa_semester' => $mahasiswa->Semester,
-                'mahasiswa_golongan' => $mahasiswa->id_Gol
-            ]);
+            // \Log::info('KRS Creation Attempt', [
+            //     'NIM' => $mahasiswa->NIM,
+            //     'Kode_mk' => $request->Kode_mk,
+            //     'matakuliah_name' => $matakuliah->Nama_mk,
+            //     'mahasiswa_semester' => $mahasiswa->Semester,
+            //     'mahasiswa_golongan' => $mahasiswa->id_Gol
+            // ]);
             
             // Validate data before creation
             if (empty($mahasiswa->NIM)) {
@@ -130,11 +130,11 @@ class KrsController extends Controller
                 ]);
             });
             
-            \Log::info('KRS Created Successfully', [
-                'id_krs' => $krs->id_krs,
-                'NIM' => $krs->NIM,
-                'Kode_mk' => $krs->Kode_mk
-            ]);
+            // \Log::info('KRS Created Successfully', [
+            //     'id_krs' => $krs->id_krs,
+            //     'NIM' => $krs->NIM,
+            //     'Kode_mk' => $krs->Kode_mk
+            // ]);
             
             $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil ditambahkan ke KRS.";
             
@@ -155,14 +155,14 @@ class KrsController extends Controller
             
         } catch (\Illuminate\Database\QueryException $e) {
             // Database specific errors
-            \Log::error('KRS Database Error', [
-                'error_code' => $e->getCode(),
-                'error_message' => $e->getMessage(),
-                'sql' => $e->getSql() ?? 'No SQL',
-                'bindings' => $e->getBindings() ?? [],
-                'NIM' => $mahasiswa->NIM,
-                'Kode_mk' => $request->Kode_mk
-            ]);
+            // \Log::error('KRS Database Error', [
+            //     'error_code' => $e->getCode(),
+            //     'error_message' => $e->getMessage(),
+            //     'sql' => $e->getSql() ?? 'No SQL',
+            //     'bindings' => $e->getBindings() ?? [],
+            //     'NIM' => $mahasiswa->NIM,
+            //     'Kode_mk' => $request->Kode_mk
+            // ]);
             
             // Check for specific database errors
             if (strpos($e->getMessage(), 'UNIQUE constraint failed') !== false) {
@@ -175,14 +175,14 @@ class KrsController extends Controller
             
         } catch (\Exception $e) {
             // General errors
-            \Log::error('KRS General Error', [
-                'error_message' => $e->getMessage(),
-                'error_trace' => $e->getTraceAsString(),
-                'NIM' => $mahasiswa->NIM,
-                'Kode_mk' => $request->Kode_mk,
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]);
+            // \Log::error('KRS General Error', [
+            //     'error_message' => $e->getMessage(),
+            //     'error_trace' => $e->getTraceAsString(),
+            //     'NIM' => $mahasiswa->NIM,
+            //     'Kode_mk' => $request->Kode_mk,
+            //     'file' => $e->getFile(),
+            //     'line' => $e->getLine()
+            // ]);
             
             return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage(), 500, $request);
         }
@@ -229,23 +229,23 @@ class KrsController extends Controller
         
         try {
             // Log the deletion attempt
-            \Log::info('KRS Deletion Attempt', [
-                'id_krs' => $krs->id_krs,
-                'NIM' => $krs->NIM,
-                'Kode_mk' => $krs->Kode_mk,
-                'matakuliah_name' => $matakuliah->Nama_mk
-            ]);
+            // \Log::info('KRS Deletion Attempt', [
+            //     'id_krs' => $krs->id_krs,
+            //     'NIM' => $krs->NIM,
+            //     'Kode_mk' => $krs->Kode_mk,
+            //     'matakuliah_name' => $matakuliah->Nama_mk
+            // ]);
             
             // Use DB transaction for data integrity
             DB::transaction(function () use ($krs) {
                 $krs->delete();
             });
             
-            \Log::info('KRS Deleted Successfully', [
-                'id_krs' => $krs->id_krs,
-                'NIM' => $krs->NIM,
-                'Kode_mk' => $krs->Kode_mk
-            ]);
+            // \Log::info('KRS Deleted Successfully', [
+            //     'id_krs' => $krs->id_krs,
+            //     'NIM' => $krs->NIM,
+            //     'Kode_mk' => $krs->Kode_mk
+            // ]);
             
             $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil dihapus dari KRS.";
             
@@ -277,25 +277,25 @@ class KrsController extends Controller
             return redirect()->back()->with('success', $message);
             
         } catch (\Illuminate\Database\QueryException $e) {
-            \Log::error('KRS Delete Database Error', [
-                'error_code' => $e->getCode(),
-                'error_message' => $e->getMessage(),
-                'id_krs' => $krs->id_krs ?? 'unknown',
-                'NIM' => $mahasiswa->NIM,
-                'Kode_mk' => $krs->Kode_mk ?? 'unknown'
-            ]);
+            // \Log::error('KRS Delete Database Error', [
+            //     'error_code' => $e->getCode(),
+            //     'error_message' => $e->getMessage(),
+            //     'id_krs' => $krs->id_krs ?? 'unknown',
+            //     'NIM' => $mahasiswa->NIM,
+            //     'Kode_mk' => $krs->Kode_mk ?? 'unknown'
+            // ]);
             
             return $this->errorResponse('Error database saat menghapus: ' . $e->getMessage(), 500, $request);
             
         } catch (\Exception $e) {
-            \Log::error('KRS Delete General Error', [
-                'error_message' => $e->getMessage(),
-                'error_trace' => $e->getTraceAsString(),
-                'id_krs' => $krs->id_krs ?? 'unknown',
-                'NIM' => $mahasiswa->NIM,
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]);
+            // \Log::error('KRS Delete General Error', [
+            //     'error_message' => $e->getMessage(),
+            //     'error_trace' => $e->getTraceAsString(),
+            //     'id_krs' => $krs->id_krs ?? 'unknown',
+            //     'NIM' => $mahasiswa->NIM,
+            //     'file' => $e->getFile(),
+            //     'line' => $e->getLine()
+            // ]);
             
             return $this->errorResponse('Terjadi kesalahan saat menghapus: ' . $e->getMessage(), 500, $request);
         }
