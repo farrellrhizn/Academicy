@@ -530,6 +530,10 @@
 									// Remove the row instead of reloading
 									$('#krs-row-' + kodeMatkuliah).fadeOut(500, function() {
 										$(this).remove();
+										// Add course back to available courses table
+										if (response.available_course) {
+											addCourseToAvailableTable(response.available_course);
+										}
 										// Update summary counters
 										updateSummary();
 									});
@@ -562,15 +566,138 @@
 				});
 			});
 			
+			// Function to add course back to available courses table
+			function addCourseToAvailableTable(course) {
+				const availableTableBody = $('.col-xl-6:nth-child(2) table tbody');
+				const emptyMessage = $('.col-xl-6:nth-child(2) .text-center');
+				
+				// Hide empty message if exists
+				if (emptyMessage.length) {
+					emptyMessage.hide();
+				}
+				
+				// Show table if hidden
+				const tableContainer = $('.col-xl-6:nth-child(2) .table-responsive');
+				if (tableContainer.length === 0) {
+					// Create table structure if it doesn't exist
+					const newTableHtml = `
+						<div class="table-responsive">
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>Kode</th>
+										<th>Mata Kuliah</th>
+										<th>SKS</th>
+										<th>Jadwal</th>
+										<th>Aksi</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+						</div>
+					`;
+					$('.col-xl-6:nth-child(2) .pb-20').append(newTableHtml);
+				}
+				
+				// Create jadwal display
+				let jadwalHtml = '';
+				if (course.jadwal) {
+					jadwalHtml = `
+						<small class="text-muted">
+							${course.jadwal.hari}, ${course.jadwal.waktu}<br>
+							<i class="fa fa-map-marker"></i> ${course.jadwal.ruang}
+						</small>
+					`;
+				} else {
+					jadwalHtml = '<small class="text-warning">Belum dijadwalkan</small>';
+				}
+				
+				// Create new row
+				const newRow = `
+					<tr>
+						<td><span class="badge badge-primary">${course.kode_mk}</span></td>
+						<td><strong>${course.nama_mk}</strong></td>
+						<td><span class="badge badge-info">${course.sks} SKS</span></td>
+						<td>${jadwalHtml}</td>
+						<td>
+							<form action="{{ route('mahasiswa.krs.store') }}" method="POST" class="d-inline add-form">
+								@csrf
+								<input type="hidden" name="Kode_mk" value="${course.kode_mk}">
+								<button type="submit" class="btn btn-outline-success btn-sm add-btn" 
+										data-kode="${course.kode_mk}" 
+										data-nama="${course.nama_mk}"
+										data-sks="${course.sks}">
+									<i class="fa fa-plus"></i> Ambil
+								</button>
+							</form>
+						</td>
+					</tr>
+				`;
+				
+				// Add to table
+				$('.col-xl-6:nth-child(2) table tbody').append(newRow);
+				
+				// Reattach event handlers for new add button
+				attachAddButtonHandlers();
+			}
+
 			// Function to update summary without page reload
 			function updateSummary() {
-				const rowCount = $('#krs-mata-kuliah tbody tr').length;
-				// This is a simple approach - you might want to make an AJAX call to get updated totals
-				location.reload(); // For now, just reload to get accurate counts
+				const krsRows = $('#krs-mata-kuliah tbody tr');
+				const totalMatkulCount = krsRows.length;
+				let totalSks = 0;
+				
+				// Calculate total SKS from remaining rows
+				krsRows.each(function() {
+					const sksText = $(this).find('td:nth-child(3) .badge').text();
+					const sks = parseInt(sksText.replace(' SKS', ''));
+					if (!isNaN(sks)) {
+						totalSks += sks;
+					}
+				});
+				
+				// Update badge counts
+				$('.badge-success').first().text(totalMatkulCount + ' Mata Kuliah');
+				$('.badge-primary').eq(1).text(totalSks + ' SKS');
+				
+				// Update summary card
+				$('.card-box .text-primary').text(totalMatkulCount);
+				$('.card-box .text-success').text(totalSks);
+				
+				// Update progress bar
+				const maxSks = 24;
+				const progressPercentage = (totalSks / maxSks) * 100;
+				$('.progress-bar').css('width', progressPercentage + '%');
+				
+				// Update remaining SKS
+				const remainingSks = maxSks - totalSks;
+				$('.text-muted').last().text(remainingSks + ' SKS tersisa');
+				
+				// Show empty message if no courses left
+				if (totalMatkulCount === 0) {
+					const emptyMessage = `
+						<div class="text-center py-4">
+							<i class="fa fa-book text-muted" style="font-size: 3rem;"></i>
+							<p class="text-muted mt-2">Belum ada mata kuliah yang diambil</p>
+							<small class="text-muted">Pilih mata kuliah dari daftar sebelah kanan</small>
+						</div>
+					`;
+					$('#krs-mata-kuliah').closest('.table-responsive').hide();
+					$('#krs-mata-kuliah').closest('.table-responsive').after(emptyMessage);
+				}
+			}
+			
+			// Function to attach add button handlers
+			function attachAddButtonHandlers() {
+				// Remove existing handlers to prevent duplicates
+				$('.add-btn').off('click.krs');
+				
+				// Reattach handlers
+				$('.add-btn').on('click.krs', handleAddButtonClick);
 			}
 			
 			// Handle add course button clicks
-			$('.add-btn').on('click', function(e) {
+			function handleAddButtonClick(e) {
 				e.preventDefault();
 				
 				const form = $(this).closest('form');
@@ -640,8 +767,12 @@
 									timer: 2000,
 									showConfirmButton: false
 								}).then(() => {
-									// Reload page to show updated data
-									window.location.reload();
+									// Remove from available courses table and add to taken courses
+									button.closest('tr').fadeOut(500, function() {
+										$(this).remove();
+										// Optionally reload to update taken courses table
+										window.location.reload();
+									});
 								});
 							},
 							error: function(xhr) {
@@ -665,7 +796,10 @@
 						});
 					}
 				});
-			});
+			}
+			
+			// Initial event binding
+			$('.add-btn').on('click', handleAddButtonClick);
 		});
 		</script>
 	</body>

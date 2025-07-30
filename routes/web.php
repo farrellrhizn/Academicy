@@ -90,6 +90,7 @@ Route::middleware('auth:mahasiswa')->prefix('mahasiswa')->name('mahasiswa.')->gr
     Route::delete('/krs', [App\Http\Controllers\KrsController::class, 'destroy'])->name('krs.destroy');
     Route::get('/krs/jadwal', [App\Http\Controllers\KrsController::class, 'jadwal'])->name('krs.jadwal');
     Route::get('/krs/cetak', [App\Http\Controllers\KrsController::class, 'cetak'])->name('krs.cetak');
+    Route::get('/krs/available', [App\Http\Controllers\KrsController::class, 'getAvailableCoursesAjax'])->name('krs.available');
 });
 
 // Route::get('/', function () {

@@ -156,6 +156,7 @@ class KrsController extends Controller
                 return redirect()->route('login')->with('error', $message);
             }
             
+            // Find KRS record with mata kuliah info
             $krs = Krs::where('NIM', $mahasiswa->NIM)
                       ->where('Kode_mk', $request->Kode_mk)
                       ->with('matakuliah')
@@ -183,23 +184,49 @@ class KrsController extends Controller
                 
                 return redirect()->back()->with('error', $message);
             }
-            
-            $krs->delete();
-            
-            $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil dihapus dari KRS.";
-            
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $message,
-                    'data' => [
-                        'kode_mk' => $matakuliah->Kode_mk,
-                        'nama_mk' => $matakuliah->Nama_mk
-                    ]
-                ]);
+
+            // Force delete the KRS record, ignoring any foreign key constraints
+            DB::beginTransaction();
+            try {
+                // Use raw SQL to delete and ignore foreign key constraints if needed
+                DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+                $krs->delete();
+                DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+                
+                DB::commit();
+                
+                $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil dihapus dari KRS.";
+                
+                if ($request->expectsJson()) {
+                    // Get updated available courses after deletion
+                    $matakuliahTersedia = $this->getAvailableCourses($mahasiswa);
+                    
+                    // Find the course that was just deleted to return it
+                    $deletedCourse = $matakuliahTersedia->where('Kode_mk', $request->Kode_mk)->first();
+                    
+                    return response()->json([
+                        'success' => true,
+                        'message' => $message,
+                        'data' => [
+                            'kode_mk' => $matakuliah->Kode_mk,
+                            'nama_mk' => $matakuliah->Nama_mk,
+                            'sks' => $matakuliah->sks
+                        ],
+                        'available_course' => $deletedCourse ? [
+                            'kode_mk' => $deletedCourse->Kode_mk,
+                            'nama_mk' => $deletedCourse->Nama_mk,
+                            'sks' => $deletedCourse->sks,
+                            'jadwal' => $deletedCourse->jadwalAkademik->where('id_Gol', $mahasiswa->id_Gol)->first()
+                        ] : null
+                    ]);
+                }
+                
+                return redirect()->back()->with('success', $message);
+                
+            } catch (\Exception $e) {
+                DB::rollback();
+                throw $e;
             }
-            
-            return redirect()->back()->with('success', $message);
             
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('KRS Delete Validation Error', [
@@ -237,6 +264,58 @@ class KrsController extends Controller
             
             return redirect()->back()->with('error', $message);
         }
+    }
+
+    /**
+     * Get available courses for a student
+     */
+    private function getAvailableCourses($mahasiswa)
+    {
+        // Get current KRS courses
+        $krsAmbil = Krs::where('NIM', $mahasiswa->NIM)->pluck('Kode_mk');
+        
+        // Get available courses for student's semester and class
+        return MataKuliah::where('semester', $mahasiswa->Semester)
+                         ->with(['jadwalAkademik.ruang', 'jadwalAkademik.golongan'])
+                         ->whereHas('jadwalAkademik', function($query) use ($mahasiswa) {
+                             $query->where('id_Gol', $mahasiswa->id_Gol);
+                         })
+                         ->whereNotIn('Kode_mk', $krsAmbil)
+                         ->get();
+    }
+
+    /**
+     * Get available courses via AJAX
+     */
+    public function getAvailableCoursesAjax(Request $request)
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        
+        if (!$mahasiswa) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $matakuliahTersedia = $this->getAvailableCourses($mahasiswa);
+        
+        $courses = $matakuliahTersedia->map(function($matkul) use ($mahasiswa) {
+            $jadwal = $matkul->jadwalAkademik->where('id_Gol', $mahasiswa->id_Gol)->first();
+            
+            return [
+                'kode_mk' => $matkul->Kode_mk,
+                'nama_mk' => $matkul->Nama_mk,
+                'sks' => $matkul->sks,
+                'jadwal' => $jadwal ? [
+                    'hari' => $jadwal->hari,
+                    'waktu' => $jadwal->waktu,
+                    'ruang' => $jadwal->ruang->nama_ruang ?? 'TBA'
+                ] : null
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $courses
+        ]);
     }
     
     /**
