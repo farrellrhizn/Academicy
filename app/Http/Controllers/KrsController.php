@@ -92,11 +92,48 @@ class KrsController extends Controller
             return $this->errorResponse('Mata kuliah belum dijadwalkan untuk golongan Anda.', 400, $request);
         }
         
+        // Cek batas SKS maksimal
+        $currentSks = Krs::where('NIM', $mahasiswa->NIM)
+                         ->join('matakuliah', 'krs.Kode_mk', '=', 'matakuliah.Kode_mk')
+                         ->sum('matakuliah.sks');
+        
+        $maxSks = 24; // Batas maksimal SKS per semester
+        
+        if (($currentSks + $matakuliah->sks) > $maxSks) {
+            return $this->errorResponse("Penambahan mata kuliah ini akan melebihi batas maksimal {$maxSks} SKS. SKS saat ini: {$currentSks}, SKS mata kuliah: {$matakuliah->sks}.", 400, $request);
+        }
+        
         try {
-            // Tambahkan ke KRS
-            $krs = Krs::create([
+            // Log the attempt for debugging
+            \Log::info('KRS Creation Attempt', [
                 'NIM' => $mahasiswa->NIM,
-                'Kode_mk' => $request->Kode_mk
+                'Kode_mk' => $request->Kode_mk,
+                'matakuliah_name' => $matakuliah->Nama_mk,
+                'mahasiswa_semester' => $mahasiswa->Semester,
+                'mahasiswa_golongan' => $mahasiswa->id_Gol
+            ]);
+            
+            // Validate data before creation
+            if (empty($mahasiswa->NIM)) {
+                throw new \Exception('NIM mahasiswa tidak valid');
+            }
+            
+            if (empty($request->Kode_mk)) {
+                throw new \Exception('Kode mata kuliah tidak valid');
+            }
+            
+            // Use DB transaction for data integrity
+            $krs = DB::transaction(function () use ($mahasiswa, $request) {
+                return Krs::create([
+                    'NIM' => $mahasiswa->NIM,
+                    'Kode_mk' => $request->Kode_mk
+                ]);
+            });
+            
+            \Log::info('KRS Created Successfully', [
+                'id_krs' => $krs->id_krs,
+                'NIM' => $krs->NIM,
+                'Kode_mk' => $krs->Kode_mk
             ]);
             
             $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil ditambahkan ke KRS.";
@@ -116,8 +153,38 @@ class KrsController extends Controller
             
             return redirect()->back()->with('success', $message);
             
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Database specific errors
+            \Log::error('KRS Database Error', [
+                'error_code' => $e->getCode(),
+                'error_message' => $e->getMessage(),
+                'sql' => $e->getSql() ?? 'No SQL',
+                'bindings' => $e->getBindings() ?? [],
+                'NIM' => $mahasiswa->NIM,
+                'Kode_mk' => $request->Kode_mk
+            ]);
+            
+            // Check for specific database errors
+            if (strpos($e->getMessage(), 'UNIQUE constraint failed') !== false) {
+                return $this->errorResponse('Mata kuliah sudah diambil sebelumnya.', 400, $request);
+            } elseif (strpos($e->getMessage(), 'FOREIGN KEY constraint failed') !== false) {
+                return $this->errorResponse('Data mata kuliah atau mahasiswa tidak valid.', 400, $request);
+            } else {
+                return $this->errorResponse('Error database: ' . $e->getMessage(), 500, $request);
+            }
+            
         } catch (\Exception $e) {
-            return $this->errorResponse('Terjadi kesalahan saat menambahkan mata kuliah ke KRS.', 500, $request);
+            // General errors
+            \Log::error('KRS General Error', [
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(),
+                'NIM' => $mahasiswa->NIM,
+                'Kode_mk' => $request->Kode_mk,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
+            return $this->errorResponse('Terjadi kesalahan: ' . $e->getMessage(), 500, $request);
         }
     }
     
@@ -161,7 +228,24 @@ class KrsController extends Controller
         }
         
         try {
-            $krs->delete();
+            // Log the deletion attempt
+            \Log::info('KRS Deletion Attempt', [
+                'id_krs' => $krs->id_krs,
+                'NIM' => $krs->NIM,
+                'Kode_mk' => $krs->Kode_mk,
+                'matakuliah_name' => $matakuliah->Nama_mk
+            ]);
+            
+            // Use DB transaction for data integrity
+            DB::transaction(function () use ($krs) {
+                $krs->delete();
+            });
+            
+            \Log::info('KRS Deleted Successfully', [
+                'id_krs' => $krs->id_krs,
+                'NIM' => $krs->NIM,
+                'Kode_mk' => $krs->Kode_mk
+            ]);
             
             $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil dihapus dari KRS.";
             
@@ -192,8 +276,28 @@ class KrsController extends Controller
             
             return redirect()->back()->with('success', $message);
             
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('KRS Delete Database Error', [
+                'error_code' => $e->getCode(),
+                'error_message' => $e->getMessage(),
+                'id_krs' => $krs->id_krs ?? 'unknown',
+                'NIM' => $mahasiswa->NIM,
+                'Kode_mk' => $krs->Kode_mk ?? 'unknown'
+            ]);
+            
+            return $this->errorResponse('Error database saat menghapus: ' . $e->getMessage(), 500, $request);
+            
         } catch (\Exception $e) {
-            return $this->errorResponse('Terjadi kesalahan saat menghapus mata kuliah dari KRS.', 500, $request);
+            \Log::error('KRS Delete General Error', [
+                'error_message' => $e->getMessage(),
+                'error_trace' => $e->getTraceAsString(),
+                'id_krs' => $krs->id_krs ?? 'unknown',
+                'NIM' => $mahasiswa->NIM,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
+            return $this->errorResponse('Terjadi kesalahan saat menghapus: ' . $e->getMessage(), 500, $request);
         }
     }
     
