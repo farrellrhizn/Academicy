@@ -77,6 +77,14 @@ class KrsController extends Controller
                 
                 return redirect()->route('login')->with('error', $message);
             }
+
+            // Log untuk debugging
+            Log::info('KRS Store Request', [
+                'nim' => $mahasiswa->NIM,
+                'kode_mk' => $request->Kode_mk,
+                'semester_mahasiswa' => $mahasiswa->Semester,
+                'id_gol_mahasiswa' => $mahasiswa->id_Gol
+            ]);
             
             // Cek apakah mata kuliah sudah diambil
             $existingKrs = Krs::where('NIM', $mahasiswa->NIM)
@@ -101,6 +109,13 @@ class KrsController extends Controller
             if (!$matakuliah) {
                 $message = 'Mata kuliah tidak sesuai dengan semester Anda.';
                 
+                Log::warning('Mata kuliah tidak sesuai semester', [
+                    'nim' => $mahasiswa->NIM,
+                    'kode_mk' => $request->Kode_mk,
+                    'semester_mahasiswa' => $mahasiswa->Semester,
+                    'semester_matkul' => MataKuliah::where('Kode_mk', $request->Kode_mk)->value('semester')
+                ]);
+                
                 if ($request->expectsJson()) {
                     return response()->json(['message' => $message], 400);
                 }
@@ -116,6 +131,48 @@ class KrsController extends Controller
             if (!$jadwal) {
                 $message = 'Mata kuliah belum dijadwalkan untuk golongan Anda.';
                 
+                Log::warning('Jadwal tidak ditemukan', [
+                    'nim' => $mahasiswa->NIM,
+                    'kode_mk' => $request->Kode_mk,
+                    'id_gol_mahasiswa' => $mahasiswa->id_Gol,
+                    'jadwal_tersedia' => JadwalAkademik::where('Kode_mk', $request->Kode_mk)->pluck('id_Gol')->toArray()
+                ]);
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 400);
+                }
+                
+                return redirect()->back()->with('error', $message);
+            }
+
+            // Validasi data sebelum insert
+            $krsData = [
+                'NIM' => $mahasiswa->NIM,
+                'Kode_mk' => $request->Kode_mk
+            ];
+
+            // Log data yang akan diinsert
+            Log::info('Data KRS yang akan diinsert', $krsData);
+
+            // Cek foreign key constraint - pastikan NIM dan Kode_mk valid
+            $nimExists = DB::table('mahasiswa')->where('NIM', $mahasiswa->NIM)->exists();
+            $kodeMkExists = DB::table('matakuliah')->where('Kode_mk', $request->Kode_mk)->exists();
+
+            if (!$nimExists) {
+                Log::error('NIM tidak ditemukan di tabel mahasiswa', ['nim' => $mahasiswa->NIM]);
+                $message = 'Data mahasiswa tidak valid.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 400);
+                }
+                
+                return redirect()->back()->with('error', $message);
+            }
+
+            if (!$kodeMkExists) {
+                Log::error('Kode_mk tidak ditemukan di tabel matakuliah', ['kode_mk' => $request->Kode_mk]);
+                $message = 'Data mata kuliah tidak valid.';
+                
                 if ($request->expectsJson()) {
                     return response()->json(['message' => $message], 400);
                 }
@@ -123,11 +180,18 @@ class KrsController extends Controller
                 return redirect()->back()->with('error', $message);
             }
             
-            // Tambahkan ke KRS
+            // Tambahkan ke KRS dengan transaction
+            DB::beginTransaction();
+            
             try {
-                Krs::create([
-                    'NIM' => $mahasiswa->NIM,
-                    'Kode_mk' => $request->Kode_mk
+                $krs = Krs::create($krsData);
+                
+                DB::commit();
+                
+                Log::info('KRS berhasil ditambahkan', [
+                    'id_krs' => $krs->id_krs,
+                    'nim' => $mahasiswa->NIM,
+                    'kode_mk' => $request->Kode_mk
                 ]);
                 
                 $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil ditambahkan ke KRS.";
@@ -137,6 +201,7 @@ class KrsController extends Controller
                         'success' => true,
                         'message' => $message,
                         'data' => [
+                            'id_krs' => $krs->id_krs,
                             'kode_mk' => $matakuliah->Kode_mk,
                             'nama_mk' => $matakuliah->Nama_mk,
                             'sks' => $matakuliah->sks
@@ -146,16 +211,59 @@ class KrsController extends Controller
                 
                 return redirect()->back()->with('success', $message);
                 
+            } catch (\Illuminate\Database\QueryException $e) {
+                DB::rollback();
+                
+                // Analisis error database yang spesifik
+                $errorCode = $e->getCode();
+                $errorMessage = $e->getMessage();
+                
+                Log::error('KRS Database Error', [
+                    'nim' => $mahasiswa->NIM,
+                    'kode_mk' => $request->Kode_mk,
+                    'error_code' => $errorCode,
+                    'error_message' => $errorMessage,
+                    'sql' => $e->getSql() ?? 'unknown',
+                    'bindings' => $e->getBindings() ?? []
+                ]);
+
+                // Handle specific database errors
+                if (strpos($errorMessage, 'UNIQUE constraint failed') !== false || 
+                    strpos($errorMessage, 'Duplicate entry') !== false) {
+                    $message = 'Mata kuliah sudah diambil sebelumnya.';
+                } elseif (strpos($errorMessage, 'FOREIGN KEY constraint failed') !== false ||
+                         strpos($errorMessage, 'foreign key constraint fails') !== false) {
+                    $message = 'Data tidak valid. Periksa kembali NIM dan kode mata kuliah.';
+                } elseif (strpos($errorMessage, 'Data too long') !== false) {
+                    $message = 'Data yang dimasukkan terlalu panjang.';
+                } else {
+                    $message = 'Terjadi kesalahan database saat menambahkan mata kuliah ke KRS.';
+                }
+                
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => $message,
+                        'error' => config('app.debug') ? $errorMessage : null,
+                        'error_code' => config('app.debug') ? $errorCode : null
+                    ], 500);
+                }
+                
+                return redirect()->back()->with('error', $message);
+                
             } catch (\Exception $e) {
-                Log::error('KRS Store Error: ' . $e->getMessage(), [
-                    'nim' => $mahasiswa->NIM ?? 'unknown',
-                    'kode_mk' => $request->Kode_mk ?? 'unknown',
-                    'exception' => $e->getTraceAsString(),
+                DB::rollback();
+                
+                Log::error('KRS Store General Error', [
+                    'nim' => $mahasiswa->NIM,
+                    'kode_mk' => $request->Kode_mk,
+                    'exception_class' => get_class($e),
+                    'exception_message' => $e->getMessage(),
+                    'exception_trace' => $e->getTraceAsString(),
                     'file' => $e->getFile(),
                     'line' => $e->getLine()
                 ]);
                 
-                $message = 'Terjadi kesalahan saat menambahkan mata kuliah ke KRS.';
+                $message = 'Terjadi kesalahan sistem saat menambahkan mata kuliah ke KRS.';
                 
                 if ($request->expectsJson()) {
                     return response()->json([
@@ -165,22 +273,8 @@ class KrsController extends Controller
                 }
                 
                 return redirect()->back()->with('error', $message);
-            } catch (ValidationException $e) {
-                Log::error('KRS Store Validation Error', [
-                    'errors' => $e->errors(),
-                    'request_data' => $request->all(),
-                    'nim' => $mahasiswa->NIM ?? 'unknown'
-                ]);
-                
-                if ($request->expectsJson()) {
-                    return response()->json([
-                        'message' => 'Data yang dikirim tidak valid.',
-                        'errors' => $e->errors()
-                    ], 422);
-                }
-                
-                return redirect()->back()->withErrors($e->errors())->withInput();
             }
+            
         } catch (ValidationException $e) {
             Log::error('KRS Store Validation Error', [
                 'errors' => $e->errors(),
@@ -196,6 +290,26 @@ class KrsController extends Controller
             }
             
             return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('KRS Store Outer Exception', [
+                'exception_class' => get_class($e),
+                'exception_message' => $e->getMessage(),
+                'exception_trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'request_data' => $request->all()
+            ]);
+            
+            $message = 'Terjadi kesalahan sistem. Silakan coba lagi.';
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'error' => config('app.debug') ? $e->getMessage() : null
+                ], 500);
+            }
+            
+            return redirect()->back()->with('error', $message);
         }
     }
     

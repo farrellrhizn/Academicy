@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('matakuliah', function (Blueprint $table) {
             $table->string('Kode_mk')->primary();
             $table->string('Nama_mk');
-            $table->integer('SKS');
+            $table->integer('sks'); // Fixed from 'SKS' to 'sks' to match model
+            $table->integer('semester'); // Added semester field
             $table->string('NIP');
             $table->timestamps();
 
