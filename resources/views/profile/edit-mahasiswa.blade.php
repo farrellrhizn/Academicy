@@ -17,6 +17,359 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('css/profile-photo.css') }}" />
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <style>
+        /* Enhanced Profile Page Styling */
+        .main-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .profile-header-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(79, 172, 254, 0.2);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-header-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+        }
+        
+        .profile-photo-container {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .avatar-upload {
+            position: relative;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        
+        .avatar-upload .avatar-edit {
+            position: absolute;
+            right: 10px;
+            z-index: 1;
+            top: 10px;
+        }
+        
+        .avatar-upload .avatar-edit input {
+            display: none;
+        }
+        
+        .avatar-upload .avatar-edit input + label {
+            display: inline-block;
+            width: 45px;
+            height: 45px;
+            margin-bottom: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #fff;
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            font-weight: normal;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4facfe;
+            font-size: 18px;
+        }
+        
+        .avatar-upload .avatar-edit input + label:hover {
+            background: #fff;
+            transform: scale(1.1);
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .avatar-upload .avatar-preview {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            border-radius: 50%;
+            border: 6px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0px 12px 30px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .avatar-upload .avatar-preview > div {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-info-section {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .profile-info-section h2 {
+            color: white;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 2.2rem;
+        }
+        
+        .profile-info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.1rem;
+        }
+        
+        .profile-info-item i {
+            margin-right: 0.8rem;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            width: 24px;
+        }
+        
+        .edit-form-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 2rem;
+        }
+        
+        .card-header-custom {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1.5rem 2rem;
+            border: none;
+        }
+        
+        .card-header-custom h5 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+        
+        .card-body-custom {
+            padding: 2rem;
+        }
+        
+        .section-divider {
+            border: none;
+            height: 2px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            margin: 2rem 0;
+            border-radius: 2px;
+        }
+        
+        .section-title {
+            color: #4facfe;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 0.8rem;
+            font-size: 1.3rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-group label i {
+            margin-right: 0.5rem;
+            color: #4facfe;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+        
+        .form-control:focus {
+            border-color: #4facfe;
+            box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.2);
+            background: white;
+        }
+        
+        .form-control[readonly] {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+            color: #6c757d;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+        
+        .alert {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 1.2rem 1.5rem;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+        
+        .upload-info {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .upload-info small {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+        
+        /* Loading States */
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+        
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: button-loading-spinner 1s ease infinite;
+        }
+        
+        @keyframes button-loading-spinner {
+            from {
+                transform: rotate(0turn);
+            }
+            to {
+                transform: rotate(1turn);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .profile-header-card {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .profile-info-section h2 {
+                font-size: 1.8rem;
+            }
+            
+            .avatar-upload .avatar-preview {
+                width: 160px;
+                height: 160px;
+            }
+            
+            .card-body-custom {
+                padding: 1.5rem;
+            }
+            
+            .btn-primary, .btn-secondary {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .profile-header-card {
+                padding: 1rem;
+            }
+            
+            .avatar-upload .avatar-preview {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .profile-info-section h2 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="pre-loader">
@@ -133,6 +486,15 @@
                     </div>
                 @endif
 
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="icon-copy bi bi-exclamation-triangle-fill"></i> {{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
                 @if($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="icon-copy bi bi-exclamation-triangle-fill"></i>
@@ -147,44 +509,58 @@
                     </div>
                 @endif
 
-                <!-- Profile Overview Card -->
-                <div class="row mb-30">
-                    <div class="col-xl-12">
-                        <div class="card-box height-100-p">
-                            <div class="profile-info-container">
-                                <div class="row">
-                                    <div class="col-lg-4 col-md-4 col-sm-12 text-center">
-                                        <div class="profile-photo-section">
-                                            <div class="avatar-upload">
-                                                <div class="avatar-edit">
-                                                    <input type='file' id="imageUpload" name="profile_photo" accept=".png, .jpg, .jpeg, .gif" />
-                                                    <label for="imageUpload" title="Upload Photo"><i class="bi bi-camera-fill"></i></label>
-                                                </div>
-                                                <div class="avatar-preview">
-                                                    <div id="imagePreview" style="background-image: url('{{ $mahasiswa->profile_photo ? asset('storage/profile_photos/' . $mahasiswa->profile_photo) : asset('bootstrap/vendors/images/photo2.jpg') }}');">
-                                                    </div>
-                                                </div>
+                <!-- Profile Header Card -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="profile-header-card">
+                            <div class="row align-items-center">
+                                <div class="col-lg-4 col-md-5 col-sm-12">
+                                    <div class="profile-photo-container text-center">
+                                        <div class="avatar-upload">
+                                            <div class="avatar-edit">
+                                                <input type='file' id="imageUpload" name="profile_photo" accept=".png, .jpg, .jpeg, .gif" />
+                                                <label for="imageUpload" title="Upload Photo"><i class="bi bi-camera-fill"></i></label>
                                             </div>
-                                            @if($mahasiswa->profile_photo)
-                                                <button type="button" class="btn btn-danger btn-sm mt-3" onclick="deletePhoto()">
-                                                    <i class="icon-copy bi bi-trash"></i> Hapus Foto
-                                                </button>
-                                            @endif
-                                            <div class="mt-3">
-                                                <small class="text-muted">
-                                                    <i class="icon-copy bi bi-info-circle"></i> 
-                                                    Upload foto profil (max 2MB, format: JPG, PNG, GIF)
-                                                </small>
+                                            <div class="avatar-preview">
+                                                <div id="imagePreview" style="background-image: url('{{ $mahasiswa->profile_photo ? asset('storage/profile_photos/' . $mahasiswa->profile_photo) : asset('bootstrap/vendors/images/photo2.jpg') }}');">
+                                                </div>
                                             </div>
                                         </div>
+                                        @if($mahasiswa->profile_photo)
+                                            <button type="button" class="btn btn-danger btn-sm mt-3" onclick="deletePhoto()">
+                                                <i class="icon-copy bi bi-trash"></i> Hapus Foto
+                                            </button>
+                                        @endif
+                                        <div class="upload-info">
+                                            <small>
+                                                <i class="icon-copy bi bi-info-circle"></i> 
+                                                Upload foto profil (max 2MB, format: JPG, PNG, GIF)
+                                            </small>
+                                        </div>
                                     </div>
-                                    <div class="col-lg-8 col-md-8 col-sm-12">
-                                        <div class="profile-overview">
-                                            <h5 class="text-blue">{{ $mahasiswa->Nama }}</h5>
-                                            <p class="text-muted mb-1"><i class="icon-copy bi bi-card-text"></i> NIM: {{ $mahasiswa->NIM }}</p>
-                                            <p class="text-muted mb-1"><i class="icon-copy bi bi-mortarboard"></i> Semester: {{ $mahasiswa->Semester }}</p>
-                                            <p class="text-muted mb-1"><i class="icon-copy bi bi-award"></i> Golongan: {{ $mahasiswa->golongan->nama_Gol ?? 'Tidak ada' }}</p>
-                                            <p class="text-muted"><i class="icon-copy bi bi-geo-alt"></i> {{ $mahasiswa->Alamat ?: 'Alamat belum diisi' }}</p>
+                                </div>
+                                <div class="col-lg-8 col-md-7 col-sm-12">
+                                    <div class="profile-info-section">
+                                        <h2>{{ $mahasiswa->Nama }}</h2>
+                                        <div class="profile-info-item">
+                                            <i class="icon-copy bi bi-card-text"></i>
+                                            <span><strong>NIM:</strong> {{ $mahasiswa->NIM }}</span>
+                                        </div>
+                                        <div class="profile-info-item">
+                                            <i class="icon-copy bi bi-mortarboard"></i>
+                                            <span><strong>Semester:</strong> {{ $mahasiswa->Semester }}</span>
+                                        </div>
+                                        <div class="profile-info-item">
+                                            <i class="icon-copy bi bi-award"></i>
+                                            <span><strong>Golongan:</strong> {{ $mahasiswa->golongan->nama_Gol ?? 'Tidak ada' }}</span>
+                                        </div>
+                                        <div class="profile-info-item">
+                                            <i class="icon-copy bi bi-phone"></i>
+                                            <span><strong>No. HP:</strong> {{ $mahasiswa->Nohp ?: 'Belum diisi' }}</span>
+                                        </div>
+                                        <div class="profile-info-item">
+                                            <i class="icon-copy bi bi-geo-alt"></i>
+                                            <span><strong>Alamat:</strong> {{ $mahasiswa->Alamat ?: 'Alamat belum diisi' }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -195,34 +571,39 @@
 
                 <!-- Edit Form -->
                 <div class="row">
-                    <div class="col-xl-12">
-                        <div class="card-box">
-                            <div class="card-header">
-                                <h5 class="card-title"><i class="icon-copy bi bi-pencil-square"></i> Edit Informasi Profile</h5>
+                    <div class="col-12">
+                        <div class="edit-form-card">
+                            <div class="card-header-custom">
+                                <h5><i class="icon-copy bi bi-pencil-square"></i> Edit Informasi Profile</h5>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body-custom">
                                 <form method="POST" action="{{ route('mahasiswa.profile.update') }}" enctype="multipart/form-data" id="profileForm">
                                     @csrf
                                     
                                     <!-- Personal Information Section -->
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <h6 class="text-blue border-bottom pb-2 mb-4"><i class="icon-copy bi bi-person-fill"></i> Informasi Personal</h6>
-                                        </div>
+                                    <div class="section-title">
+                                        <i class="icon-copy bi bi-person-fill"></i>
+                                        Informasi Personal
                                     </div>
                                     
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="NIM"><i class="icon-copy bi bi-card-text"></i> NIM <span class="text-danger">*</span></label>
-                                                <input class="form-control" type="text" value="{{ $mahasiswa->NIM }}" readonly style="background-color: #f8f9fa;" />
+                                                <label for="NIM">
+                                                    <i class="icon-copy bi bi-card-text"></i> 
+                                                    NIM <span class="text-danger">*</span>
+                                                </label>
+                                                <input class="form-control" type="text" value="{{ $mahasiswa->NIM }}" readonly />
                                                 <small class="text-muted">NIM tidak dapat diubah</small>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="Semester"><i class="icon-copy bi bi-mortarboard"></i> Semester <span class="text-danger">*</span></label>
-                                                <input class="form-control" type="text" value="{{ $mahasiswa->Semester }}" readonly style="background-color: #f8f9fa;" />
+                                                <label for="Semester">
+                                                    <i class="icon-copy bi bi-mortarboard"></i> 
+                                                    Semester <span class="text-danger">*</span>
+                                                </label>
+                                                <input class="form-control" type="text" value="{{ $mahasiswa->Semester }}" readonly />
                                                 <small class="text-muted">Semester diatur oleh admin</small>
                                             </div>
                                         </div>
@@ -231,80 +612,105 @@
                                     <div class="row">
                                         <div class="col-md-8">
                                             <div class="form-group">
-                                                <label for="Nama"><i class="icon-copy bi bi-person"></i> Nama Lengkap <span class="text-danger">*</span></label>
+                                                <label for="Nama">
+                                                    <i class="icon-copy bi bi-person"></i> 
+                                                    Nama Lengkap <span class="text-danger">*</span>
+                                                </label>
                                                 <input class="form-control" type="text" name="Nama" value="{{ old('Nama', $mahasiswa->Nama) }}" required placeholder="Masukkan nama lengkap Anda" />
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="Golongan"><i class="icon-copy bi bi-award"></i> Golongan <span class="text-danger">*</span></label>
-                                                <input class="form-control" type="text" value="{{ $mahasiswa->golongan->nama_Gol ?? 'Tidak ada' }}" readonly style="background-color: #f8f9fa;" />
+                                                <label for="Golongan">
+                                                    <i class="icon-copy bi bi-award"></i> 
+                                                    Golongan <span class="text-danger">*</span>
+                                                </label>
+                                                <input class="form-control" type="text" value="{{ $mahasiswa->golongan->nama_Gol ?? 'Tidak ada' }}" readonly />
                                                 <small class="text-muted">Golongan diatur oleh admin</small>
                                             </div>
                                         </div>
                                     </div>
 
+                                    <hr class="section-divider">
+
                                     <!-- Contact Information Section -->
-                                    <div class="row mt-4">
-                                        <div class="col-12">
-                                            <h6 class="text-blue border-bottom pb-2 mb-4"><i class="icon-copy bi bi-telephone-fill"></i> Informasi Kontak</h6>
-                                        </div>
+                                    <div class="section-title">
+                                        <i class="icon-copy bi bi-telephone-fill"></i>
+                                        Informasi Kontak
                                     </div>
 
                                     <div class="row">
                                         <div class="col-md-8">
                                             <div class="form-group">
-                                                <label for="Alamat"><i class="icon-copy bi bi-geo-alt-fill"></i> Alamat Lengkap <span class="text-danger">*</span></label>
+                                                <label for="Alamat">
+                                                    <i class="icon-copy bi bi-geo-alt-fill"></i> 
+                                                    Alamat Lengkap <span class="text-danger">*</span>
+                                                </label>
                                                 <textarea class="form-control" name="Alamat" rows="3" required placeholder="Masukkan alamat lengkap Anda">{{ old('Alamat', $mahasiswa->Alamat) }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="Nohp"><i class="icon-copy bi bi-phone"></i> No. HP</label>
+                                                <label for="Nohp">
+                                                    <i class="icon-copy bi bi-phone"></i> 
+                                                    No. HP
+                                                </label>
                                                 <input class="form-control" type="text" name="Nohp" value="{{ old('Nohp', $mahasiswa->Nohp) }}" placeholder="Contoh: 08123456789" />
                                                 <small class="text-muted">Nomor HP untuk komunikasi</small>
                                             </div>
                                         </div>
                                     </div>
 
+                                    <hr class="section-divider">
+
                                     <!-- Security Section -->
-                                    <div class="row mt-4">
-                                        <div class="col-12">
-                                            <h6 class="text-blue border-bottom pb-2 mb-4"><i class="icon-copy bi bi-shield-lock-fill"></i> Keamanan Akun</h6>
-                                        </div>
+                                    <div class="section-title">
+                                        <i class="icon-copy bi bi-shield-lock-fill"></i>
+                                        Keamanan Akun
                                     </div>
                                     
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="password"><i class="icon-copy bi bi-lock"></i> Password Baru</label>
+                                                <label for="password">
+                                                    <i class="icon-copy bi bi-lock"></i> 
+                                                    Password Baru
+                                                </label>
                                                 <input class="form-control" type="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah password" />
                                                 <small class="text-muted">Minimal 6 karakter</small>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="password_confirmation"><i class="icon-copy bi bi-lock-fill"></i> Konfirmasi Password Baru</label>
+                                                <label for="password_confirmation">
+                                                    <i class="icon-copy bi bi-lock-fill"></i> 
+                                                    Konfirmasi Password Baru
+                                                </label>
                                                 <input class="form-control" type="password" name="password_confirmation" placeholder="Ulangi password baru" />
                                                 <small class="text-muted">Harus sama dengan password baru</small>
                                             </div>
                                         </div>
                                     </div>
                                     
+                                    <hr class="section-divider">
+                                    
                                     <!-- Action Buttons -->
-                                    <div class="row mt-4">
+                                    <div class="row">
                                         <div class="col-12">
-                                            <div class="form-group d-flex justify-content-between align-items-center">
-                                                <div>
+                                            <div class="d-flex flex-wrap justify-content-between align-items-center">
+                                                <div class="d-flex flex-wrap gap-2">
                                                     <button type="submit" class="btn btn-primary btn-lg">
                                                         <i class="icon-copy bi bi-check-circle"></i> Simpan Perubahan
                                                     </button>
-                                                    <a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-secondary btn-lg ml-2">
+                                                    <a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-secondary btn-lg">
                                                         <i class="icon-copy bi bi-arrow-left"></i> Kembali
                                                     </a>
                                                 </div>
-                                                <div class="text-muted">
-                                                    <small><i class="icon-copy bi bi-info-circle"></i> Semua perubahan akan disimpan secara permanen</small>
+                                                <div class="text-muted mt-2 mt-lg-0">
+                                                    <small>
+                                                        <i class="icon-copy bi bi-info-circle"></i> 
+                                                        Semua perubahan akan disimpan secara permanen
+                                                    </small>
                                                 </div>
                                             </div>
                                         </div>
@@ -322,248 +728,6 @@
     <script src="{{ asset('bootstrap/vendors/scripts/script.min.js') }}"></script>
     <script src="{{ asset('bootstrap/vendors/scripts/process.js') }}"></script>
     <script src="{{ asset('bootstrap/vendors/scripts/layout-settings.js') }}"></script>
-
-    <style>
-        /* Enhanced Profile Page Styling */
-        .profile-info-container {
-            padding: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            color: white;
-            margin-bottom: 0;
-        }
-        
-        .profile-overview h5 {
-            color: white !important;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        
-        .profile-overview p {
-            color: rgba(255, 255, 255, 0.9) !important;
-            margin-bottom: 8px;
-        }
-        
-        .profile-photo-section {
-            padding: 20px 0;
-        }
-        
-        .avatar-upload {
-            position: relative;
-            max-width: 200px;
-            margin: 0 auto;
-        }
-        
-        .avatar-upload .avatar-edit {
-            position: absolute;
-            right: 15px;
-            z-index: 1;
-            top: 15px;
-        }
-        
-        .avatar-upload .avatar-edit input {
-            display: none;
-        }
-        
-        .avatar-upload .avatar-edit input + label {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            margin-bottom: 0;
-            border-radius: 50%;
-            background: #fff;
-            border: 2px solid #2196F3;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-            font-weight: normal;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #2196F3;
-            font-size: 16px;
-        }
-        
-        .avatar-upload .avatar-edit input + label:hover {
-            background: #2196F3;
-            color: white;
-            transform: scale(1.1);
-        }
-        
-        .avatar-upload .avatar-preview {
-            width: 180px;
-            height: 180px;
-            position: relative;
-            border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
-            margin: 0 auto;
-        }
-        
-        .avatar-upload .avatar-preview > div {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-        
-        .card-box {
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            border: none;
-        }
-        
-        .card-header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 20px 30px;
-            border: none;
-        }
-        
-        .card-header h5 {
-            margin: 0;
-            font-weight: 600;
-        }
-        
-        .card-body {
-            padding: 30px;
-        }
-        
-        .form-group label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-        
-        .form-control {
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
-            padding: 12px 15px;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-        
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-secondary {
-            border-radius: 8px;
-            padding: 12px 30px;
-            font-weight: 600;
-            border: 2px solid #6c757d;
-            background: transparent;
-            color: #6c757d;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-secondary:hover {
-            background: #6c757d;
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        .text-blue {
-            color: #667eea !important;
-        }
-        
-        .border-bottom {
-            border-bottom: 2px solid #e9ecef !important;
-        }
-        
-        .text-danger {
-            color: #dc3545 !important;
-        }
-        
-        .text-muted {
-            color: #6c757d !important;
-        }
-        
-        .alert {
-            border-radius: 10px;
-            border: none;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .alert-success {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-        }
-        
-        .alert-danger {
-            background: linear-gradient(45deg, #dc3545, #fd7e14);
-            color: white;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .profile-info-container {
-                padding: 20px;
-            }
-            
-            .avatar-upload .avatar-preview {
-                width: 150px;
-                height: 150px;
-            }
-            
-            .card-body {
-                padding: 20px;
-            }
-            
-            .btn-lg {
-                padding: 10px 20px;
-                font-size: 14px;
-            }
-        }
-        
-        /* Loading States */
-        .btn-loading {
-            position: relative;
-            color: transparent;
-        }
-        
-        .btn-loading::after {
-            content: "";
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            margin-left: -8px;
-            margin-top: -8px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: button-loading-spinner 1s ease infinite;
-        }
-        
-        @keyframes button-loading-spinner {
-            from {
-                transform: rotate(0turn);
-            }
-            to {
-                transform: rotate(1turn);
-            }
-        }
-    </style>
 
     <script>
         $(document).ready(function() {
@@ -659,7 +823,7 @@
                             
                             // Update profile overview
                             if (response.user_name) {
-                                $('.profile-overview h5').text(response.user_name);
+                                $('.profile-info-section h2').text(response.user_name);
                                 $('.user-name').text(response.user_name);
                             }
                         } else {
