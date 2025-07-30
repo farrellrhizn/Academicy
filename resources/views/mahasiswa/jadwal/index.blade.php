@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>Jadwal Kuliah - KRS</title>
+		<title>Jadwal Kuliah - Mahasiswa</title>
 
 		<link
 			rel="apple-touch-icon"
@@ -85,7 +85,7 @@
 									<li>
 										<a href="#">
 											<img src="../../../bootstrap/vendors/images/img.jpg" alt="" />
-											<h3>Info Akademik</h3>
+											<h3>Info Jadwal</h3>
 											<p>
 												Jadwal kuliah sudah tersedia. Pastikan Anda hadir tepat waktu.
 											</p>
@@ -185,9 +185,6 @@
 										<li class="breadcrumb-item">
 											<a href="{{ route('mahasiswa.dashboard') }}">Dashboard</a>
 										</li>
-										<li class="breadcrumb-item">
-											<a href="{{ route('mahasiswa.krs.index') }}">KRS</a>
-										</li>
 										<li class="breadcrumb-item active" aria-current="page">
 											Jadwal Kuliah
 										</li>
@@ -196,16 +193,16 @@
 							</div>
 							<div class="col-md-6 col-sm-12 text-right">
 								<div class="pd-20">
-									<h4 class="text-blue h4">NIM: {{ $mahasiswa->NIM }}</h4>
-									<p class="mb-0">Semester {{ $mahasiswa->Semester }}</p>
+									<h4 class="text-blue h4">{{ $mahasiswa->Nama }}</h4>
+									<p class="mb-0">NIM: {{ $mahasiswa->NIM }} | Semester {{ $mahasiswa->Semester }}</p>
 								</div>
 							</div>
 						</div>
 					</div>
 
 					@if($jadwalKuliah->count() > 0)
-						<!-- Jadwal Hari ini -->
-						<div class="row pb-10">
+						<!-- Jadwal Hari Ini -->
+						<div class="row pb-20">
 							<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-30">
 								<div class="card-box pd-20">
 									<div class="d-flex justify-content-between align-items-center mb-20">
@@ -213,9 +210,6 @@
 										<div>
 											<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-outline-primary btn-sm">
 												<i class="fa fa-arrow-left"></i> Kembali ke KRS
-											</a>
-											<a href="{{ route('mahasiswa.krs.cetak') }}" class="btn btn-primary btn-sm">
-												<i class="fa fa-print"></i> Cetak Jadwal
 											</a>
 										</div>
 									</div>
@@ -228,32 +222,35 @@
 									@endphp
 									
 									@if($jadwalHariIni->count() > 0)
-										<div class="row">
-											@foreach($jadwalHariIni as $jadwal)
-												<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-20">
-													<div class="card-box pd-20" style="border-left: 4px solid #007bff;">
-														<h5 class="text-blue h5">{{ $jadwal['Nama_mk'] }}</h5>
-														<p class="mb-0"><span class="badge badge-primary">{{ $jadwal['Kode_mk'] }}</span></p>
-														<hr class="my-2">
-														<div class="d-flex align-items-center mb-2">
-															<i class="fa fa-clock-o text-primary mr-2"></i>
-															<span>{{ $jadwal['waktu'] }}</span>
-														</div>
-														<div class="d-flex align-items-center mb-2">
-															<i class="fa fa-map-marker text-danger mr-2"></i>
-															<span>{{ $jadwal['nama_ruang'] }}</span>
-														</div>
-														<div class="d-flex align-items-center">
-															<i class="fa fa-graduation-cap text-success mr-2"></i>
-															<span>{{ $jadwal['sks'] }} SKS</span>
-														</div>
-													</div>
-												</div>
-											@endforeach
+										<div class="table-responsive">
+											<table class="table table-striped">
+												<thead class="table-dark">
+													<tr>
+														<th>Waktu</th>
+														<th>Mata Kuliah</th>
+														<th>Kode MK</th>
+														<th>Ruang</th>
+														<th>SKS</th>
+														<th>Dosen</th>
+													</tr>
+												</thead>
+												<tbody>
+													@foreach($jadwalHariIni->sortBy('waktu') as $jadwal)
+														<tr>
+															<td><span class="badge badge-primary">{{ $jadwal['waktu'] }}</span></td>
+															<td><strong>{{ $jadwal['Nama_mk'] }}</strong></td>
+															<td>{{ $jadwal['Kode_mk'] }}</td>
+															<td><i class="fa fa-map-marker text-danger"></i> {{ $jadwal['nama_ruang'] }}</td>
+															<td><span class="badge badge-success">{{ $jadwal['sks'] }} SKS</span></td>
+															<td>{{ $jadwal['nama_Gol'] ?? 'TBA' }}</td>
+														</tr>
+													@endforeach
+												</tbody>
+											</table>
 										</div>
 									@else
 										<div class="alert alert-info" role="alert">
-											<i class="fa fa-info-circle"></i> Tidak ada jadwal kuliah hari ini.
+											<i class="fa fa-info-circle"></i> Tidak ada jadwal kuliah hari ini. Anda bisa beristirahat! 😊
 										</div>
 									@endif
 								</div>
@@ -261,63 +258,107 @@
 						</div>
 
 						<!-- Jadwal Mingguan -->
-						<div class="row">
+						<div class="row pb-20">
 							<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-30">
 								<div class="card-box pd-20">
-									<h4 class="text-blue h4">Jadwal Mingguan</h4>
-									<div class="pb-20">
-										@php
-											$hari = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-											$hariIndonesia = [
-												'Monday' => 'Senin',
-												'Tuesday' => 'Selasa', 
-												'Wednesday' => 'Rabu',
-												'Thursday' => 'Kamis',
-												'Friday' => 'Jumat',
-												'Saturday' => 'Sabtu',
-												'Sunday' => 'Minggu'
-											];
-										@endphp
-										
-										@foreach($hari as $hariEng)
+									<h4 class="text-blue h4 mb-20">Jadwal Mingguan Lengkap</h4>
+									
+									@php
+										$hari = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+										$hariIndonesia = [
+											'Monday' => 'Senin',
+											'Tuesday' => 'Selasa', 
+											'Wednesday' => 'Rabu',
+											'Thursday' => 'Kamis',
+											'Friday' => 'Jumat',
+											'Saturday' => 'Sabtu',
+											'Sunday' => 'Minggu'
+										];
+										$warnaHari = [
+											'Monday' => 'primary',
+											'Tuesday' => 'success', 
+											'Wednesday' => 'warning',
+											'Thursday' => 'info',
+											'Friday' => 'danger',
+											'Saturday' => 'dark',
+											'Sunday' => 'secondary'
+										];
+									@endphp
+									
+									<!-- Navigasi Tab -->
+									<ul class="nav nav-tabs" id="jadwalTabs" role="tablist">
+										@foreach($hari as $index => $hariEng)
+											@php
+												$jadwalHari = $jadwalKuliah->filter(function($jadwal) use ($hariEng) {
+													return $jadwal['hari'] == $hariEng;
+												});
+											@endphp
+											@if($jadwalHari->count() > 0)
+												<li class="nav-item">
+													<a class="nav-link {{ $index == 0 ? 'active' : '' }}" 
+													   id="{{ strtolower($hariEng) }}-tab" 
+													   data-toggle="tab" 
+													   href="#{{ strtolower($hariEng) }}" 
+													   role="tab" 
+													   aria-controls="{{ strtolower($hariEng) }}"
+													   aria-selected="{{ $index == 0 ? 'true' : 'false' }}">
+														<i class="fa fa-calendar"></i> {{ $hariIndonesia[$hariEng] }}
+														<span class="badge badge-{{ $warnaHari[$hariEng] }} ml-2">{{ $jadwalHari->count() }}</span>
+													</a>
+												</li>
+											@endif
+										@endforeach
+									</ul>
+									
+									<!-- Konten Tab -->
+									<div class="tab-content mt-3" id="jadwalTabContent">
+										@foreach($hari as $index => $hariEng)
 											@php
 												$jadwalHari = $jadwalKuliah->filter(function($jadwal) use ($hariEng) {
 													return $jadwal['hari'] == $hariEng;
 												})->sortBy('waktu');
 											@endphp
-											
 											@if($jadwalHari->count() > 0)
-												<div class="mb-30">
-													<div class="bg-primary text-white pd-10 border-radius-4 mb-20">
-														<h5 class="text-white h5 mb-0">{{ $hariIndonesia[$hariEng] }}</h5>
-													</div>
-													<div class="row">
-														@foreach($jadwalHari as $jadwal)
-															<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-20">
-																<div class="card-box pd-20" style="border-left: 4px solid #28a745;">
-																	<div class="d-flex justify-content-between align-items-start">
-																		<div class="flex-grow-1">
-																			<h6 class="text-blue h6">{{ $jadwal['Nama_mk'] }}</h6>
-																			<p class="mb-2"><span class="badge badge-primary">{{ $jadwal['Kode_mk'] }}</span></p>
-																		</div>
-																		<span class="badge badge-success">{{ $jadwal['sks'] }} SKS</span>
-																	</div>
-																	<hr class="my-2">
-																	<div class="row">
-																		<div class="col-6">
-																			<small class="text-muted">
-																				<i class="fa fa-clock-o"></i> {{ $jadwal['waktu'] }}
-																			</small>
-																		</div>
-																		<div class="col-6">
-																			<small class="text-muted">
-																				<i class="fa fa-map-marker"></i> {{ $jadwal['nama_ruang'] }}
-																			</small>
-																		</div>
-																	</div>
-																</div>
-															</div>
-														@endforeach
+												<div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}" 
+													 id="{{ strtolower($hariEng) }}" 
+													 role="tabpanel" 
+													 aria-labelledby="{{ strtolower($hariEng) }}-tab">
+													<div class="table-responsive">
+														<table class="table table-hover">
+															<thead class="bg-{{ $warnaHari[$hariEng] }} text-white">
+																<tr>
+																	<th>Waktu</th>
+																	<th>Mata Kuliah</th>
+																	<th>Kode MK</th>
+																	<th>Ruang</th>
+																	<th>SKS</th>
+																	<th>Golongan</th>
+																</tr>
+															</thead>
+															<tbody>
+																@foreach($jadwalHari as $jadwal)
+																	<tr>
+																		<td>
+																			<span class="badge badge-{{ $warnaHari[$hariEng] }}">
+																				{{ $jadwal['waktu'] }}
+																			</span>
+																		</td>
+																		<td>
+																			<strong>{{ $jadwal['Nama_mk'] }}</strong>
+																		</td>
+																		<td>{{ $jadwal['Kode_mk'] }}</td>
+																		<td>
+																			<i class="fa fa-map-marker text-danger"></i> 
+																			{{ $jadwal['nama_ruang'] }}
+																		</td>
+																		<td>
+																			<span class="badge badge-success">{{ $jadwal['sks'] }} SKS</span>
+																		</td>
+																		<td>{{ $jadwal['nama_Gol'] ?? 'TBA' }}</td>
+																	</tr>
+																@endforeach
+															</tbody>
+														</table>
 													</div>
 												</div>
 											@endif
@@ -327,57 +368,53 @@
 							</div>
 						</div>
 
-						<!-- Ringkasan Jadwal -->
+						<!-- Ringkasan dan Quick Actions -->
 						<div class="row">
-							<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
+							<div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 mb-30">
 								<div class="card-box pd-20">
-									<h4 class="text-blue h4">Statistik Jadwal</h4>
-									<div class="pb-20">
-										<div class="d-flex align-items-center justify-content-between mb-10">
-											<span>Total Jadwal:</span>
-											<strong class="text-primary">{{ $jadwalKuliah->count() }}</strong>
+									<h4 class="text-blue h4 mb-20">Ringkasan Jadwal</h4>
+									<div class="row">
+										<div class="col-md-3 col-sm-6 mb-20">
+											<div class="bg-primary text-white pd-20 border-radius-5 text-center">
+												<h5 class="text-white mb-0">{{ $jadwalKuliah->count() }}</h5>
+												<small>Total Mata Kuliah</small>
+											</div>
 										</div>
-										<div class="d-flex align-items-center justify-content-between mb-10">
-											<span>Mata Kuliah:</span>
-											<strong class="text-success">{{ $jadwalKuliah->count() }}</strong>
+										<div class="col-md-3 col-sm-6 mb-20">
+											<div class="bg-success text-white pd-20 border-radius-5 text-center">
+												<h5 class="text-white mb-0">{{ $jadwalKuliah->sum('sks') }}</h5>
+												<small>Total SKS</small>
+											</div>
 										</div>
-										<div class="d-flex align-items-center justify-content-between mb-10">
-											<span>Total SKS:</span>
-											<strong class="text-info">{{ $jadwalKuliah->sum('sks') }}</strong>
+										<div class="col-md-3 col-sm-6 mb-20">
+											<div class="bg-warning text-white pd-20 border-radius-5 text-center">
+												<h5 class="text-white mb-0">{{ $jadwalKuliah->unique('hari')->count() }}</h5>
+												<small>Hari Kuliah</small>
+											</div>
+										</div>
+										<div class="col-md-3 col-sm-6 mb-20">
+											<div class="bg-info text-white pd-20 border-radius-5 text-center">
+												<h5 class="text-white mb-0">{{ \Carbon\Carbon::now()->format('Y') }}</h5>
+												<small>Tahun Akademik</small>
+											</div>
 										</div>
 									</div>
 								</div>
 							</div>
 							
-							<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
+							<div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 mb-30">
 								<div class="card-box pd-20">
-									<h4 class="text-blue h4">Quick Actions</h4>
-									<div class="pb-20">
-										<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-outline-primary btn-block mb-10">
-											<i class="fa fa-arrow-left"></i> Kembali ke KRS
+									<h4 class="text-blue h4 mb-20">Quick Actions</h4>
+									<div class="list-group">
+										<a href="{{ route('mahasiswa.krs.index') }}" class="list-group-item list-group-item-action">
+											<i class="fa fa-arrow-left text-primary"></i> Kembali ke KRS
 										</a>
-										<a href="{{ route('mahasiswa.krs.cetak') }}" class="btn btn-primary btn-block mb-10">
-											<i class="fa fa-print"></i> Cetak Jadwal
+										<a href="{{ route('mahasiswa.presensi.riwayat') }}" class="list-group-item list-group-item-action">
+											<i class="fa fa-check-square text-success"></i> Lihat Riwayat Presensi
 										</a>
-										<a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-outline-secondary btn-block">
-											<i class="fa fa-home"></i> Dashboard
+										<a href="{{ route('mahasiswa.dashboard') }}" class="list-group-item list-group-item-action">
+											<i class="fa fa-home text-info"></i> Dashboard
 										</a>
-									</div>
-								</div>
-							</div>
-							
-							<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-30">
-								<div class="card-box pd-20">
-									<h4 class="text-blue h4">Catatan Penting</h4>
-									<div class="pb-20">
-										<div class="alert alert-success" role="alert">
-											<i class="fa fa-check-circle"></i> <strong>Hadir Tepat Waktu</strong><br>
-											Pastikan Anda hadir 15 menit sebelum kelas dimulai
-										</div>
-										<div class="alert alert-info" role="alert">
-											<i class="fa fa-info-circle"></i> <strong>Perubahan Jadwal</strong><br>
-											Pantau pengumuman untuk perubahan jadwal
-										</div>
 									</div>
 								</div>
 							</div>
@@ -390,6 +427,9 @@
 									<i class="fa fa-calendar-times-o text-muted" style="font-size: 5rem;"></i>
 									<h4 class="text-blue h4 mt-20">Belum Ada Jadwal</h4>
 									<p class="text-muted mb-20">Anda belum mengambil mata kuliah atau jadwal belum tersedia</p>
+									<div class="alert alert-warning" role="alert">
+										<i class="fa fa-warning"></i> Silakan ambil mata kuliah terlebih dahulu di menu KRS.
+									</div>
 									<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-primary">
 										<i class="fa fa-plus"></i> Ambil Mata Kuliah
 									</a>

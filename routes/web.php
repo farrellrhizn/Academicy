@@ -91,6 +91,12 @@ Route::middleware('auth:mahasiswa')->prefix('mahasiswa')->name('mahasiswa.')->gr
     Route::get('/krs/jadwal', [App\Http\Controllers\KrsController::class, 'jadwal'])->name('krs.jadwal');
     Route::get('/krs/cetak', [App\Http\Controllers\KrsController::class, 'cetak'])->name('krs.cetak');
     Route::get('/krs/available', [App\Http\Controllers\KrsController::class, 'getAvailableCoursesAjax'])->name('krs.available');
+    
+    // Route Jadwal Mahasiswa
+    Route::get('/jadwal', [App\Http\Controllers\KrsController::class, 'jadwal'])->name('jadwal.index');
+    
+    // Route Presensi Mahasiswa
+    Route::get('/presensi/riwayat', [App\Http\Controllers\KrsController::class, 'riwayatPresensi'])->name('presensi.riwayat');
 });
 
 // Route::get('/', function () {

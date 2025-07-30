@@ -397,7 +397,7 @@ class KrsController extends Controller
                           ->sortBy('hari')
                           ->sortBy('waktu');
         
-        return view('mahasiswa.krs.jadwal', compact('jadwalKuliah', 'mahasiswa'));
+        return view('mahasiswa.jadwal.index', compact('jadwalKuliah', 'mahasiswa'));
     }
     
     /**
@@ -427,6 +427,63 @@ class KrsController extends Controller
         });
         
         return view('mahasiswa.krs.cetak', compact('krsData', 'mahasiswa', 'totalSks'));
+    }
+    
+    /**
+     * Tampilkan riwayat presensi mahasiswa
+     */
+    public function riwayatPresensi(Request $request)
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        
+        if (!$mahasiswa) {
+            return redirect()->route('login')->with('error', 'Sesi login telah berakhir. Silakan login kembali.');
+        }
+        
+        // Ambil mata kuliah yang diambil mahasiswa untuk filter
+        $matakuliahDiambil = Krs::where('NIM', $mahasiswa->NIM)
+                               ->with('matakuliah')
+                               ->get()
+                               ->pluck('matakuliah')
+                               ->filter()
+                               ->unique('Kode_mk')
+                               ->sortBy('Nama_mk');
+        
+        // Filter berdasarkan mata kuliah yang dipilih
+        $selectedKodeMk = $request->get('kode_mk', '');
+        
+        $riwayatPresensi = collect();
+        
+        if ($selectedKodeMk) {
+            // Ambil riwayat presensi untuk mata kuliah tertentu
+            $riwayatPresensi = \App\Models\PresensiAkademik::where('NIM', $mahasiswa->NIM)
+                                                         ->where('Kode_mk', $selectedKodeMk)
+                                                         ->with('matakuliah')
+                                                         ->orderBy('tanggal', 'desc')
+                                                         ->get();
+            
+            // Hitung statistik presensi
+            $statistik = [
+                'total_pertemuan' => $riwayatPresensi->count(),
+                'hadir' => $riwayatPresensi->where('status_kehadiran', 'Hadir')->count(),
+                'izin' => $riwayatPresensi->where('status_kehadiran', 'Izin')->count(),
+                'alpa' => $riwayatPresensi->where('status_kehadiran', 'Alpa')->count(),
+            ];
+            
+            $statistik['persentase_kehadiran'] = $statistik['total_pertemuan'] > 0 
+                ? round(($statistik['hadir'] / $statistik['total_pertemuan']) * 100, 1) 
+                : 0;
+        } else {
+            $statistik = null;
+        }
+        
+        return view('mahasiswa.presensi.riwayat', compact(
+            'riwayatPresensi', 
+            'matakuliahDiambil', 
+            'selectedKodeMk', 
+            'mahasiswa',
+            'statistik'
+        ));
     }
     
     /**
