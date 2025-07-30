@@ -62,31 +62,45 @@ class ProfileController extends Controller
             // Handle profile photo upload
             if ($request->hasFile('profile_photo')) {
                 try {
-                    // Ensure directory exists
+                    // Ensure directory exists and has proper permissions
                     $this->ensureDirectoryExists();
+                    
+                    // Validate file is actually an image
+                    $file = $request->file('profile_photo');
+                    if (!$file->isValid()) {
+                        throw new \Exception('File upload tidak valid. Silakan coba lagi.');
+                    }
                     
                     // Delete old photo if exists
                     if ($dosen->profile_photo) {
                         $this->imageService->deleteProfilePhoto($dosen->profile_photo);
                     }
-
-                    $file = $request->file('profile_photo');
                     
-                    // Validate file type
-                    if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'])) {
+                    // Validate file type more strictly
+                    $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+                    if (!in_array($file->getMimeType(), $allowedMimes)) {
                         throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
                     }
                     
-                    $fileName = 'dosen_' . $dosen->NIP . '_' . time() . '.' . $file->getClientOriginalExtension();
+                    // Generate unique filename
+                    $fileName = 'dosen_' . $dosen->NIP . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     
                     // Resize and save the image
                     $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
+                    
+                    // Verify file was actually saved
+                    $savedPath = storage_path('app/public/profile_photos/' . $savedFileName);
+                    if (!file_exists($savedPath)) {
+                        throw new \Exception('Gagal menyimpan file gambar. Silakan coba lagi.');
+                    }
+                    
                     $data['profile_photo'] = $savedFileName;
                     $newPhotoUrl = asset('storage/profile_photos/' . $savedFileName);
                     
                     Log::info('Profile photo uploaded successfully for dosen: ' . $dosen->NIP, [
                         'file_name' => $savedFileName,
-                        'file_size' => $file->getSize()
+                        'file_size' => $file->getSize(),
+                        'saved_path' => $savedPath
                     ]);
                 } catch (\Exception $e) {
                     Log::error('Failed to upload profile photo for dosen: ' . $dosen->NIP, [
@@ -179,31 +193,45 @@ class ProfileController extends Controller
             // Handle profile photo upload
             if ($request->hasFile('profile_photo')) {
                 try {
-                    // Ensure directory exists
+                    // Ensure directory exists and has proper permissions
                     $this->ensureDirectoryExists();
+                    
+                    // Validate file is actually an image
+                    $file = $request->file('profile_photo');
+                    if (!$file->isValid()) {
+                        throw new \Exception('File upload tidak valid. Silakan coba lagi.');
+                    }
                     
                     // Delete old photo if exists
                     if ($mahasiswa->profile_photo) {
                         $this->imageService->deleteProfilePhoto($mahasiswa->profile_photo);
                     }
-
-                    $file = $request->file('profile_photo');
                     
-                    // Validate file type
-                    if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'])) {
+                    // Validate file type more strictly
+                    $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+                    if (!in_array($file->getMimeType(), $allowedMimes)) {
                         throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
                     }
                     
-                    $fileName = 'mahasiswa_' . $mahasiswa->NIM . '_' . time() . '.' . $file->getClientOriginalExtension();
+                    // Generate unique filename
+                    $fileName = 'mahasiswa_' . $mahasiswa->NIM . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     
                     // Resize and save the image
                     $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
+                    
+                    // Verify file was actually saved
+                    $savedPath = storage_path('app/public/profile_photos/' . $savedFileName);
+                    if (!file_exists($savedPath)) {
+                        throw new \Exception('Gagal menyimpan file gambar. Silakan coba lagi.');
+                    }
+                    
                     $data['profile_photo'] = $savedFileName;
                     $newPhotoUrl = asset('storage/profile_photos/' . $savedFileName);
                     
                     Log::info('Profile photo uploaded successfully for mahasiswa: ' . $mahasiswa->NIM, [
                         'file_name' => $savedFileName,
-                        'file_size' => $file->getSize()
+                        'file_size' => $file->getSize(),
+                        'saved_path' => $savedPath
                     ]);
                 } catch (\Exception $e) {
                     Log::error('Failed to upload profile photo for mahasiswa: ' . $mahasiswa->NIM, [
@@ -277,25 +305,37 @@ class ProfileController extends Controller
                 return response()->json(['success' => false, 'message' => 'Invalid user type']);
             }
 
-            // Ensure directory exists
+            // Ensure directory exists and has proper permissions
             $this->ensureDirectoryExists();
+            
+            // Validate file is actually an image
+            $file = $request->file('profile_photo');
+            if (!$file->isValid()) {
+                throw new \Exception('File upload tidak valid. Silakan coba lagi.');
+            }
 
             // Delete old photo if exists
             if ($user->profile_photo) {
                 $this->imageService->deleteProfilePhoto($user->profile_photo);
             }
-
-            $file = $request->file('profile_photo');
             
-            // Validate file type
-            if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'])) {
+            // Validate file type more strictly
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+            if (!in_array($file->getMimeType(), $allowedMimes)) {
                 throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
             }
             
-            $fileName = $prefix . '_' . time() . '.' . $file->getClientOriginalExtension();
+            // Generate unique filename
+            $fileName = $prefix . '_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             
             // Resize and save the image
             $savedFileName = $this->imageService->resizeProfilePhoto($file, $fileName, 200, 200);
+            
+            // Verify file was actually saved
+            $savedPath = storage_path('app/public/profile_photos/' . $savedFileName);
+            if (!file_exists($savedPath)) {
+                throw new \Exception('Gagal menyimpan file gambar. Silakan coba lagi.');
+            }
             
             // Update user profile_photo
             $user->update(['profile_photo' => $savedFileName]);
@@ -305,7 +345,8 @@ class ProfileController extends Controller
             Log::info('Profile photo uploaded via dedicated endpoint', [
                 'user_type' => $userType,
                 'user_id' => $user->id,
-                'file_name' => $savedFileName
+                'file_name' => $savedFileName,
+                'saved_path' => $savedPath
             ]);
             
             return response()->json([
@@ -427,6 +468,16 @@ class ProfileController extends Controller
         if (!is_writable($directory)) {
             chmod($directory, 0755);
             Log::info('Fixed permissions for profile_photos directory: ' . $directory);
+        }
+        
+        // Ensure the public/storage symlink exists
+        $publicStorageLink = public_path('storage');
+        if (!file_exists($publicStorageLink)) {
+            $storagePath = storage_path('app/public');
+            if (is_dir($storagePath)) {
+                symlink($storagePath, $publicStorageLink);
+                Log::info('Created storage symlink: ' . $publicStorageLink);
+            }
         }
     }
 }

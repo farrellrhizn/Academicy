@@ -29,16 +29,26 @@ class ImageService
             throw new \Exception('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.');
         }
 
+        // Ensure GD extension is available
+        if (!extension_loaded('gd')) {
+            throw new \Exception('GD extension tidak tersedia. Tidak dapat memproses gambar.');
+        }
+
         // Create image resource from uploaded file
         $sourceImage = $this->createImageFromFile($file);
         
         if (!$sourceImage) {
-            throw new \Exception('Unable to create image from uploaded file. File mungkin rusak atau format tidak valid.');
+            throw new \Exception('Tidak dapat membuat gambar dari file yang diupload. File mungkin rusak atau format tidak valid.');
         }
         
         // Get original dimensions
         $originalWidth = imagesx($sourceImage);
         $originalHeight = imagesy($sourceImage);
+        
+        if ($originalWidth === false || $originalHeight === false) {
+            imagedestroy($sourceImage);
+            throw new \Exception('Tidak dapat membaca dimensi gambar.');
+        }
         
         // Calculate aspect ratio
         $aspectRatio = $originalWidth / $originalHeight;
@@ -61,6 +71,11 @@ class ImageService
         // Create a new square image
         $resizedImage = imagecreatetruecolor($width, $height);
         
+        if (!$resizedImage) {
+            imagedestroy($sourceImage);
+            throw new \Exception('Tidak dapat membuat gambar baru untuk resize.');
+        }
+        
         // Enable alpha blending for PNG images with transparency
         imagealphablending($resizedImage, false);
         imagesavealpha($resizedImage, true);
@@ -69,19 +84,38 @@ class ImageService
         imagealphablending($resizedImage, true);
         
         // Copy and resize the cropped portion to the new image
-        imagecopyresampled(
+        $resizeResult = imagecopyresampled(
             $resizedImage, $sourceImage,
             0, 0, $cropX, $cropY,
             $width, $height, $cropWidth, $cropHeight
         );
         
+        if (!$resizeResult) {
+            imagedestroy($sourceImage);
+            imagedestroy($resizedImage);
+            throw new \Exception('Gagal melakukan resize gambar.');
+        }
+        
         // Save the resized image
         $path = storage_path('app/public/profile_photos/' . $filename);
         
-        // Ensure directory exists
+        // Ensure directory exists with proper permissions
         $directory = dirname($path);
         if (!file_exists($directory)) {
-            mkdir($directory, 0755, true);
+            if (!mkdir($directory, 0755, true)) {
+                imagedestroy($sourceImage);
+                imagedestroy($resizedImage);
+                throw new \Exception('Tidak dapat membuat direktori untuk menyimpan gambar.');
+            }
+        }
+        
+        // Make sure directory is writable
+        if (!is_writable($directory)) {
+            if (!chmod($directory, 0755)) {
+                imagedestroy($sourceImage);
+                imagedestroy($resizedImage);
+                throw new \Exception('Direktori tidak dapat ditulis. Periksa permission.');
+            }
         }
         
         // Save based on file extension
@@ -112,8 +146,16 @@ class ImageService
         imagedestroy($resizedImage);
         
         if (!$success) {
-            throw new \Exception('Failed to save resized image');
+            throw new \Exception('Gagal menyimpan gambar yang sudah diresize.');
         }
+        
+        // Verify the file was actually created and has content
+        if (!file_exists($path) || filesize($path) === 0) {
+            throw new \Exception('File gambar tidak dapat disimpan atau file kosong.');
+        }
+        
+        // Set proper file permissions
+        chmod($path, 0644);
         
         return $filename;
     }
@@ -129,15 +171,36 @@ class ImageService
         $mimeType = $file->getMimeType();
         $tempPath = $file->getPathname();
         
-        switch ($mimeType) {
-            case 'image/jpeg':
-                return imagecreatefromjpeg($tempPath);
-            case 'image/png':
-                return imagecreatefrompng($tempPath);
-            case 'image/gif':
-                return imagecreatefromgif($tempPath);
-            default:
+        // Verify file exists and is readable
+        if (!file_exists($tempPath) || !is_readable($tempPath)) {
+            return false;
+        }
+        
+        try {
+            switch ($mimeType) {
+                case 'image/jpeg':
+                case 'image/jpg':
+                    $image = imagecreatefromjpeg($tempPath);
+                    break;
+                case 'image/png':
+                    $image = imagecreatefrompng($tempPath);
+                    break;
+                case 'image/gif':
+                    $image = imagecreatefromgif($tempPath);
+                    break;
+                default:
+                    return false;
+            }
+            
+            // Additional check to ensure image was created successfully
+            if ($image === false) {
                 return false;
+            }
+            
+            return $image;
+        } catch (\Exception $e) {
+            \Log::error('Error creating image from file: ' . $e->getMessage());
+            return false;
         }
     }
     
@@ -161,10 +224,22 @@ class ImageService
         }
         
         try {
-            return Storage::delete($filePath);
+            $deleted = Storage::delete($filePath);
+            
+            // Double check that file is actually deleted
+            if ($deleted && !Storage::exists($filePath)) {
+                \Log::info('Profile photo deleted successfully: ' . $filename);
+                return true;
+            } else {
+                \Log::warning('Failed to delete profile photo: ' . $filename);
+                return false;
+            }
         } catch (\Exception $e) {
             // Log error but don't throw exception
-            \Log::error('Failed to delete profile photo: ' . $e->getMessage());
+            \Log::error('Failed to delete profile photo: ' . $e->getMessage(), [
+                'filename' => $filename,
+                'trace' => $e->getTraceAsString()
+            ]);
             return false;
         }
     }
