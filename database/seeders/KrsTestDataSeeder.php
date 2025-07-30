@@ -42,25 +42,25 @@ class KrsTestDataSeeder extends Seeder
             );
         }
 
-        // Data Dosen
+                // Data Dosen
         $dosen = [
             [
-                'id_admin' => 1,
-                'username' => 'dosen001',
-                'nama_lengkap' => 'Dr. John Doe, M.Kom',
-                'password' => Hash::make('password'),
+                'NIP' => 'DSN001',
+                'Nama' => 'Dr. John Doe, M.Kom',
+                'Alamat' => 'Jl. Dosen No. 1',
+                'Nohp' => '081111111111',
             ],
             [
-                'id_admin' => 2,
-                'username' => 'dosen002', 
-                'nama_lengkap' => 'Prof. Jane Smith, Ph.D',
-                'password' => Hash::make('password'),
+                'NIP' => 'DSN002',
+                'Nama' => 'Prof. Jane Smith, Ph.D',
+                'Alamat' => 'Jl. Dosen No. 2',
+                'Nohp' => '081222222222',
             ],
         ];
 
         foreach ($dosen as $d) {
             DB::table('dosen')->updateOrInsert(
-                ['id_admin' => $d['id_admin']], 
+                ['NIP' => $d['NIP']], 
                 $d
             );
         }
@@ -110,30 +110,35 @@ class KrsTestDataSeeder extends Seeder
                 'Nama_mk' => 'Basis Data',
                 'sks' => 3,
                 'semester' => 3,
+                'NIP' => 'DSN001',
             ],
             [
                 'Kode_mk' => 'SI302',
                 'Nama_mk' => 'Pemrograman Web',
                 'sks' => 3,
                 'semester' => 3,
+                'NIP' => 'DSN001',
             ],
             [
                 'Kode_mk' => 'SI303',
                 'Nama_mk' => 'Analisis dan Perancangan Sistem',
                 'sks' => 3,
                 'semester' => 3,
+                'NIP' => 'DSN002',
             ],
             [
                 'Kode_mk' => 'SI304',
                 'Nama_mk' => 'Jaringan Komputer',
                 'sks' => 2,
                 'semester' => 3,
+                'NIP' => 'DSN002',
             ],
             [
                 'Kode_mk' => 'SI305',
                 'Nama_mk' => 'Struktur Data',
                 'sks' => 3,
                 'semester' => 3,
+                'NIP' => 'DSN001',
             ],
         ];
 
@@ -144,21 +149,7 @@ class KrsTestDataSeeder extends Seeder
             );
         }
 
-        // Data Pengampu (Dosen mengampu mata kuliah)
-        $pengampu = [
-            ['id_admin' => 1, 'Kode_mk' => 'SI301'],
-            ['id_admin' => 1, 'Kode_mk' => 'SI302'],
-            ['id_admin' => 2, 'Kode_mk' => 'SI303'],
-            ['id_admin' => 2, 'Kode_mk' => 'SI304'],
-            ['id_admin' => 1, 'Kode_mk' => 'SI305'],
-        ];
-
-        foreach ($pengampu as $p) {
-            DB::table('pengampu')->updateOrInsert(
-                ['id_admin' => $p['id_admin'], 'Kode_mk' => $p['Kode_mk']], 
-                $p
-            );
-        }
+        // Data pengampu sudah terintegrasi di tabel matakuliah melalui kolom NIP
 
         // Data Jadwal Akademik
         $jadwal = [
@@ -280,7 +271,7 @@ class KrsTestDataSeeder extends Seeder
         }
         echo "\nDosen:\n";
         foreach ($dosen as $d) {
-            echo "  - Username: {$d['username']}, Password: password\n";
+            echo "  - NIP: {$d['NIP']}, Nama: {$d['Nama']}\n";
         }
     }
 }
