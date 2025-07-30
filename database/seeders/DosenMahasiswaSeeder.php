@@ -15,7 +15,7 @@ class DosenMahasiswaSeeder extends Seeder
         Dosen::create([
             'NIP' => 'DSN003',
             'Nama' => 'Budi Santoso, M.Kom',
-            'Password' => Hash::make('12345678'), // Password di-hash
+            'password' => Hash::make('12345678'), // Password di-hash
             'Alamat' => 'Jl. Merdeka No. 10',
             'Nohp' => '081234567890',
         ]);
@@ -24,7 +24,7 @@ class DosenMahasiswaSeeder extends Seeder
         Mahasiswa::create([
             'NIM' => 'MHS003',
             'Nama' => 'Ani Wijaya',
-            'Password' => Hash::make('12345678'), // Password di-hash
+            'password' => Hash::make('12345678'), // Password di-hash
             'Alamat' => 'Jl. Pelajar No. 5',
             'Nohp' => '081209876543',
             'Semester' => 1,
