@@ -92,16 +92,12 @@
 								<span class="micon bi bi-journal-check"></span><span class="mtext">Input Presensi Cepat</span>
 							</a>
 						</li>
-						<li>
-							<a href="{{ route('dosen.presensi.index') }}" class="dropdown-toggle no-arrow">
-								<span class="micon bi bi-journal"></span><span class="mtext">Input Presensi Detail</span>
-							</a>
-						</li>
-						<li>
-							<a href="matkul-diampu.html" class="dropdown-toggle no-arrow">
-								<span class="micon bi bi-book"></span><span class="mtext">Mata Kuliah Diampu</span>
-							</a>
-						</li>
+						
+						                        <li>
+                            <a href="{{ route('dosen.mata-kuliah-diampu.index') }}" class="dropdown-toggle no-arrow">
+                                <span class="micon bi bi-book"></span><span class="mtext">Mata Kuliah Diampu</span>
+                            </a>
+                        </li>
 					</ul>
 				</div>
 			</div>

@@ -83,16 +83,12 @@
                             <span class="micon bi bi-journal-check"></span><span class="mtext">Input Presensi Cepat</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('dosen.presensi.index') }}" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-journal"></span><span class="mtext">Input Presensi Detail</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="matkul-diampu.html" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-book"></span><span class="mtext">Mata Kuliah Diampu</span>
-                        </a>
-                    </li>
+                    
+                                            <li>
+                            <a href="{{ route('dosen.mata-kuliah-diampu.index') }}" class="dropdown-toggle no-arrow">
+                                <span class="micon bi bi-book"></span><span class="mtext">Mata Kuliah Diampu</span>
+                            </a>
+                        </li>
                 </ul>
             </div>
         </div>
@@ -212,13 +208,13 @@
                                                 <input type="hidden" name="mahasiswa[{{ $index }}][nim]" value="{{ $mhs->NIM }}">
                                                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                                     <label class="btn btn-outline-success btn-sm">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Hadir"> Hadir
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Hadir" autocomplete="off"> Hadir
                                                     </label>
                                                     <label class="btn btn-outline-warning btn-sm">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Izin"> Izin
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Izin" autocomplete="off"> Izin
                                                     </label>
                                                     <label class="btn btn-outline-danger btn-sm">
-                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Alpa"> Alpa
+                                                        <input type="radio" name="mahasiswa[{{ $index }}][status]" value="Alpa" autocomplete="off"> Alpa
                                                     </label>
                                                 </div>
                                             </td>

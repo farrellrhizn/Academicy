@@ -72,9 +72,7 @@ Route::middleware('auth:dosen')->prefix('dosen')->name('dosen.')->group(function
     Route::get('/presensi-simple', [PresensiController::class, 'simple'])->name('presensi.simple');
     Route::post('/presensi-simple', [PresensiController::class, 'storeSimple'])->name('presensi.store-simple');
     
-    // Route presensi detail (pilih mata kuliah dan tanggal)
-    Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi.index');
-    Route::post('/presensi', [PresensiController::class, 'store'])->name('presensi.store');
+    // Route presensi detail (REMOVED as requested by user)
     
     // Route mata kuliah diampu
     Route::get('/mata-kuliah-diampu', [MataKuliahDiampuController::class, 'index'])->name('mata-kuliah-diampu.index');
