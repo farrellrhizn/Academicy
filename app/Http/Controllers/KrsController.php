@@ -77,94 +77,110 @@ class KrsController extends Controller
                 
                 return redirect()->route('login')->with('error', $message);
             }
-        
-        // Cek apakah mata kuliah sudah diambil
-        $existingKrs = Krs::where('NIM', $mahasiswa->NIM)
-                         ->where('Kode_mk', $request->Kode_mk)
-                         ->first();
-        
-        if ($existingKrs) {
-            $message = 'Mata kuliah sudah diambil sebelumnya.';
             
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $message], 400);
+            // Cek apakah mata kuliah sudah diambil
+            $existingKrs = Krs::where('NIM', $mahasiswa->NIM)
+                             ->where('Kode_mk', $request->Kode_mk)
+                             ->first();
+            
+            if ($existingKrs) {
+                $message = 'Mata kuliah sudah diambil sebelumnya.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 400);
+                }
+                
+                return redirect()->back()->with('error', $message);
             }
             
-            return redirect()->back()->with('error', $message);
-        }
-        
-        // Cek apakah mata kuliah sesuai semester mahasiswa
-        $matakuliah = MataKuliah::where('Kode_mk', $request->Kode_mk)
-                               ->where('semester', $mahasiswa->Semester)
-                               ->first();
-        
-        if (!$matakuliah) {
-            $message = 'Mata kuliah tidak sesuai dengan semester Anda.';
+            // Cek apakah mata kuliah sesuai semester mahasiswa
+            $matakuliah = MataKuliah::where('Kode_mk', $request->Kode_mk)
+                                   ->where('semester', $mahasiswa->Semester)
+                                   ->first();
             
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $message], 400);
+            if (!$matakuliah) {
+                $message = 'Mata kuliah tidak sesuai dengan semester Anda.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 400);
+                }
+                
+                return redirect()->back()->with('error', $message);
             }
             
-            return redirect()->back()->with('error', $message);
-        }
-        
-        // Cek apakah ada jadwal untuk golongan mahasiswa
-        $jadwal = JadwalAkademik::where('Kode_mk', $request->Kode_mk)
-                               ->where('id_Gol', $mahasiswa->id_Gol)
-                               ->first();
-        
-        if (!$jadwal) {
-            $message = 'Mata kuliah belum dijadwalkan untuk golongan Anda.';
+            // Cek apakah ada jadwal untuk golongan mahasiswa
+            $jadwal = JadwalAkademik::where('Kode_mk', $request->Kode_mk)
+                                   ->where('id_Gol', $mahasiswa->id_Gol)
+                                   ->first();
             
-            if ($request->expectsJson()) {
-                return response()->json(['message' => $message], 400);
+            if (!$jadwal) {
+                $message = 'Mata kuliah belum dijadwalkan untuk golongan Anda.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 400);
+                }
+                
+                return redirect()->back()->with('error', $message);
             }
             
-            return redirect()->back()->with('error', $message);
-        }
-        
-        // Tambahkan ke KRS
-        try {
-            Krs::create([
-                'NIM' => $mahasiswa->NIM,
-                'Kode_mk' => $request->Kode_mk
-            ]);
-            
-            $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil ditambahkan ke KRS.";
-            
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $message,
-                    'data' => [
-                        'kode_mk' => $matakuliah->Kode_mk,
-                        'nama_mk' => $matakuliah->Nama_mk,
-                        'sks' => $matakuliah->sks
-                    ]
+            // Tambahkan ke KRS
+            try {
+                Krs::create([
+                    'NIM' => $mahasiswa->NIM,
+                    'Kode_mk' => $request->Kode_mk
                 ]);
+                
+                $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil ditambahkan ke KRS.";
+                
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => $message,
+                        'data' => [
+                            'kode_mk' => $matakuliah->Kode_mk,
+                            'nama_mk' => $matakuliah->Nama_mk,
+                            'sks' => $matakuliah->sks
+                        ]
+                    ]);
+                }
+                
+                return redirect()->back()->with('success', $message);
+                
+            } catch (\Exception $e) {
+                Log::error('KRS Store Error: ' . $e->getMessage(), [
+                    'nim' => $mahasiswa->NIM ?? 'unknown',
+                    'kode_mk' => $request->Kode_mk ?? 'unknown',
+                    'exception' => $e->getTraceAsString(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]);
+                
+                $message = 'Terjadi kesalahan saat menambahkan mata kuliah ke KRS.';
+                
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => $message,
+                        'error' => config('app.debug') ? $e->getMessage() : null
+                    ], 500);
+                }
+                
+                return redirect()->back()->with('error', $message);
+            } catch (ValidationException $e) {
+                Log::error('KRS Store Validation Error', [
+                    'errors' => $e->errors(),
+                    'request_data' => $request->all(),
+                    'nim' => $mahasiswa->NIM ?? 'unknown'
+                ]);
+                
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Data yang dikirim tidak valid.',
+                        'errors' => $e->errors()
+                    ], 422);
+                }
+                
+                return redirect()->back()->withErrors($e->errors())->withInput();
             }
-            
-            return redirect()->back()->with('success', $message);
-            
-        } catch (\Exception $e) {
-            Log::error('KRS Store Error: ' . $e->getMessage(), [
-                'nim' => $mahasiswa->NIM ?? 'unknown',
-                'kode_mk' => $request->Kode_mk ?? 'unknown',
-                'exception' => $e->getTraceAsString(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]);
-            
-            $message = 'Terjadi kesalahan saat menambahkan mata kuliah ke KRS.';
-            
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => $message,
-                    'error' => config('app.debug') ? $e->getMessage() : null
-                ], 500);
-            }
-            
-            return redirect()->back()->with('error', $message);
         } catch (ValidationException $e) {
             Log::error('KRS Store Validation Error', [
                 'errors' => $e->errors(),
