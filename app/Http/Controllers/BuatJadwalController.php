@@ -8,6 +8,7 @@ use App\Models\Matakuliah;
 use App\Models\Ruang;
 use App\Models\Golongan;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class BuatJadwalController extends Controller
 {
@@ -41,7 +42,8 @@ class BuatJadwalController extends Controller
             $semesterList[$i] = "Semester $i";
         }
 
-        return view('buat-jadwal.index', compact('jadwal', 'matakuliah', 'ruang', 'golongan', 'semesterList', 'semesterFilter'));
+        $userData = Auth::guard('admin')->user();
+        return view('buat-jadwal.index', compact('jadwal', 'matakuliah', 'ruang', 'golongan', 'semesterList', 'semesterFilter', 'userData'));
     }
 
     /**

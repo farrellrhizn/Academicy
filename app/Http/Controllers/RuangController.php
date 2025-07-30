@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ruang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,8 @@ class RuangController extends Controller
     public function index()
     {
         $ruang = Ruang::orderBy('nama_ruang')->get();
-        return view('ruang.index', compact('ruang'));
+        $userData = Auth::guard('admin')->user();
+        return view('ruang.index', compact('ruang', 'userData'));
     }
 
     /**

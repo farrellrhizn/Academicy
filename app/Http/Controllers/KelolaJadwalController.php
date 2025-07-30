@@ -10,6 +10,7 @@ use App\Models\Golongan;
 use App\Models\Dosen; // 1. Tambahkan model Dosen
 use App\Models\Pengampu; // 2. Tambahkan model Pengampu
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class KelolaJadwalController extends Controller
 {
@@ -45,7 +46,8 @@ class KelolaJadwalController extends Controller
         }
 
         // 4. Kirim data dosen ke view
-        return view('kelola-jadwal.index', compact('jadwal', 'matakuliah', 'ruang', 'golongan', 'dosen', 'semesterList', 'semesterFilter'));
+        $userData = Auth::guard('admin')->user();
+        return view('kelola-jadwal.index', compact('jadwal', 'matakuliah', 'ruang', 'golongan', 'dosen', 'semesterList', 'semesterFilter', 'userData'));
     }
 
     /**

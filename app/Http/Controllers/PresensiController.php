@@ -58,6 +58,7 @@ class PresensiController extends Controller
             'mahasiswa' => $mahasiswa,
             'selectedMkName' => $selectedMkName,
             'existingPresensi' => $existingPresensi,
+            'dosen' => $dosen,
         ]);
     }
 

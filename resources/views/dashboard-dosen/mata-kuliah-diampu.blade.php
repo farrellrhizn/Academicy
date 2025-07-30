@@ -92,7 +92,11 @@
 							data-toggle="dropdown"
 						>
 							<span class="user-icon">
-								<img src="../../bootstrap/vendors/images/photo1.jpg" alt="" />
+								@if($dosen->profile_photo)
+									<img src="{{ asset('storage/profile_photos/' . $dosen->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
+								@else
+									<i class="dw dw-user1"></i>
+								@endif
 							</span>
 							<span class="user-name">{{ $dosen->Nama ?? 'Dosen' }}</span>
 						</a>

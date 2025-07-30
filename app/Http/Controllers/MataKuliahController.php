@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MataKuliah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class MataKuliahController extends Controller
@@ -13,7 +14,8 @@ class MataKuliahController extends Controller
     public function index()
     {
         $matakuliah = MataKuliah::orderBy('semester')->orderBy('Kode_mk')->get();
-        return view('matakuliah.index', compact('matakuliah'));
+        $userData = Auth::guard('admin')->user();
+        return view('matakuliah.index', compact('matakuliah', 'userData'));
     }
 
     // Simpan data baru (CREATE)
@@ -97,6 +99,7 @@ class MataKuliahController extends Controller
             $matakuliah = MataKuliah::orderBy('semester')->orderBy('Kode_mk')->get();
         }
 
-        return view('matakuliah.index', compact('matakuliah', 'semester'));
+        $userData = Auth::guard('admin')->user();
+        return view('matakuliah.index', compact('matakuliah', 'semester', 'userData'));
     }
 }

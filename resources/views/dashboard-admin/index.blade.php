@@ -36,9 +36,9 @@
             <div class="user-info-dropdown">
                 <div class="dropdown">
                     <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                        <span class="user-icon">
-                            <img src="{{ asset('bootstrap/vendors/images/photo1.jpg') }}" alt="" />
-                        </span>
+                        							<span class="user-icon">
+								<i class="dw dw-user1"></i>
+							</span>
                         <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
