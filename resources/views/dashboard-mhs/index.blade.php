@@ -7,19 +7,19 @@
 		<link
 			rel="apple-touch-icon"
 			sizes="180x180"
-			href="../../bootstrap/vendors/images/apple-touch-icon.png"
+			href="{{ asset('bootstrap/vendors/images/apple-touch-icon.png') }}"
 		/>
 		<link
 			rel="icon"
 			type="image/png"
 			sizes="32x32"
-			href="../../bootstrap/vendors/images/favicon-32x32.png"
+			href="{{ asset('bootstrap/vendors/images/favicon-32x32.png') }}"
 		/>
 		<link
 			rel="icon"
 			type="image/png"
 			sizes="16x16"
-			href="../../bootstrap/vendors/images/favicon-16x16.png"
+			href="{{ asset('bootstrap/vendors/images/favicon-16x16.png') }}"
 		/>
 
 		<meta
@@ -31,30 +31,30 @@
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
-		<link rel="stylesheet" type="text/css" href="../../bootstrap/vendors/styles/core.css" />
+		<link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/core.css') }}" />
 		<link
 			rel="stylesheet"
 			type="text/css"
-			href="../../bootstrap/vendors/styles/icon-font.min.css"
+			href="{{ asset('bootstrap/vendors/styles/icon-font.min.css') }}"
 		/>
 		<link
 			rel="stylesheet"
 			type="text/css"
-			href="../../bootstrap/src/plugins/datatables/css/dataTables.bootstrap4.min.css"
+			href="{{ asset('bootstrap/src/plugins/datatables/css/dataTables.bootstrap4.min.css') }}"
 		/>
 		<link
 			rel="stylesheet"
 			type="text/css"
-			href="../../bootstrap/src/plugins/datatables/css/responsive.bootstrap4.min.css"
+			href="{{ asset('bootstrap/src/plugins/datatables/css/responsive.bootstrap4.min.css') }}"
 		/>
-		<link rel="stylesheet" type="text/css" href="../../bootstrap/vendors/styles/style.css" />
+		<link rel="stylesheet" type="text/css" href="{{ asset('bootstrap/vendors/styles/style.css') }}" />
 
 	</head>
 	<body>
 		<div class="pre-loader">
 			<div class="pre-loader-box">
 				<div class="loader-logo">
-					<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+					<img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" />
 				</div>
 				<div class="loader-progress" id="progress_div">
 					<div class="bar" id="bar1"></div>
@@ -85,7 +85,7 @@
 								<ul>
 									<li>
 										<a href="#">
-											<img src="../../bootstrap/vendors/images/img.jpg" alt="" />
+											<img src="{{ asset('bootstrap/vendors/images/img.jpg') }}" alt="" />
 											<h3>Info Akademik</h3>
 											<p>
 												Batas akhir pengisian KRS adalah tanggal 30 Agustus 2025.
@@ -106,9 +106,9 @@
 							data-toggle="dropdown"
 						>
 							<span class="user-icon">
-								<img src="../../bootstrap/vendors/images/photo1.jpg" alt="" />
+								<img src="{{ asset('bootstrap/vendors/images/photo1.jpg') }}" alt="" />
 							</span>
-							<span class="user-name">[Nama Mahasiswa]</span>
+							<span class="user-name">{{ $userData->Nama ?? 'Mahasiswa' }}</span>
 						</a>
 						<div
 							class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
@@ -130,10 +130,10 @@
 		
 		<div class="left-side-bar">
 			<div class="brand-logo">
-				<a href="index.html">
-					<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
+				<a href="{{ route('mahasiswa.dashboard') }}">
+					<img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
 					<img
-						src="../../bootstrap/vendors/images/deskapp-logo-white.svg"
+						src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}"
 						alt=""
 						class="light-logo"
 					/>
@@ -176,12 +176,12 @@
 				<div class="card-box pd-20 height-100-p mb-30">
 					<div class="row align-items-center">
 						<div class="col-md-4">
-							<img src="../../bootstrap/vendors/images/banner-img.png" alt="" />
+							<img src="{{ asset('bootstrap/vendors/images/banner-img.png') }}" alt="" />
 						</div>
 						<div class="col-md-8">
 							<h4 class="font-20 weight-500 mb-10 text-capitalize">
 								Selamat Datang,
-								<div class="weight-600 font-30 text-blue">[Nama Mahasiswa]!</div>
+								<div class="weight-600 font-30 text-blue">{{ $userData->Nama ?? 'Mahasiswa' }}!</div>
 							</h4>
 							<p class="font-18 max-width-600">
 								Selamat datang di Sistem Informasi Akademik. Di sini Anda dapat mengelola semua kegiatan akademik Anda dengan mudah.
@@ -198,7 +198,7 @@
 									<div id="chart"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0">3.58</div>
+									<div class="h4 mb-0">{{ $ipk }}</div>
 									<div class="weight-600 font-14">IPK Kumulatif</div>
 								</div>
 							</div>
@@ -211,7 +211,7 @@
 									<div id="chart2"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0">98</div>
+									<div class="h4 mb-0">{{ $totalSks }}</div>
 									<div class="weight-600 font-14">Total SKS Ditempuh</div>
 								</div>
 							</div>
@@ -224,7 +224,7 @@
 									<div id="chart3"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0">7</div>
+									<div class="h4 mb-0">{{ $mataKuliahSemesterIni }}</div>
 									<div class="weight-600 font-14">Mata Kuliah Semester Ini</div>
 								</div>
 							</div>
@@ -237,7 +237,7 @@
 									<div id="chart4"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0 text-success">Aktif</div>
+									<div class="h4 mb-0 {{ $statusClass }}">{{ $statusAkademik }}</div>
 									<div class="weight-600 font-14">Status Akademik</div>
 								</div>
 							</div>
@@ -248,7 +248,7 @@
 				<div class="row">
 					<div class="col-xl-8 mb-30">
 						<div class="card-box height-100-p pd-20">
-							<h2 class="h4 mb-20">Jadwal Kuliah Hari Ini (Senin, 28 Juli 2025)</h2>
+							<h2 class="h4 mb-20">Jadwal Kuliah Hari Ini ({{ ucfirst(\Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y')) }})</h2>
 							<table class="table table-striped">
 								<thead>
 									<tr>
@@ -259,24 +259,24 @@
 									</tr>
 								</thead>
 								<tbody>
+									@forelse($jadwalHariIni as $jadwal)
 									<tr>
-										<td>08:00 - 09:40</td>
-										<td>Dasar Pemrograman</td>
-										<td>Lab Komputer 1</td>
-										<td>Dr. Budi Santoso, M.Kom</td>
+										<td>{{ $jadwal->waktu }}</td>
+										<td>{{ $jadwal->matakuliah->Nama_mk ?? 'N/A' }}</td>
+										<td>{{ $jadwal->ruang->nama_ruang ?? 'N/A' }}</td>
+										<td>
+											@if($jadwal->matakuliah && $jadwal->matakuliah->pengampu->isNotEmpty())
+												{{ $jadwal->matakuliah->pengampu->first()->dosen->Nama ?? 'N/A' }}
+											@else
+												N/A
+											@endif
+										</td>
 									</tr>
+									@empty
 									<tr>
-										<td>10:00 - 11:40</td>
-										<td>Kalkulus I</td>
-										<td>Gedung A R.101</td>
-										<td>Siti Aminah, M.Sc</td>
+										<td colspan="4" class="text-center">Tidak ada jadwal hari ini</td>
 									</tr>
-									<tr>
-										<td>13:00 - 14:40</td>
-										<td>Pendidikan Kewarganegaraan</td>
-										<td>Gedung B R.203</td>
-										<td>Prof. Dr. Agus Wijaya</td>
-									</tr>
+									@endforelse
 								</tbody>
 							</table>
 						</div>
@@ -315,11 +315,11 @@
 			</div>
 		</div>
 
-		<script src="../../bootstrap/vendors/scripts/core.js"></script>
-		<script src="../../bootstrap/vendors/scripts/script.min.js"></script>
-		<script src="../../bootstrap/vendors/scripts/process.js"></script>
-		<script src="../../bootstrap/vendors/scripts/layout-settings.js"></script>
-		<script src="../../bootstrap/src/plugins/apexcharts/apexcharts.min.js"></script>
-		<script src="../../bootstrap/vendors/scripts/dashboard.js"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/core.js') }}"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/script.min.js') }}"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/process.js') }}"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/layout-settings.js') }}"></script>
+		<script src="{{ asset('bootstrap/src/plugins/apexcharts/apexcharts.min.js') }}"></script>
+		<script src="{{ asset('bootstrap/vendors/scripts/dashboard.js') }}"></script>
 	</body>
 </html>
