@@ -82,8 +82,8 @@
                 <div class="dropdown">
                     <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
                         							<span class="user-icon">
-								@if($dosen->profile_photo)
-									<img src="{{ asset('storage/profile_photos/' . $dosen->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
+								                        @if($dosen->profile_photo)
+                            <img src="{{ asset('storage/profile_photos/' . $dosen->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
 								@else
 									<i class="dw dw-user1"></i>
 								@endif
