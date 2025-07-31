@@ -107,8 +107,8 @@
 							data-toggle="dropdown"
 						>
 							<span class="user-icon">
-								@if($userData->profile_photo)
-									<img src="{{ asset('storage/profile_photos/' . $userData->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
+								                        @if($userData->profile_photo)
+                            <img src="{{ asset('storage/profile_photos/' . $userData->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
 								@else
 									<i class="dw dw-user1"></i>
 								@endif
