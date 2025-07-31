@@ -84,15 +84,23 @@
 						<div class="dropdown-menu dropdown-menu-right">
 							<div class="notification-list mx-h-350 customscroll">
 								<ul>
+									@forelse($dynamicAnnouncements->take(3) as $announcement)
 									<li>
 										<a href="#">
 											<img src="{{ asset('bootstrap/vendors/images/img.jpg') }}" alt="" />
-											<h3>Info Akademik</h3>
-											<p>
-												Batas akhir pengisian KRS adalah tanggal 30 Agustus 2025.
-											</p>
+											<h3>{{ $announcement['title'] }}</h3>
+											<p>{{ $announcement['message'] }}</p>
 										</a>
 									</li>
+									@empty
+									<li>
+										<a href="#">
+											<img src="{{ asset('bootstrap/vendors/images/img.jpg') }}" alt="" />
+											<h3>Sistem Akademik</h3>
+											<p>Tidak ada notifikasi baru saat ini.</p>
+										</a>
+									</li>
+									@endforelse
 								</ul>
 							</div>
 						</div>
@@ -229,8 +237,9 @@
 									<div id="chart3"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0">{{ $mataKuliahSemesterIni }}</div>
-									<div class="weight-600 font-14">Mata Kuliah Semester Ini</div>
+									<div class="h4 mb-0">{{ $attendanceStats['percentage'] }}%</div>
+									<div class="weight-600 font-14">Kehadiran</div>
+									<div class="small text-muted">{{ $attendanceStats['hadir'] }}/{{ $attendanceStats['total'] }} Hadir</div>
 								</div>
 							</div>
 						</div>
@@ -244,6 +253,65 @@
 								<div class="widget-data">
 									<div class="h4 mb-0 {{ $statusClass }}">{{ $statusAkademik }}</div>
 									<div class="weight-600 font-14">Status Akademik</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Row kedua untuk informasi tambahan -->
+				<div class="row">
+					<div class="col-xl-3 mb-30">
+						<div class="card-box height-100-p widget-style1">
+							<div class="d-flex flex-wrap align-items-center">
+								<div class="progress-data">
+									<div id="chart5"></div>
+								</div>
+								<div class="widget-data">
+									<div class="h4 mb-0">{{ $mataKuliahSemesterIni }}</div>
+									<div class="weight-600 font-14">Mata Kuliah Semester {{ $userData->Semester }}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 mb-30">
+						<div class="card-box height-100-p widget-style1">
+							<div class="d-flex flex-wrap align-items-center">
+								<div class="progress-data">
+									<div id="chart6"></div>
+								</div>
+								<div class="widget-data">
+									<div class="h4 mb-0">{{ $semesterProgress['progress_percentage'] }}%</div>
+									<div class="weight-600 font-14">Progress Semester</div>
+									<div class="small text-muted">{{ $semesterProgress['completed'] }}/{{ $semesterProgress['taken'] }} Selesai</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 mb-30">
+						<div class="card-box height-100-p widget-style1">
+							<div class="d-flex flex-wrap align-items-center">
+								<div class="progress-data">
+									<div id="chart7"></div>
+								</div>
+								<div class="widget-data">
+									<div class="h4 mb-0">{{ $attendanceStats['alpa'] }}</div>
+									<div class="weight-600 font-14">Alfa</div>
+									<div class="small text-muted">Total ketidakhadiran</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 mb-30">
+						<div class="card-box height-100-p widget-style1">
+							<div class="d-flex flex-wrap align-items-center">
+								<div class="progress-data">
+									<div id="chart8"></div>
+								</div>
+								<div class="widget-data">
+									<div class="h4 mb-0">{{ $recentGrades->count() }}</div>
+									<div class="weight-600 font-14">Nilai Terbaru</div>
+									<div class="small text-muted">Mata kuliah dinilai</div>
 								</div>
 							</div>
 						</div>
@@ -290,29 +358,72 @@
 						<div class="card-box height-100-p pd-20">
 							<h2 class="h4 mb-20">Pengumuman Akademik 📢</h2>
 							<div class="list-group">
+								@forelse($dynamicAnnouncements as $announcement)
 								<a href="#" class="list-group-item list-group-item-action">
 									<div class="d-flex w-100 justify-content-between">
-										<h5 class="mb-1">Batas Akhir KRS</h5>
-										<small>3 hari lagi</small>
+										<h5 class="mb-1">{{ $announcement['title'] }}</h5>
+										<small class="badge badge-{{ $announcement['type'] == 'warning' ? 'warning' : ($announcement['type'] == 'success' ? 'success' : 'info') }}">{{ $announcement['time'] }}</small>
 									</div>
-									<p class="mb-1">Pengisian KRS semester ganjil akan ditutup pada 30 Juli 2025.</p>
+									<p class="mb-1">{{ $announcement['message'] }}</p>
 								</a>
-								<a href="#" class="list-group-item list-group-item-action">
-									<div class="d-flex w-100 justify-content-between">
-										<h5 class="mb-1">Jadwal UTS</h5>
-									</div>
-									<p class="mb-1">Jadwal Ujian Tengah Semester telah dirilis. Silakan cek di menu Jadwal.</p>
-								</a>
-								<a href="#" class="list-group-item list-group-item-action">
-									<div class="d-flex w-100 justify-content-between">
-										<h5 class="mb-1">Beasiswa PPA</h5>
-									</div>
-									<p class="mb-1">Pendaftaran beasiswa Peningkatan Prestasi Akademik dibuka.</p>
-								</a>
+								@empty
+								<div class="list-group-item">
+									<p class="mb-0 text-muted">Tidak ada pengumuman saat ini.</p>
+								</div>
+								@endforelse
 							</div>
 						</div>
 					</div>
 				</div>
+
+				<!-- Section untuk nilai terbaru -->
+				@if($recentGrades->count() > 0)
+				<div class="row">
+					<div class="col-xl-12 mb-30">
+						<div class="card-box pd-20">
+							<h2 class="h4 mb-20">Nilai Terbaru 📊</h2>
+							<div class="table-responsive">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>Mata Kuliah</th>
+											<th>SKS</th>
+											<th>Nilai</th>
+											<th>Grade</th>
+											<th>Status</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach($recentGrades as $grade)
+										<tr>
+											<td>{{ $grade->matakuliah->Nama_mk ?? 'N/A' }}</td>
+											<td>{{ $grade->matakuliah->sks ?? 'N/A' }}</td>
+											<td>
+												<span class="badge badge-{{ $grade->Nilai >= 3.0 ? 'success' : ($grade->Nilai >= 2.0 ? 'warning' : 'danger') }}">
+													{{ number_format($grade->Nilai, 2) }}
+												</span>
+											</td>
+											<td>
+												<span class="badge badge-{{ $grade->Grade == 'A' || $grade->Grade == 'B' ? 'success' : ($grade->Grade == 'C' ? 'warning' : 'danger') }}">
+													{{ $grade->Grade ?? '-' }}
+												</span>
+											</td>
+											<td>
+												@if($grade->Nilai >= 2.0)
+													<span class="badge badge-success">Lulus</span>
+												@else
+													<span class="badge badge-danger">Tidak Lulus</span>
+												@endif
+											</td>
+										</tr>
+										@endforeach
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				@endif
 				
 				<div class="footer-wrap pd-20 mb-20 card-box">
 					Sistem Informasi Akademik - © 2025
