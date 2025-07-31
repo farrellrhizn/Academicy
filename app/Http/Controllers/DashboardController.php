@@ -113,13 +113,13 @@ class DashboardController extends Controller
         // Ambil data KRS mahasiswa dengan relasi
         $krsData = $this->getKrsData($nimMahasiswa);
         
-        // Hitung statistik akademik dasar
-        $academicStats = $this->calculateAcademicStats($krsData, $userData);
+        // Hitung statistik akademik dasar untuk informasi akademik
+        $academicStats = $this->calculateBasicAcademicStats($krsData, $userData);
         
-        // Ambil data tambahan secara paralel untuk performa yang lebih baik
-        $additionalData = $this->getAdditionalDashboardData($userData, $nimMahasiswa);
+        // Ambil hanya data yang diperlukan untuk dashboard mahasiswa
+        $dashboardData = $this->getEssentialDashboardData($userData, $nimMahasiswa);
 
-        return array_merge($academicStats, $additionalData);
+        return array_merge($academicStats, $dashboardData);
     }
 
     /**
@@ -135,33 +135,24 @@ class DashboardController extends Controller
     }
 
     /**
-     * Menghitung statistik akademik dasar
+     * Menghitung statistik akademik dasar untuk informasi akademik saja
      */
-    private function calculateAcademicStats(Collection $krsData, Mahasiswa $userData): array
+    private function calculateBasicAcademicStats(Collection $krsData, Mahasiswa $userData): array
     {
-        // Hitung total SKS dan statistik lainnya
+        // Hitung total SKS
         $totalSks = $krsData->sum(function($krs) {
             return $krs->matakuliah->sks ?? 0;
         });
 
         $totalMataKuliah = $krsData->count();
-        $rataRataSks = $totalMataKuliah > 0 ? round($totalSks / $totalMataKuliah, 1) : 0;
         
-        // Mata kuliah semester ini
-        $mataKuliahSemesterIni = $krsData->filter(function($krs) use ($userData) {
-            return $krs->matakuliah && $krs->matakuliah->semester == $userData->Semester;
-        })->count();
-
         // Tentukan status akademik
         $statusAkademik = $this->determineAcademicStatus($totalSks);
 
         return [
             'userData' => $userData,
-            'ipk' => 0, // Set IPK ke 0 karena tidak ada data nilai
             'totalSks' => $totalSks,
             'totalMataKuliah' => $totalMataKuliah,
-            'rataRataSks' => $rataRataSks,
-            'mataKuliahSemesterIni' => $mataKuliahSemesterIni,
             'statusAkademik' => $statusAkademik['label'],
             'statusClass' => $statusAkademik['class']
         ];
@@ -182,15 +173,12 @@ class DashboardController extends Controller
     }
 
     /**
-     * Mengambil data tambahan untuk dashboard
+     * Mengambil data penting untuk dashboard mahasiswa
      */
-    private function getAdditionalDashboardData(Mahasiswa $userData, string $nimMahasiswa): array
+    private function getEssentialDashboardData(Mahasiswa $userData, string $nimMahasiswa): array
     {
         return [
             'jadwalHariIni' => $this->getJadwalHariIni($userData),
-            'attendanceStats' => $this->getAttendanceStats($nimMahasiswa),
-            'recentCourses' => $this->getRecentCourses($nimMahasiswa),
-            'semesterProgress' => $this->getSemesterProgress($nimMahasiswa, $userData->Semester),
             'dynamicAnnouncements' => $this->getDynamicAnnouncements($userData)
         ];
     }
@@ -472,23 +460,11 @@ class DashboardController extends Controller
         
         return view('dashboard-mhs.index', [
             'userData' => $userData,
-            'ipk' => 0,
             'totalSks' => 0,
             'totalMataKuliah' => 0,
-            'rataRataSks' => 0,
-            'mataKuliahSemesterIni' => 0,
             'statusAkademik' => 'Data tidak tersedia',
             'statusClass' => 'text-muted',
             'jadwalHariIni' => collect(),
-            'attendanceStats' => [
-                'total' => 0, 'hadir' => 0, 'izin' => 0, 
-                'alpa' => 0, 'percentage' => 0
-            ],
-            'recentCourses' => collect(),
-            'semesterProgress' => [
-                'total_available' => 0, 'taken' => 0, 
-                'completed' => 0, 'progress_percentage' => 0
-            ],
             'dynamicAnnouncements' => [[
                 'title' => 'Sistem Informasi Akademik',
                 'message' => 'Dashboard sedang dalam perbaikan. Silakan refresh halaman.',
