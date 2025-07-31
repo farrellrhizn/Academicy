@@ -392,7 +392,7 @@
                     <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
                         <span class="user-icon">
                             @if($dosen->profile_photo)
-                                <img src="{{ asset('storage/profile_photos/' . $dosen->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 52px; height: 52px; object-fit: cover;">
+                                <img src="{{ asset('storage/profile_photos/' . $dosen->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
                             @else
                                 <i class="dw dw-user1"></i>
                             @endif
@@ -781,7 +781,7 @@
                                 if (navbarImg.length) {
                                     navbarImg.attr('src', response.profile_photo_url);
                                 } else {
-                                    $('.user-icon').html('<img src="' + response.profile_photo_url + '" alt="Profile" class="rounded-circle" style="width: 52px; height: 52px; object-fit: cover;">');
+                                    $('.user-icon').html('<img src="' + response.profile_photo_url + '" alt="Profile" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">');
                                 }
                             }
                             
