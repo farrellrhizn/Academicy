@@ -97,12 +97,11 @@ class DashboardController extends Controller
     }
 
     /**
-     * Mendapatkan nilai terbaru mahasiswa
+     * Mendapatkan mata kuliah terbaru yang diambil mahasiswa
      */
-    private function getRecentGrades($nimMahasiswa, $limit = 5)
+    private function getRecentCourses($nimMahasiswa, $limit = 5)
     {
         return Krs::where('NIM', $nimMahasiswa)
-            ->whereNotNull('Nilai')
             ->with(['matakuliah'])
             ->orderBy('updated_at', 'desc')
             ->take($limit)
@@ -124,15 +123,11 @@ class DashboardController extends Controller
             })
             ->count();
         
-        // Mata kuliah yang sudah diselesaikan (ada nilai)
-        $mataKuliahSelesai = Krs::where('NIM', $nimMahasiswa)
-            ->whereNotNull('Nilai')
-            ->whereHas('matakuliah', function($query) use ($semester) {
-                $query->where('semester', $semester);
-            })
-            ->count();
+        // Untuk sementara, anggap semua mata kuliah yang diambil sebagai "sedang berlangsung"
+        // karena tidak ada kolom nilai untuk menentukan mata kuliah yang selesai
+        $mataKuliahSelesai = $mataKuliahDiambil; // Menggunakan jumlah yang diambil sebagai yang sedang berlangsung
         
-        $progressPercentage = $mataKuliahDiambil > 0 ? round($mataKuliahSelesai / $mataKuliahDiambil * 100, 1) : 0;
+        $progressPercentage = $totalMataKuliahSemester > 0 ? round($mataKuliahDiambil / $totalMataKuliahSemester * 100, 1) : 0;
         
         return [
             'total_available' => $totalMataKuliahSemester,
@@ -181,26 +176,26 @@ class DashboardController extends Controller
             ];
         }
         
-        // Cek IPK untuk rekomendasi beasiswa
+        // Cek total SKS untuk informasi akademik
         $krsData = Krs::where('NIM', $userData->NIM)->with('matakuliah')->get();
-        $totalNilai = 0;
-        $totalSksBerNilai = 0;
+        $totalSks = $krsData->sum(function($krs) {
+            return $krs->matakuliah->sks ?? 0;
+        });
         
-        foreach($krsData as $krs) {
-            if($krs->Nilai !== null && $krs->matakuliah) {
-                $totalNilai += $krs->Nilai * $krs->matakuliah->sks;
-                $totalSksBerNilai += $krs->matakuliah->sks;
-            }
-        }
-        
-        $ipk = $totalSksBerNilai > 0 ? $totalNilai / $totalSksBerNilai : 0;
-        
-        if ($ipk >= 3.5) {
+        // Berikan informasi berdasarkan total SKS yang diambil
+        if ($totalSks >= 20) {
             $announcements[] = [
-                'title' => 'Rekomendasi Beasiswa',
-                'message' => 'IPK Anda memenuhi syarat untuk beasiswa prestasi. Silakan hubungi bagian akademik.',
+                'title' => 'Beban Akademik Optimal',
+                'message' => 'Anda telah mengambil SKS yang cukup untuk semester ini. Pertahankan konsistensi belajar!',
                 'time' => 'Info',
                 'type' => 'success'
+            ];
+        } elseif ($totalSks >= 12) {
+            $announcements[] = [
+                'title' => 'Beban Akademik Normal',
+                'message' => 'Beban SKS Anda normal. Manfaatkan waktu untuk fokus pada setiap mata kuliah.',
+                'time' => 'Info',
+                'type' => 'info'
             ];
         }
         
@@ -237,16 +232,11 @@ public function showDashboard()
             return $krs->matakuliah->sks ?? 0;
         });
 
-        // Hitung IPK (berdasarkan nilai yang ada)
-        $totalNilai = 0;
-        $totalSksBerNilai = 0;
-        foreach($krsData as $krs) {
-            if($krs->Nilai !== null && $krs->matakuliah) {
-                $totalNilai += $krs->Nilai * $krs->matakuliah->sks;
-                $totalSksBerNilai += $krs->matakuliah->sks;
-            }
-        }
-        $ipk = $totalSksBerNilai > 0 ? round($totalNilai / $totalSksBerNilai, 2) : 0;
+        // Karena tidak ada kolom nilai, tampilkan informasi akademik lain
+        // Misalnya rata-rata SKS per mata kuliah atau total mata kuliah diambil
+        $totalMataKuliah = $krsData->count();
+        $rataRataSks = $totalMataKuliah > 0 ? round($totalSks / $totalMataKuliah, 1) : 0;
+        $ipk = 0; // Set IPK ke 0 karena tidak ada data nilai
 
         // Mata kuliah semester ini (semester aktif mahasiswa)
         $mataKuliahSemesterIni = Krs::where('NIM', $nimMahasiswa)
@@ -256,15 +246,18 @@ public function showDashboard()
             ->with('matakuliah')
             ->count();
 
-        // Status akademik (berdasarkan IPK)
-        if($ipk >= 3.0) {
-            $statusAkademik = 'Aktif';
+        // Status akademik (berdasarkan jumlah SKS yang diambil)
+        if($totalSks >= 18) {
+            $statusAkademik = 'Aktif - Beban Penuh';
             $statusClass = 'text-success';
-        } elseif($ipk >= 2.0) {
-            $statusAkademik = 'Peringatan';
+        } elseif($totalSks >= 12) {
+            $statusAkademik = 'Aktif - Beban Normal';
+            $statusClass = 'text-success';
+        } elseif($totalSks >= 6) {
+            $statusAkademik = 'Aktif - Beban Ringan';
             $statusClass = 'text-warning';
         } else {
-            $statusAkademik = 'Probasi';
+            $statusAkademik = 'Belum Mengambil SKS';
             $statusClass = 'text-danger';
         }
 
@@ -273,7 +266,7 @@ public function showDashboard()
 
         // Ambil data tambahan untuk dashboard yang lebih informatif
         $attendanceStats = $this->getAttendanceStats($nimMahasiswa);
-        $recentGrades = $this->getRecentGrades($nimMahasiswa);
+        $recentCourses = $this->getRecentCourses($nimMahasiswa);
         $semesterProgress = $this->getSemesterProgress($nimMahasiswa, $userData->Semester);
         $dynamicAnnouncements = $this->getDynamicAnnouncements($userData);
 
@@ -287,9 +280,11 @@ public function showDashboard()
             'statusClass',
             'jadwalHariIni',
             'attendanceStats',
-            'recentGrades', 
+            'recentCourses', 
             'semesterProgress',
-            'dynamicAnnouncements'
+            'dynamicAnnouncements',
+            'totalMataKuliah',
+            'rataRataSks'
         ));
     
 }

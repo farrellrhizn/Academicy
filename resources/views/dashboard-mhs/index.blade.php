@@ -309,9 +309,9 @@
 									<div id="chart8"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0">{{ $recentGrades->count() }}</div>
-									<div class="weight-600 font-14">Nilai Terbaru</div>
-									<div class="small text-muted">Mata kuliah dinilai</div>
+									<div class="h4 mb-0">{{ $recentCourses->count() }}</div>
+									<div class="weight-600 font-14">Mata Kuliah Diambil</div>
+									<div class="small text-muted">Total mata kuliah</div>
 								</div>
 							</div>
 						</div>
@@ -376,44 +376,40 @@
 					</div>
 				</div>
 
-				<!-- Section untuk nilai terbaru -->
-				@if($recentGrades->count() > 0)
+				<!-- Section untuk mata kuliah terbaru -->
+				@if($recentCourses->count() > 0)
 				<div class="row">
 					<div class="col-xl-12 mb-30">
 						<div class="card-box pd-20">
-							<h2 class="h4 mb-20">Nilai Terbaru 📊</h2>
+							<h2 class="h4 mb-20">Mata Kuliah Diambil 📚</h2>
 							<div class="table-responsive">
 								<table class="table table-striped">
 									<thead>
 										<tr>
+											<th>Kode MK</th>
 											<th>Mata Kuliah</th>
 											<th>SKS</th>
-											<th>Nilai</th>
-											<th>Grade</th>
+											<th>Semester</th>
 											<th>Status</th>
 										</tr>
 									</thead>
 									<tbody>
-										@foreach($recentGrades as $grade)
+										@foreach($recentCourses as $course)
 										<tr>
-											<td>{{ $grade->matakuliah->Nama_mk ?? 'N/A' }}</td>
-											<td>{{ $grade->matakuliah->sks ?? 'N/A' }}</td>
+											<td><strong>{{ $course->Kode_mk }}</strong></td>
+											<td>{{ $course->matakuliah->Nama_mk ?? 'N/A' }}</td>
 											<td>
-												<span class="badge badge-{{ $grade->Nilai >= 3.0 ? 'success' : ($grade->Nilai >= 2.0 ? 'warning' : 'danger') }}">
-													{{ number_format($grade->Nilai, 2) }}
+												<span class="badge badge-info">
+													{{ $course->matakuliah->sks ?? 'N/A' }} SKS
 												</span>
 											</td>
 											<td>
-												<span class="badge badge-{{ $grade->Grade == 'A' || $grade->Grade == 'B' ? 'success' : ($grade->Grade == 'C' ? 'warning' : 'danger') }}">
-													{{ $grade->Grade ?? '-' }}
+												<span class="badge badge-secondary">
+													Semester {{ $course->matakuliah->semester ?? '-' }}
 												</span>
 											</td>
 											<td>
-												@if($grade->Nilai >= 2.0)
-													<span class="badge badge-success">Lulus</span>
-												@else
-													<span class="badge badge-danger">Tidak Lulus</span>
-												@endif
+												<span class="badge badge-primary">Sedang Berlangsung</span>
 											</td>
 										</tr>
 										@endforeach
