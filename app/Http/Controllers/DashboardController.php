@@ -35,41 +35,46 @@ class DashboardController extends Controller
      */
     private function getJadwalHariIni($mahasiswa)
     {
-        $hariIni = Carbon::now()->format('l'); // Format: Monday, Tuesday, etc.
-        
-        // Konversi ke format Indonesia yang digunakan di database
-        $hariIndonesia = [
-            'Monday' => 'Senin',
-            'Tuesday' => 'Selasa',
-            'Wednesday' => 'Rabu', 
-            'Thursday' => 'Kamis',
-            'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu',
-            'Sunday' => 'Minggu'
-        ];
-        
-        $hariIndo = $hariIndonesia[$hariIni] ?? $hariIni;
-        
-        // Ambil jadwal berdasarkan mata kuliah yang diambil mahasiswa (KRS)
-        $jadwalHariIni = JadwalAkademik::whereHas('matakuliah.krs', function($query) use ($mahasiswa) {
-                $query->where('NIM', $mahasiswa->NIM);
-            })
-            ->where('id_Gol', $mahasiswa->id_Gol)
-            ->where(function($query) use ($hariIni, $hariIndo) {
-                // Cari berdasarkan format Indonesia (yang digunakan di database)
-                $query->where('hari', $hariIndo)
-                      ->orWhere('hari', strtolower($hariIndo))
-                      ->orWhere('hari', strtoupper($hariIndo))
-                      // Fallback ke format Inggris
-                      ->orWhere('hari', $hariIni)
-                      ->orWhere('hari', strtolower($hariIni))
-                      ->orWhere('hari', ucfirst(strtolower($hariIni)));
-            })
-            ->with(['matakuliah.pengampu.dosen', 'ruang', 'golongan'])
-            ->orderBy('waktu')
-            ->get();
+        try {
+            $hariIni = Carbon::now()->format('l'); // Format: Monday, Tuesday, etc.
+            
+            // Konversi ke format Indonesia yang digunakan di database
+            $hariIndonesia = [
+                'Monday' => 'Senin',
+                'Tuesday' => 'Selasa',
+                'Wednesday' => 'Rabu', 
+                'Thursday' => 'Kamis',
+                'Friday' => 'Jumat',
+                'Saturday' => 'Sabtu',
+                'Sunday' => 'Minggu'
+            ];
+            
+            $hariIndo = $hariIndonesia[$hariIni] ?? $hariIni;
+            
+            // Ambil jadwal berdasarkan mata kuliah yang diambil mahasiswa (KRS)
+            $jadwalHariIni = JadwalAkademik::whereHas('matakuliah.krs', function($query) use ($mahasiswa) {
+                    $query->where('NIM', $mahasiswa->NIM);
+                })
+                ->where('id_Gol', $mahasiswa->id_Gol)
+                ->where(function($query) use ($hariIni, $hariIndo) {
+                    // Cari berdasarkan format Indonesia (yang digunakan di database)
+                    $query->where('hari', $hariIndo)
+                          ->orWhere('hari', strtolower($hariIndo))
+                          ->orWhere('hari', strtoupper($hariIndo))
+                          // Fallback ke format Inggris
+                          ->orWhere('hari', $hariIni)
+                          ->orWhere('hari', strtolower($hariIni))
+                          ->orWhere('hari', ucfirst(strtolower($hariIni)));
+                })
+                ->with(['matakuliah.pengampu.dosen', 'ruang', 'golongan'])
+                ->orderBy('waktu')
+                ->get();
 
-        return $jadwalHariIni;
+            return $jadwalHariIni;
+        } catch (\Exception $e) {
+            \Log::error('Error fetching today schedule: ' . $e->getMessage());
+            return collect(); // Return empty collection on error
+        }
     }
 
     /**
@@ -214,13 +219,19 @@ class DashboardController extends Controller
 
 public function showDashboard()
 {
+        try {
+            // Middleware 'auth:mahasiswa' sudah memastikan hanya mahasiswa yang bisa masuk.
+            // Jadi, pengecekan manual tidak diperlukan lagi.
 
-        // Middleware 'auth:mahasiswa' sudah memastikan hanya mahasiswa yang bisa masuk.
-        // Jadi, pengecekan manual tidak diperlukan lagi.
+            // Ambil data mahasiswa yang sedang login dari guard 'mahasiswa'
+            $userData = Auth::guard('mahasiswa')->user();
+            
+            if (!$userData) {
+                \Log::error('User data not found in dashboard');
+                return redirect()->route('login')->with('error', 'Session expired. Please login again.');
+            }
 
-        // Ambil data mahasiswa yang sedang login dari guard 'mahasiswa'
-        $userData = Auth::guard('mahasiswa')->user();
-        $nimMahasiswa = $userData->NIM;
+            $nimMahasiswa = $userData->NIM;
 
         // Ambil data KRS mahasiswa
         $krsData = Krs::where('NIM', $nimMahasiswa)
@@ -270,22 +281,50 @@ public function showDashboard()
         $semesterProgress = $this->getSemesterProgress($nimMahasiswa, $userData->Semester);
         $dynamicAnnouncements = $this->getDynamicAnnouncements($userData);
 
-        // Kirim data ke view
-        return view('dashboard-mhs.index', compact(
-            'userData', 
-            'ipk', 
-            'totalSks', 
-            'mataKuliahSemesterIni',
-            'statusAkademik',
-            'statusClass',
-            'jadwalHariIni',
-            'attendanceStats',
-            'recentCourses', 
-            'semesterProgress',
-            'dynamicAnnouncements',
-            'totalMataKuliah',
-            'rataRataSks'
-        ));
-    
+            // Kirim data ke view
+            return view('dashboard-mhs.index', compact(
+                'userData', 
+                'ipk', 
+                'totalSks', 
+                'mataKuliahSemesterIni',
+                'statusAkademik',
+                'statusClass',
+                'jadwalHariIni',
+                'attendanceStats',
+                'recentCourses', 
+                'semesterProgress',
+                'dynamicAnnouncements',
+                'totalMataKuliah',
+                'rataRataSks'
+            ));
+        } catch (\Exception $e) {
+            \Log::error('Dashboard error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // Return dashboard with minimal data in case of error
+            $userData = Auth::guard('mahasiswa')->user();
+            
+            return view('dashboard-mhs.index', [
+                'userData' => $userData,
+                'ipk' => 0,
+                'totalSks' => 0,
+                'mataKuliahSemesterIni' => 0,
+                'statusAkademik' => 'Data tidak tersedia',
+                'statusClass' => 'text-muted',
+                'jadwalHariIni' => collect(),
+                'attendanceStats' => ['total' => 0, 'hadir' => 0, 'izin' => 0, 'alpa' => 0, 'percentage' => 0],
+                'recentCourses' => collect(),
+                'semesterProgress' => ['total_available' => 0, 'taken' => 0, 'completed' => 0, 'progress_percentage' => 0],
+                'dynamicAnnouncements' => [[
+                    'title' => 'Sistem Informasi Akademik',
+                    'message' => 'Dashboard sedang dalam perbaikan. Silakan refresh halaman.',
+                    'time' => 'Info',
+                    'type' => 'warning'
+                ]],
+                'totalMataKuliah' => 0,
+                'rataRataSks' => 0
+            ])->with('error', 'Terjadi kesalahan saat memuat data. Silakan refresh halaman.');
+        }
+    }
 }
 }

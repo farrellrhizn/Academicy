@@ -186,6 +186,25 @@
 
 		<div class="main-container">
 			<div class="pd-ltr-20">
+				<!-- Alert untuk error atau sukses -->
+				@if(session('error'))
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+						<strong>Error!</strong> {{ session('error') }}
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+				@endif
+				
+				@if(session('success'))
+					<div class="alert alert-success alert-dismissible fade show" role="alert">
+						<strong>Sukses!</strong> {{ session('success') }}
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+				@endif
+
 				<div class="card-box pd-20 height-100-p mb-30">
 					<div class="row align-items-center">
 						<div class="col-md-4">
@@ -199,6 +218,19 @@
 							<p class="font-18 max-width-600">
 								Selamat datang di Sistem Informasi Akademik. Di sini Anda dapat mengelola semua kegiatan akademik Anda dengan mudah.
 							</p>
+							<!-- Informasi Umum Mahasiswa -->
+							<div class="row mt-3">
+								<div class="col-md-6">
+									<small class="text-muted">NIM:</small> <strong>{{ $userData->NIM ?? '-' }}</strong><br>
+									<small class="text-muted">Semester:</small> <strong>{{ $userData->Semester ?? '-' }}</strong><br>
+									<small class="text-muted">Golongan:</small> <strong>{{ $userData->golongan->nama_Gol ?? 'Tidak Diketahui' }}</strong>
+								</div>
+								<div class="col-md-6">
+									<small class="text-muted">Total SKS:</small> <strong>{{ $totalSks ?? 0 }}</strong><br>
+									<small class="text-muted">Mata Kuliah:</small> <strong>{{ $totalMataKuliah ?? 0 }}</strong><br>
+									<small class="text-muted">Status:</small> <strong class="{{ $statusClass ?? 'text-muted' }}">{{ $statusAkademik ?? 'Aktif' }}</strong>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -211,8 +243,9 @@
 									<div id="chart"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0">{{ $ipk }}</div>
+									<div class="h4 mb-0">{{ $ipk ?? '0.00' }}</div>
 									<div class="weight-600 font-14">IPK Kumulatif</div>
+									<small class="text-muted">Belum tersedia</small>
 								</div>
 							</div>
 						</div>
@@ -224,8 +257,9 @@
 									<div id="chart2"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0">{{ $totalSks }}</div>
+									<div class="h4 mb-0">{{ $totalSks ?? 0 }}</div>
 									<div class="weight-600 font-14">Total SKS Ditempuh</div>
+									<small class="text-muted">Semester {{ $userData->Semester ?? 1 }}</small>
 								</div>
 							</div>
 						</div>
@@ -237,9 +271,9 @@
 									<div id="chart3"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0">{{ $attendanceStats['percentage'] }}%</div>
+									<div class="h4 mb-0">{{ isset($attendanceStats) ? $attendanceStats['percentage'] : 0 }}%</div>
 									<div class="weight-600 font-14">Kehadiran</div>
-									<div class="small text-muted">{{ $attendanceStats['hadir'] }}/{{ $attendanceStats['total'] }} Hadir</div>
+									<div class="small text-muted">{{ isset($attendanceStats) ? $attendanceStats['hadir'] : 0 }}/{{ isset($attendanceStats) ? $attendanceStats['total'] : 0 }} Hadir</div>
 								</div>
 							</div>
 						</div>
@@ -251,8 +285,17 @@
 									<div id="chart4"></div>
 								</div>
 								<div class="widget-data">
-									<div class="h4 mb-0 {{ $statusClass }}">{{ $statusAkademik }}</div>
+									<div class="h4 mb-0 {{ $statusClass ?? 'text-success' }}">
+										@if(strlen($statusAkademik ?? '') > 15)
+											Aktif
+										@else
+											{{ $statusAkademik ?? 'Aktif' }}
+										@endif
+									</div>
 									<div class="weight-600 font-14">Status Akademik</div>
+									@if(strlen($statusAkademik ?? '') > 15)
+										<small class="text-muted">{{ $statusAkademik }}</small>
+									@endif
 								</div>
 							</div>
 						</div>
@@ -321,105 +364,167 @@
 				<div class="row">
 					<div class="col-xl-8 mb-30">
 						<div class="card-box height-100-p pd-20">
-							<h2 class="h4 mb-20">Jadwal Kuliah Hari Ini ({{ ucfirst(\Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y')) }})</h2>
-							<table class="table table-striped">
-								<thead>
-									<tr>
-										<th scope="col">Waktu</th>
-										<th scope="col">Mata Kuliah</th>
-										<th scope="col">Ruang</th>
-										<th scope="col">Dosen</th>
-									</tr>
-								</thead>
-								<tbody>
-									@forelse($jadwalHariIni as $jadwal)
-									<tr>
-										<td>{{ $jadwal->waktu }}</td>
-										<td>{{ $jadwal->matakuliah->Nama_mk ?? 'N/A' }}</td>
-										<td>{{ $jadwal->ruang->nama_ruang ?? 'N/A' }}</td>
-										<td>
-											@if($jadwal->matakuliah && $jadwal->matakuliah->pengampu->isNotEmpty())
-												{{ $jadwal->matakuliah->pengampu->first()->dosen->Nama ?? 'N/A' }}
-											@else
-												N/A
-											@endif
-										</td>
-									</tr>
-									@empty
-									<tr>
-										<td colspan="4" class="text-center">Tidak ada jadwal hari ini</td>
-									</tr>
-									@endforelse
-								</tbody>
-							</table>
+							<h2 class="h4 mb-20">
+								<i class="icon-copy dw dw-calendar1"></i> 
+								Jadwal Kuliah Hari Ini 
+								<small class="text-muted">({{ ucfirst(\Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y')) }})</small>
+							</h2>
+							@if(isset($jadwalHariIni) && $jadwalHariIni->count() > 0)
+								<div class="table-responsive">
+									<table class="table table-striped table-hover">
+										<thead class="bg-light">
+											<tr>
+												<th scope="col"><i class="icon-copy dw dw-clock"></i> Waktu</th>
+												<th scope="col"><i class="icon-copy dw dw-book"></i> Mata Kuliah</th>
+												<th scope="col"><i class="icon-copy dw dw-home"></i> Ruang</th>
+												<th scope="col"><i class="icon-copy dw dw-user1"></i> Dosen</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach($jadwalHariIni as $jadwal)
+											<tr>
+												<td><span class="badge badge-primary">{{ $jadwal->waktu ?? 'N/A' }}</span></td>
+												<td><strong>{{ $jadwal->matakuliah->Nama_mk ?? 'N/A' }}</strong></td>
+												<td>{{ $jadwal->ruang->nama_ruang ?? 'N/A' }}</td>
+												<td>
+													@if($jadwal->matakuliah && $jadwal->matakuliah->pengampu && $jadwal->matakuliah->pengampu->isNotEmpty())
+														{{ $jadwal->matakuliah->pengampu->first()->dosen->Nama ?? 'N/A' }}
+													@else
+														N/A
+													@endif
+												</td>
+											</tr>
+											@endforeach
+										</tbody>
+									</table>
+								</div>
+							@else
+								<div class="text-center py-5">
+									<i class="icon-copy dw dw-calendar1 fa-3x text-muted mb-3"></i>
+									<h5 class="text-muted">Tidak ada jadwal kuliah hari ini</h5>
+									<p class="text-muted">Silakan periksa jadwal kuliah Anda di menu <a href="{{ route('mahasiswa.jadwal.index') }}" class="text-primary">Jadwal Kuliah</a></p>
+								</div>
+							@endif
 						</div>
 					</div>
 					<div class="col-xl-4 mb-30">
 						<div class="card-box height-100-p pd-20">
-							<h2 class="h4 mb-20">Pengumuman Akademik 📢</h2>
+							<h2 class="h4 mb-20">
+								<i class="icon-copy dw dw-notification"></i> 
+								Informasi Akademik
+							</h2>
+							
+							<!-- Informasi Umum Mahasiswa -->
+							<div class="alert alert-info mb-3">
+								<h6 class="alert-heading"><i class="icon-copy dw dw-user1"></i> Info Mahasiswa</h6>
+								<small class="d-block"><strong>NIM:</strong> {{ $userData->NIM ?? '-' }}</small>
+								<small class="d-block"><strong>Semester:</strong> {{ $userData->Semester ?? '-' }}</small>
+								<small class="d-block"><strong>Status:</strong> <span class="{{ $statusClass ?? 'text-muted' }}">{{ $statusAkademik ?? 'Aktif' }}</span></small>
+								<small class="d-block"><strong>Total SKS:</strong> {{ $totalSks ?? 0 }}</small>
+							</div>
+
+							<!-- Pengumuman Dinamis -->
 							<div class="list-group">
-								@forelse($dynamicAnnouncements as $announcement)
-								<a href="#" class="list-group-item list-group-item-action">
-									<div class="d-flex w-100 justify-content-between">
-										<h5 class="mb-1">{{ $announcement['title'] }}</h5>
-										<small class="badge badge-{{ $announcement['type'] == 'warning' ? 'warning' : ($announcement['type'] == 'success' ? 'success' : 'info') }}">{{ $announcement['time'] }}</small>
+								@if(isset($dynamicAnnouncements) && count($dynamicAnnouncements) > 0)
+									@foreach($dynamicAnnouncements as $announcement)
+									<div class="list-group-item">
+										<div class="d-flex w-100 justify-content-between">
+											<h6 class="mb-1">{{ $announcement['title'] ?? 'Pengumuman' }}</h6>
+											<small class="badge badge-{{ $announcement['type'] == 'warning' ? 'warning' : ($announcement['type'] == 'success' ? 'success' : 'info') }}">
+												{{ $announcement['time'] ?? 'Info' }}
+											</small>
+										</div>
+										<p class="mb-1 small">{{ $announcement['message'] ?? 'Tidak ada pesan' }}</p>
 									</div>
-									<p class="mb-1">{{ $announcement['message'] }}</p>
-								</a>
-								@empty
-								<div class="list-group-item">
+									@endforeach
+								@else
+								<div class="list-group-item text-center">
+									<i class="icon-copy dw dw-notification fa-2x text-muted mb-2"></i>
 									<p class="mb-0 text-muted">Tidak ada pengumuman saat ini.</p>
 								</div>
-								@endforelse
+								@endif
+							</div>
+
+							<!-- Quick Links -->
+							<div class="mt-3">
+								<h6><i class="icon-copy dw dw-link"></i> Menu Cepat</h6>
+								<div class="btn-group-vertical w-100" role="group">
+									<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-outline-primary btn-sm">
+										<i class="icon-copy dw dw-card-list"></i> Kelola KRS
+									</a>
+									<a href="{{ route('mahasiswa.jadwal.index') }}" class="btn btn-outline-success btn-sm">
+										<i class="icon-copy dw dw-calendar-week"></i> Lihat Jadwal
+									</a>
+									<a href="{{ route('mahasiswa.presensi.riwayat') }}" class="btn btn-outline-info btn-sm">
+										<i class="icon-copy dw dw-check2-square"></i> Riwayat Presensi
+									</a>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
 				<!-- Section untuk mata kuliah terbaru -->
-				@if($recentCourses->count() > 0)
 				<div class="row">
 					<div class="col-xl-12 mb-30">
 						<div class="card-box pd-20">
-							<h2 class="h4 mb-20">Mata Kuliah Diambil 📚</h2>
-							<div class="table-responsive">
-								<table class="table table-striped">
-									<thead>
-										<tr>
-											<th>Kode MK</th>
-											<th>Mata Kuliah</th>
-											<th>SKS</th>
-											<th>Semester</th>
-											<th>Status</th>
-										</tr>
-									</thead>
-									<tbody>
-										@foreach($recentCourses as $course)
-										<tr>
-											<td><strong>{{ $course->Kode_mk }}</strong></td>
-											<td>{{ $course->matakuliah->Nama_mk ?? 'N/A' }}</td>
-											<td>
-												<span class="badge badge-info">
-													{{ $course->matakuliah->sks ?? 'N/A' }} SKS
-												</span>
-											</td>
-											<td>
-												<span class="badge badge-secondary">
-													Semester {{ $course->matakuliah->semester ?? '-' }}
-												</span>
-											</td>
-											<td>
-												<span class="badge badge-primary">Sedang Berlangsung</span>
-											</td>
-										</tr>
-										@endforeach
-									</tbody>
-								</table>
-							</div>
+							<h2 class="h4 mb-20">
+								<i class="icon-copy dw dw-book"></i> 
+								Mata Kuliah Diambil
+							</h2>
+							@if(isset($recentCourses) && $recentCourses->count() > 0)
+								<div class="table-responsive">
+									<table class="table table-striped table-hover">
+										<thead class="bg-light">
+											<tr>
+												<th><i class="icon-copy dw dw-code"></i> Kode MK</th>
+												<th><i class="icon-copy dw dw-book"></i> Mata Kuliah</th>
+												<th><i class="icon-copy dw dw-star"></i> SKS</th>
+												<th><i class="icon-copy dw dw-calendar"></i> Semester</th>
+												<th><i class="icon-copy dw dw-check"></i> Status</th>
+											</tr>
+										</thead>
+										<tbody>
+											@foreach($recentCourses as $course)
+											<tr>
+												<td><strong>{{ $course->Kode_mk ?? 'N/A' }}</strong></td>
+												<td>{{ $course->matakuliah->Nama_mk ?? 'N/A' }}</td>
+												<td>
+													<span class="badge badge-info">
+														{{ $course->matakuliah->sks ?? 'N/A' }} SKS
+													</span>
+												</td>
+												<td>
+													<span class="badge badge-secondary">
+														Semester {{ $course->matakuliah->semester ?? '-' }}
+													</span>
+												</td>
+												<td>
+													<span class="badge badge-success">Sedang Berlangsung</span>
+												</td>
+											</tr>
+											@endforeach
+										</tbody>
+									</table>
+								</div>
+								<div class="mt-3 text-center">
+									<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-primary">
+										<i class="icon-copy dw dw-card-list"></i> Kelola KRS
+									</a>
+								</div>
+							@else
+								<div class="text-center py-5">
+									<i class="icon-copy dw dw-book fa-3x text-muted mb-3"></i>
+									<h5 class="text-muted">Belum ada mata kuliah yang diambil</h5>
+									<p class="text-muted">Silakan ambil mata kuliah di menu KRS untuk memulai semester Anda</p>
+									<a href="{{ route('mahasiswa.krs.index') }}" class="btn btn-primary">
+										<i class="icon-copy dw dw-card-list"></i> Kelola KRS
+									</a>
+								</div>
+							@endif
 						</div>
 					</div>
 				</div>
-				@endif
 				
 				<div class="footer-wrap pd-20 mb-20 card-box">
 					Sistem Informasi Akademik - © 2025
