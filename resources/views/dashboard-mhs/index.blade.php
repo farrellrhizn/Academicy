@@ -84,7 +84,7 @@
 						<div class="dropdown-menu dropdown-menu-right">
 							<div class="notification-list mx-h-350 customscroll">
 								<ul>
-									@forelse($dynamicAnnouncements->take(3) as $announcement)
+									@forelse(array_slice($dynamicAnnouncements, 0, 3) as $announcement)
 									<li>
 										<a href="#">
 											<img src="{{ asset('bootstrap/vendors/images/img.jpg') }}" alt="" />
