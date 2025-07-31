@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+  EMPLOYEE
+}
+
+enum Department {
+  HRGA
+  ENGINEERING
+  PLAN
+  FINANCE
+  OPERATIONS
+  SUPPORT
+  PURCHASING
+  LOGISTICS
+}
+
+enum CertificateType {
+  TRAINING
+  LICENSE
+  DIPLOMA
+}
+
+enum ApplicationStatus {
+  APPLIED
+  REVIEWED
+  INTERVIEW
+  REJECTED
+  ACCEPTED
+}
+
+enum ArticleType {
+  NEWS
+  ARTICLE
+}
+
+enum DocumentType {
+  REPORT
+  FORM
+  CERTIFICATE
+  OTHER
+}
+
+enum JobType {
+  FULL_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+  TEMPORARY
+}
+
+enum KPIType {
+  PERCENTAGE
+  NUMBER
+  CURRENCY
+  RATIO
+  BOOLEAN
+}
+
+enum KPIFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+model User {
+  id                String           @id @default(uuid())
+  email             String           @unique
+  password          String
+  name              String
+  avatar            String?
+  role              Role             @default(USER)
+  department        Department?
+  isVerify          Boolean          @default(false)
+  verificationToken String?          @unique
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relations
+  profile           Profile?
+  certificates      Certificate[]
+  applications      JobApplication[]
+  educations        Education[]
+  experiences       Experience[]
+  createdJobs       Job[]            @relation("CreatedJobs")
+  updatedJobs       Job[]            @relation("UpdatedJobs")
+  
+  // Articles and documents
+  articles          Article[]        @relation("ArticleAuthor")
+  documents         Document[]       @relation("DocumentOwner")
+  driverUpdates     DriverUpdate[]   @relation("DriverUpdateAuthor")
+  
+  // KPI relations
+  kpiEntries        KPIEntry[]       @relation("KPIEntryUser")
+  createdKPIs       KPI[]            @relation("KPICreator")
+}
+
+model Profile {
+  id        String  @id @default(uuid())
+  userId    String  @unique
+  bio       String?
+  phone     String?
+  address   String?
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Certificate {
+  id        String          @id @default(uuid())
+  userId    String
+  title     String
+  issuer    String
+  issuedAt  DateTime
+  fileUrl   String
+  type      CertificateType?
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Education {
+  id          String   @id @default(uuid())
+  userId      String
+  degree      String   // S1, D3, SMA, dll
+  institution String
+  major       String?
+  yearStart   Int?
+  yearEnd     Int?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Experience {
+  id               String   @id @default(uuid())
+  userId           String
+  companyName      String
+  position         String
+  startDate        DateTime
+  endDate          DateTime?
+  description      String?
+  reasonForLeaving String?
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Job {
+  id            String           @id @default(uuid())
+  title         String
+  slug          String           @unique
+  description   String
+  requirements  String
+  location      String
+  salaryMin     Int?
+  salaryMax     Int?
+  expiredAt     DateTime?
+  postedAt      DateTime         @default(now())
+  isDeleted     Boolean          @default(false)
+  jobType       JobType          @default(CONTRACT)
+
+  applications  JobApplication[]
+
+  createdById   String?
+  createdBy     User?            @relation("CreatedJobs", fields: [createdById], references: [id])
+
+  updatedById   String?
+  updatedBy     User?            @relation("UpdatedJobs", fields: [updatedById], references: [id])
+}
+
+model JobApplication {
+  id        String            @id @default(uuid())
+  userId    String
+  jobId     String
+  appliedAt DateTime          @default(now())
+  status    ApplicationStatus @default(APPLIED)
+
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job       Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+}
+
+model Article {
+  id          String      @id @default(uuid())
+  title       String
+  slug        String      @unique
+  content     String      @db.Text
+  summary     String?
+  imageUrl    String?
+  type        ArticleType
+  isPublished Boolean     @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  authorId    String
+  author      User        @relation("ArticleAuthor", fields: [authorId], references: [id])
+}
+
+model Document {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  fileUrl     String
+  fileType    String       // e.g., pdf, docx, xlsx
+  fileSize    Int          // in bytes
+  type        DocumentType @default(OTHER)
+  uploadedAt  DateTime     @default(now())
+  
+  ownerId     String
+  owner       User         @relation("DocumentOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+model DriverUpdate {
+  id          String   @id @default(uuid())
+  version     String   // e.g., "1.2.3"
+  title       String
+  description String   @db.Text
+  changeLog   String?  @db.Text
+  fileUrl     String?  // for optional download file
+  isRequired  Boolean  @default(false)
+  releaseDate DateTime @default(now())
+  
+  authorId    String
+  author      User     @relation("DriverUpdateAuthor", fields: [authorId], references: [id])
+}
+
+model KPI {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  department  Department
+  type        KPIType
+  frequency   KPIFrequency
+  target      Float?
+  unit        String?      // e.g., "%", "$", "units"
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  createdById String
+  createdBy   User         @relation("KPICreator", fields: [createdById], references: [id])
+  
+  entries     KPIEntry[]
+}
+
+model KPIEntry {
+  id        String   @id @default(uuid())
+  kpiId     String
+  value     Float
+  period    DateTime
+  notes     String?
+  createdAt DateTime @default(now())
+  
+  kpi       KPI      @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  
+  enteredById String?
+  enteredBy   User?  @relation("KPIEntryUser", fields: [enteredById], references: [id])
+  
+  @@unique([kpiId, period])
+}
