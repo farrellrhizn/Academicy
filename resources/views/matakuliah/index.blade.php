@@ -38,109 +38,82 @@
 	</div>
 
 	<div class="header">
-		<div class="header-left">
-			<div class="menu-icon bi bi-list"></div>
-			<div class="search-toggle-icon bi bi-search" data-toggle="header_search"></div>
-			<div class="header-search">
-				<form>
-					<div class="form-group mb-0">
-						<i class="dw dw-search2 search-icon"></i>
-						<input type="text" class="form-control search-input" placeholder="Search Here" />
-					</div>
-				</form>
-			</div>
-		</div>
-		<div class="header-right">
-			<div class="dashboard-setting user-notification">
-				<div class="dropdown">
-					<a class="dropdown-toggle no-arrow" href="javascript:;" data-toggle="right-sidebar">
-						<i class="dw dw-settings2"></i>
-					</a>
-				</div>
-			</div>
-			<div class="user-info-dropdown">
-				<div class="dropdown">
-					<a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-													<span class="user-icon">
+        <div class="header-left">
+            <div class="menu-icon bi bi-list"></div>
+        </div>
+        <div class="header-right">
+            <div class="user-info-dropdown">
+                <div class="dropdown">
+                    <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+                        							<span class="user-icon">
 								<i class="dw dw-user1"></i>
 							</span>
-						<span class="user-name">Admin User</span>
-					</a>
-					<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-						<a class="dropdown-item" href="#"><i class="dw dw-user1"></i> Profile</a>
-						<a class="dropdown-item" href="#"><i class="dw dw-settings2"></i> Setting</a>
-						<form method="POST" action="{{ route('logout') }}" style="display: inline;">
-							@csrf
-							<button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
-								<i class="dw dw-logout"></i> Log Out
-							</button>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                        <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                        <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                            @csrf
+                            <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                <i class="dw dw-logout"></i> Log Out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<div class="left-side-bar">
-		<div class="brand-logo">
-			<a href="index.html">
-				<img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
-				<img src="../../../bootstrap/vendors/images/deskapp-logo-white.svg" alt="" class="light-logo" />
-			</a>
-			<div class="close-sidebar" data-toggle="left-sidebar-close">
-				<i class="ion-close-round"></i>
-			</div>
-		</div>
+    <div class="left-side-bar">
+        <div class="brand-logo">
+            <a href="{{ route('admin.dashboard') }}">
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
+            </a>
+            <div class="close-sidebar" data-toggle="left-sidebar-close">
+                <i class="ion-close-round"></i>
+            </div>
+        </div>
 
-		<div class="menu-block customscroll">
-			<div class="sidebar-menu">
-				<ul id="accordion-menu">
-					<li>
-						<a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow">
-							<span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
-						</a>
-					</li>
-					<li class="dropdown">
-						<a href="javascript:;" class="dropdown-toggle">
-							<span class="micon bi bi-mortarboard"></span><span class="mtext">Data Master</span>
-						</a>
-						<ul class="submenu">
-							<li><a href="{{ route('admin.matakuliah.index') }}" class="active">Mata Kuliah</a></li>
-							<li><a href="{{ route('admin.dosen.index') }}">Dosen</a></li>
-							<li><a href="{{ route('admin.mahasiswa.index') }}">Mahasiswa</a></li>
-						</ul>
-					</li>
-					<li class="dropdown">
-						<a href="javascript:;" class="dropdown-toggle">
-							<span class="micon bi bi-calendar3-week"></span><span class="mtext">Jadwal</span>
-						</a>
-						<ul class="submenu">
-							<li><a href="{{ route('admin.buat-jadwal.index') }}">Buat Jadwal</a></li>
-							<li><a href="{{ route('admin.kelola-jadwal.index') }}">Kelola Jadwal</a></li>
-						</ul>
-					</li>
-					<li class="dropdown">
-						<a href="javascript:;" class="dropdown-toggle">
-							<span class="micon bi bi-building"></span><span class="mtext">Ruang & Kelas</span>
-						</a>
-						<ul class="submenu">
-							<li><a href="{{ route('admin.ruang.index') }}">Ruang</a></li>
-							<li><a href="{{ route('admin.golongan.index') }}">Kelas/Golongan</a></li>
-						</ul>
-					</li>
-					<li class="dropdown">
-						<a href="javascript:;" class="dropdown-toggle">
-							<span class="micon bi bi-gear"></span><span class="mtext">Pengaturan</span>
-						</a>
-						<ul class="submenu">
-							<li><a href="pengaturan-sistem.html">Sistem</a></li>
-							<li><a href="profil-admin.html">Profil</a></li>
-						</ul>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
+        <div class="menu-block customscroll">
+            <div class="sidebar-menu">
+                <ul id="accordion-menu">
+                    <li>
+                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow active">
+                            <span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="javascript:;" class="dropdown-toggle">
+                            <span class="micon bi bi-mortarboard"></span><span class="mtext">Data Master</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="{{ route('admin.matakuliah.index') }}" class="active">Mata Kuliah</a></li>
+                            <li><a href="{{ route('admin.dosen.index') }}">Dosen</a></li>
+                            <li><a href="{{ route('admin.mahasiswa.index') }}">Mahasiswa</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="javascript:;" class="dropdown-toggle">
+                            <span class="micon bi bi-calendar3-week"></span><span class="mtext">Jadwal</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="{{ route('admin.buat-jadwal.index') }}">Buat Jadwal</a></li>
+                            <li><a href="{{ route('admin.kelola-jadwal.index') }}">Kelola Jadwal</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="javascript:;" class="dropdown-toggle">
+                            <span class="micon bi bi-building"></span><span class="mtext">Ruang & Kelas</span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="{{ route('admin.ruang.index') }}">Ruang</a></li>
+                            <li><a href="{{ route('admin.golongan.index') }}">Kelas/Golongan</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 	<div class="mobile-menu-overlay"></div>
 
 	<div class="main-container">

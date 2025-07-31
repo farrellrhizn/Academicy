@@ -36,38 +36,37 @@
 		</div>
 	</div>
 
-    <div class="header">
-    <div class="header-left">
-        <div class="menu-icon bi bi-list"></div>
-    </div>
-    <div class="header-right">
-        <div class="user-info-dropdown">
-            <div class="dropdown">
-                <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                    							<span class="user-icon">
+    <<div class="header">
+        <div class="header-left">
+            <div class="menu-icon bi bi-list"></div>
+        </div>
+        <div class="header-right">
+            <div class="user-info-dropdown">
+                <div class="dropdown">
+                    <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+                        							<span class="user-icon">
 								<i class="dw dw-user1"></i>
 							</span>
-                    <span class="user-name">Administrator</span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                    <a class="dropdown-item" href="profil-admin.html"><i class="dw dw-user1"></i> Profil</a>
-                                            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                        <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf
                             <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
                                 <i class="dw dw-logout"></i> Log Out
                             </button>
                         </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     <div class="left-side-bar">
         <div class="brand-logo">
-            <a href="index.html">
-                <img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
-                <img src="../../../bootstrap/vendors/images/deskapp-logo-white.svg" alt="" class="light-logo" />
+            <a href="{{ route('admin.dashboard') }}">
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>
@@ -78,7 +77,7 @@
             <div class="sidebar-menu">
                 <ul id="accordion-menu">
                     <li>
-                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow active">
+                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow ">
                             <span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
                         </a>
                     </li>
@@ -88,7 +87,7 @@
                         </a>
                         <ul class="submenu">
                             <li><a href="{{ route('admin.matakuliah.index') }}">Mata Kuliah</a></li>
-                            <li><a href="{{ route('admin.dosen.index') }}">Dosen</a></li>
+                            <li><a href="{{ route('admin.dosen.index') }}" class="active">Dosen</a></li>
                             <li><a href="{{ route('admin.mahasiswa.index') }}">Mahasiswa</a></li>
                         </ul>
                     </li>
@@ -110,21 +109,12 @@
                             <li><a href="{{ route('admin.golongan.index') }}">Kelas/Golongan</a></li>
                         </ul>
                     </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon bi bi-gear"></span><span class="mtext">Pengaturan</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="pengaturan-sistem.html">Sistem</a></li>
-                            <li><a href="profil-admin.html">Profil</a></li>
-                        </ul>
-                    </li>
                 </ul>
             </div>
         </div>
     </div>
-
 <div class="mobile-menu-overlay"></div>
+
     <div class="main-container">
         <div class="pd-ltr-20 xs-pd-20-10">
             <div class="min-height-200px">

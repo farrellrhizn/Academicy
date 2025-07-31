@@ -79,30 +79,35 @@
         </div>
         <div class="header-right">
             <div class="user-info-dropdown">
-                <div class="dropdown">
-                    <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                        							<span class="user-icon">
-								                                                @if($dosen->profile_photo)
-                            <img src="{{ asset('storage/profile_photos/' . $dosen->profile_photo) }}" alt="Profile" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
-                        @else
-									<i class="dw dw-user1"></i>
-								@endif
-							</span>
-                        <span class="user-name">{{ session('dosen_nama') ?? 'Dosen' }}</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                        <a class="dropdown-item" href="#"><i class="dw dw-user1"></i> Profil</a>
-                        <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                            @csrf
-                            <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
-                                <i class="dw dw-logout"></i> Log Out
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+				<div class="dropdown">
+					<a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+						<span class="user-icon">
+							@if($dosen->profile_photo)
+								<img src="{{ asset('storage/profile_photos/' . $dosen->profile_photo) }}" alt="Profile"
+									class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
+							@else
+								<i class="dw dw-user1"></i>
+							@endif
+						</span>
+						<span class="user-name">{{ $dosen->Nama ?? 'Dosen' }}</span>
+					</a>
+					<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+						<a class="dropdown-item" href="{{ route('dosen.profile.edit') }}"><i class="dw dw-user1"></i>
+							Profile</a>
+						<a class="dropdown-item" href="{{ route('dosen.profile.edit') }}"><i
+								class="dw dw-settings2"></i> Setting</a>
+						<form method="POST" action="{{ route('logout') }}" style="display: inline;">
+							@csrf
+							<button type="submit" class="dropdown-item"
+								style="border: none; background: none; width: 100%; text-align: left;">
+								<i class="dw dw-logout"></i> Log Out
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 
     <div class="left-side-bar">
         <div class="brand-logo">

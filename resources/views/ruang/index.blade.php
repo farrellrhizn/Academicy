@@ -42,10 +42,9 @@
                         							<span class="user-icon">
 								<i class="dw dw-user1"></i>
 							</span>
-                        <span class="user-name">Administrator</span>
+                        <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                        <a class="dropdown-item" href="profil-admin.html"><i class="dw dw-user1"></i> Profil</a>
                         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf
                             <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
@@ -60,9 +59,9 @@
 
     <div class="left-side-bar">
         <div class="brand-logo">
-            <a href="index.html">
-                <img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
-                <img src="../../../bootstrap/vendors/images/deskapp-logo-white.svg" alt="" class="light-logo" />
+            <a href="{{ route('admin.dashboard') }}">
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
+                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>
@@ -73,7 +72,7 @@
             <div class="sidebar-menu">
                 <ul id="accordion-menu">
                     <li>
-                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow active">
+                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow">
                             <span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
                         </a>
                     </li>
@@ -101,17 +100,8 @@
                             <span class="micon bi bi-building"></span><span class="mtext">Ruang & Kelas</span>
                         </a>
                         <ul class="submenu">
-                            <li><a href="{{ route('admin.ruang.index') }}">Ruang</a></li>
+                            <li><a href="{{ route('admin.ruang.index') }}" class="active">Ruang</a></li>
                             <li><a href="{{ route('admin.golongan.index') }}">Kelas/Golongan</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon bi bi-gear"></span><span class="mtext">Pengaturan</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="pengaturan-sistem.html">Sistem</a></li>
-                            <li><a href="profil-admin.html">Profil</a></li>
                         </ul>
                     </li>
                 </ul>

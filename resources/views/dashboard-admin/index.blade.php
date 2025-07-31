@@ -42,7 +42,6 @@
                         <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                        <a class="dropdown-item" href="profil-admin.html"><i class="dw dw-user1"></i> Profil</a>
                         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf
                             <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
@@ -100,15 +99,6 @@
                         <ul class="submenu">
                             <li><a href="{{ route('admin.ruang.index') }}">Ruang</a></li>
                             <li><a href="{{ route('admin.golongan.index') }}">Kelas/Golongan</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon bi bi-gear"></span><span class="mtext">Pengaturan</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="pengaturan-sistem.html">Sistem</a></li>
-                            <li><a href="profil-admin.html">Profil</a></li>
                         </ul>
                     </li>
                 </ul>

@@ -39,10 +39,9 @@
                         							<span class="user-icon">
 								<i class="dw dw-user1"></i>
 							</span>
-                        <span class="user-name">Administrator</span>
+                        <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                        <a class="dropdown-item" href="profil-admin.html"><i class="dw dw-user1"></i> Profil</a>
                         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf
                             <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
@@ -74,14 +73,14 @@
                             <span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
                         </a>
                     </li>
-                    <li class="dropdown active">
+                    <li class="dropdown">
                         <a href="javascript:;" class="dropdown-toggle">
                             <span class="micon bi bi-mortarboard"></span><span class="mtext">Data Master</span>
                         </a>
                         <ul class="submenu">
                             <li><a href="{{ route('admin.matakuliah.index') }}">Mata Kuliah</a></li>
                             <li><a href="{{ route('admin.dosen.index') }}">Dosen</a></li>
-                            <li class="active"><a href="{{ route('admin.mahasiswa.index') }}">Mahasiswa</a></li>
+                            <li><a href="{{ route('admin.mahasiswa.index') }}" class="active">Mahasiswa</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -100,15 +99,6 @@
                         <ul class="submenu">
                             <li><a href="{{ route('admin.ruang.index') }}">Ruang</a></li>
                             <li><a href="{{ route('admin.golongan.index') }}">Kelas/Golongan</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="javascript:;" class="dropdown-toggle">
-                            <span class="micon bi bi-gear"></span><span class="mtext">Pengaturan</span>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="pengaturan-sistem.html">Sistem</a></li>
-                            <li><a href="profil-admin.html">Profil</a></li>
                         </ul>
                     </li>
                 </ul>
