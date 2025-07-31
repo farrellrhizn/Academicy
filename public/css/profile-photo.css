@@ -1,27 +1,63 @@
-/* Profile Photo Enhancements */
-.user-icon img {
-    width: 35px !important;
-    height: 35px !important;
-    object-fit: cover !important;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+/* Profile Photo Enhancements - Native Design */
+.user-icon {
+    width: 52px;
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    border-radius: 50%;
+    background: #ebeff3;
+    overflow: hidden;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.user-icon img {
+    width: 52px !important;
+    height: 52px !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    border: none !important;
+    transition: all 0.3s ease;
+}
+
 .user-icon img:hover {
-    border-color: rgba(255, 255, 255, 0.3);
     transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Ensure consistent styling for profile photos across all header types */
+.header .user-icon,
+.navbar .user-icon,
+.dropdown-toggle .user-icon {
+    width: 52px;
+    height: 52px;
+}
+
 .header .user-icon img,
 .navbar .user-icon img,
 .dropdown-toggle .user-icon img {
-    width: 35px !important;
-    height: 35px !important;
+    width: 52px !important;
+    height: 52px !important;
     object-fit: cover !important;
     border-radius: 50% !important;
+}
+
+/* User name alignment fix */
+.user-info-dropdown .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.user-info-dropdown .dropdown-toggle .user-name {
+    font-weight: 500;
+    margin-left: 8px;
+    color: #131e22;
+    font-family: "Inter", sans-serif;
+    line-height: 1.4;
+    vertical-align: middle;
 }
 
 /* Profile edit page photo preview enhancements */
@@ -39,8 +75,8 @@
 
 /* Loading state for profile photos */
 .user-icon .loading-photo {
-    width: 35px;
-    height: 35px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
     background-size: 200% 100%;
@@ -56,35 +92,53 @@
     }
 }
 
-/* Fallback icon styling */
+/* Fallback icon styling - Native Design */
 .user-icon i.dw-user1 {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 24px;
+    color: #1b00ff;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 35px;
-    height: 35px;
-    background: rgba(255, 255, 255, 0.1);
+    width: 52px;
+    height: 52px;
+    background: transparent;
     border-radius: 50%;
     transition: all 0.3s ease;
 }
 
-.user-icon i.dw-user1:hover {
-    background: rgba(255, 255, 255, 0.2);
+.user-icon:hover i.dw-user1 {
+    color: #0056b3;
     transform: scale(1.05);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .user-icon,
     .user-icon img,
     .user-icon i.dw-user1 {
-        width: 30px !important;
-        height: 30px !important;
+        width: 45px !important;
+        height: 45px !important;
     }
     
     .user-icon i.dw-user1 {
-        font-size: 16px;
+        font-size: 20px;
+    }
+    
+    .user-info-dropdown .dropdown-toggle .user-name {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-icon,
+    .user-icon img,
+    .user-icon i.dw-user1 {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .user-icon i.dw-user1 {
+        font-size: 18px;
     }
 }
 
@@ -94,8 +148,26 @@
     outline: none;
 }
 
+.dropdown-toggle:focus .user-icon,
 .dropdown-toggle:focus .user-icon img,
 .dropdown-toggle:focus .user-icon i.dw-user1 {
     outline: 2px solid #007bff;
     outline-offset: 2px;
+}
+
+/* Override Bootstrap styles to ensure native design takes precedence */
+.user-info-dropdown .dropdown-toggle .user-icon {
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 24px !important;
+    background: #ebeff3 !important;
+    color: #1b00ff !important;
+    line-height: 52px !important;
+    text-align: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
