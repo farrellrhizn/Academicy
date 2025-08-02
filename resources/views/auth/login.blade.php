@@ -22,9 +22,9 @@
 <body class="login-page">
     <div class="login-header box-shadow">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <div class="brand-logo">
+            <div>
                 <a href="#">
-                    <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="Academicy" />
+                    <span style="font-size: 32px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
                 </a>
             </div>
         </div>

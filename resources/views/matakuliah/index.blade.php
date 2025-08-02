@@ -25,17 +25,17 @@
 
 <body>
 	<div class="pre-loader">
-		<div class="pre-loader-box">
-			<div class="loader-logo">
-				<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
 			</div>
-			<div class="loader-progress" id="progress_div">
-				<div class="bar" id="bar1"></div>
-			</div>
-			<div class="percent" id="percent1">0%</div>
-			<div class="loading-text">Loading...</div>
 		</div>
-	</div>
 
 	<div class="header">
         <div class="header-left">
@@ -66,8 +66,7 @@
     <div class="left-side-bar">
         <div class="brand-logo">
             <a href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
+				<span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>
@@ -78,7 +77,7 @@
             <div class="sidebar-menu">
                 <ul id="accordion-menu">
                     <li>
-                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow active">
+                        <a href="{{ route('admin.dashboard') }}" class="dropdown-toggle no-arrow ">
                             <span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
                         </a>
                     </li>
@@ -139,7 +138,7 @@
 								</ol>
 							</nav>
 						</div>
-						<div class="col-md-6 col-sm-12 text-right">
+						<!-- <div class="col-md-6 col-sm-12 text-right">
 							<div class="dropdown">
 								<a class="btn btn-secondary dropdown-toggle" href="#" role="button"
 									data-toggle="dropdown">
@@ -151,7 +150,7 @@
 									<a class="dropdown-item" href="#">Print Report</a>
 								</div>
 							</div>
-						</div>
+						</div> -->
 					</div>
 				</div>
 
@@ -256,7 +255,7 @@
 								<h4 class="text-blue h4">Daftar Mata Kuliah</h4>
 								<p class="mb-30">Data mata kuliah yang telah tersimpan dalam sistem</p>
 							</div>
-							<div class="pull-right">
+							<!-- <div class="pull-right">
 								<div class="dropdown">
 									<a class="btn btn-outline-primary dropdown-toggle" href="#" role="button"
 										data-toggle="dropdown">
@@ -275,7 +274,7 @@
 										<a class="dropdown-item" href="#" onclick="filterBySemester('8')">Semester 8</a>
 									</div>
 								</div>
-							</div>
+							</div> -->
 						</div>
 					</div>
 					<div class="pb-20">

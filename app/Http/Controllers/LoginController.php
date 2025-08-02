@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // <-- Gunakan Auth facade
-
+use Illuminate\Support\Facades\Auth; 
 class LoginController extends Controller
 {
     /**
@@ -81,7 +80,7 @@ class LoginController extends Controller
         // Login gagal
         return back()
             ->withInput($request->only('login_id', 'user_type'))
-            ->withErrors(['login_id' => 'Kredensial yang diberikan tidak cocok dengan catatan kami.']);
+            ->withErrors(['login_id' => 'Username/NIM/NIP atau password salah.']);
     }
 
     public function logout(Request $request)

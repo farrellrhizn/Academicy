@@ -25,7 +25,7 @@ class CheckAuth
             }
         } else {
             // Untuk web routes
-            if (!$isAuthenticated && !$request->is('login', 'register', 'forgot-password', 'forgot-pass', '/')) {
+            if (!$isAuthenticated && !$request->is('login', 'register', '/')) {
                 return redirect()->route('login');
             }
         }

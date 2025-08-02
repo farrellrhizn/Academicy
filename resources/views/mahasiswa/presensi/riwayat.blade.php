@@ -30,7 +30,7 @@
 	<div class="pre-loader">
 		<div class="pre-loader-box">
 			<div class="loader-logo">
-				<img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+					<span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
 			</div>
 			<div class="loader-progress" id="progress_div">
 				<div class="bar" id="bar1"></div>
@@ -99,8 +99,7 @@
 	<div class="left-side-bar">
 		<div class="brand-logo">
 			<a href="{{ route('mahasiswa.dashboard') }}">
-				<img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
-				<img src="../../../bootstrap/vendors/images/deskapp-logo-white.svg" alt="" class="light-logo" />
+					<span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
 			</a>
 			<div class="close-sidebar" data-toggle="left-sidebar-close">
 				<i class="ion-close-round"></i>

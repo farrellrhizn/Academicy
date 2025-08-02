@@ -1,0 +1,12 @@
+<svg width="277" height="55" viewBox="0 0 277 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0,2)">
+    <g transform="scale(0.9)">
+      <path d="M30 5L15 12.5L30 20L45 12.5L30 5Z" fill="#0A1A4F"></path>
+      <path d="M15 12.5V22.5L30 30V20L15 12.5Z" fill="#00B8B2"></path>
+      <path d="M45 12.5V22.5L30 30V20L45 12.5Z" fill="#00B8B2"></path>
+      <circle cx="13" cy="23" r="2" fill="#00B8B2"></circle>
+      <path d="M12 25C12 27 12.8 29 14.5 31L18 30C16 28.5 15 26 15 25H12Z" fill="#E1007E"></path>
+    </g>
+    <text x="70" y="35" font-family="Segoe UI, sans-serif" font-size="28" fill="#0A1A4F" font-weight="600">Academicy</text>
+  </g>
+</svg>

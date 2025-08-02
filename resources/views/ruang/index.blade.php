@@ -21,7 +21,7 @@
     <div class="pre-loader">
         <div class="pre-loader-box">
             <div class="loader-logo">
-                <img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+                <span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
             </div>
             <div class="loader-progress" id="progress_div">
                 <div class="bar" id="bar1"></div>
@@ -39,15 +39,16 @@
             <div class="user-info-dropdown">
                 <div class="dropdown">
                     <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                        							<span class="user-icon">
-								<i class="dw dw-user1"></i>
-							</span>
+                        <span class="user-icon">
+                            <i class="dw dw-user1"></i>
+                        </span>
                         <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
                         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf
-                            <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                            <button type="submit" class="dropdown-item"
+                                style="border: none; background: none; width: 100%; text-align: left;">
                                 <i class="dw dw-logout"></i> Log Out
                             </button>
                         </form>
@@ -60,8 +61,7 @@
     <div class="left-side-bar">
         <div class="brand-logo">
             <a href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
+				<span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>

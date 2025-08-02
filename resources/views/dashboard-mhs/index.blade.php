@@ -55,7 +55,9 @@
 		<div class="pre-loader">
 			<div class="pre-loader-box">
 				<div class="loader-logo">
-					<img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" />
+					<!-- <img src="{{ asset('bootstrap/vendors/images/logo-aca.svg') }}" alt="" /> -->
+					 
+					<span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
 				</div>
 				<div class="loader-progress" id="progress_div">
 					<div class="bar" id="bar1"></div>
@@ -144,12 +146,7 @@
 		<div class="left-side-bar">
 			<div class="brand-logo">
 				<a href="{{ route('mahasiswa.dashboard') }}">
-					<img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
-					<img
-						src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}"
-						alt=""
-						class="light-logo"
-					/>
+					<span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
 				</a>
 				<div class="close-sidebar" data-toggle="left-sidebar-close">
 					<i class="ion-close-round"></i>
@@ -225,11 +222,11 @@
 									<small class="text-muted">Semester:</small> <strong>{{ $userData->Semester ?? '-' }}</strong><br>
 									<small class="text-muted">Golongan:</small> <strong>{{ $userData->golongan->nama_Gol ?? 'Tidak Diketahui' }}</strong>
 								</div>
-								<div class="col-md-6">
+								<!-- <div class="col-md-6">
 									<small class="text-muted">Total SKS:</small> <strong>{{ $totalSks ?? 0 }}</strong><br>
 									<small class="text-muted">Mata Kuliah:</small> <strong>{{ $totalMataKuliah ?? 0 }}</strong><br>
 									<small class="text-muted">Status:</small> <strong class="{{ $statusClass ?? 'text-muted' }}">{{ $statusAkademik ?? 'Aktif' }}</strong>
-								</div>
+								</div> -->
 							</div>
 						</div>
 					</div>
@@ -293,8 +290,8 @@
 								<h6 class="alert-heading"><i class="icon-copy dw dw-user1"></i> Info Mahasiswa</h6>
 								<small class="d-block"><strong>NIM:</strong> {{ $userData->NIM ?? '-' }}</small>
 								<small class="d-block"><strong>Semester:</strong> {{ $userData->Semester ?? '-' }}</small>
-								<small class="d-block"><strong>Status:</strong> <span class="{{ $statusClass ?? 'text-muted' }}">{{ $statusAkademik ?? 'Aktif' }}</span></small>
-								<small class="d-block"><strong>Total SKS:</strong> {{ $totalSks ?? 0 }}</small>
+								<!-- <small class="d-block"><strong>Status:</strong> <span class="{{ $statusClass ?? 'text-muted' }}">{{ $statusAkademik ?? 'Aktif' }}</span></small>
+								<small class="d-block"><strong>Total SKS:</strong> {{ $totalSks ?? 0 }}</small> -->
 							</div>
 
 							<!-- Pengumuman Dinamis -->

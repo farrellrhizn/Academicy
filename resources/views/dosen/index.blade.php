@@ -24,19 +24,19 @@
 
 <body>
     <div class="pre-loader">
-		<div class="pre-loader-box">
-			<div class="loader-logo">
-				<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
 			</div>
-			<div class="loader-progress" id="progress_div">
-				<div class="bar" id="bar1"></div>
-			</div>
-			<div class="percent" id="percent1">0%</div>
-			<div class="loading-text">Loading...</div>
 		</div>
-	</div>
 
-    <<div class="header">
+    <div class="header">
         <div class="header-left">
             <div class="menu-icon bi bi-list"></div>
         </div>
@@ -65,8 +65,7 @@
     <div class="left-side-bar">
         <div class="brand-logo">
             <a href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
+				<span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>

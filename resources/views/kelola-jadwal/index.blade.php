@@ -21,7 +21,7 @@
     <div class="pre-loader">
         <div class="pre-loader-box">
             <div class="loader-logo">
-                <img src="../../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
+                <span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
             </div>
             <div class="loader-progress" id="progress_div">
                 <div class="bar" id="bar1"></div>
@@ -39,15 +39,16 @@
             <div class="user-info-dropdown">
                 <div class="dropdown">
                     <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                        							<span class="user-icon">
-								<i class="dw dw-user1"></i>
-							</span>
+                        <span class="user-icon">
+                            <i class="dw dw-user1"></i>
+                        </span>
                         <span class="user-name">{{ $userData->nama_lengkap ?? 'Administrator' }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
                         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf
-                            <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                            <button type="submit" class="dropdown-item"
+                                style="border: none; background: none; width: 100%; text-align: left;">
                                 <i class="dw dw-logout"></i> Log Out
                             </button>
                         </form>
@@ -60,8 +61,7 @@
     <div class="left-side-bar">
         <div class="brand-logo">
             <a href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
+                <span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>
@@ -146,12 +146,13 @@
                                         <select id="filterSemester" class="form-control">
                                             <option value="all" {{ ($semesterFilter == 'all' || !$semesterFilter) ? 'selected' : '' }}>-- Semua Semester --</option>
                                             @for($i = 1; $i <= 8; $i++)
-                                            <option value="{{ $i }}" {{ $semesterFilter == $i ? 'selected' : '' }}>Semester {{ $i }}</option>
+                                                <option value="{{ $i }}" {{ $semesterFilter == $i ? 'selected' : '' }}>
+                                                    Semester {{ $i }}</option>
                                             @endfor
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <!-- <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Filter Hari:</label>
                                         <select id="filterHari" class="form-control">
@@ -163,7 +164,7 @@
                                             <option>Jumat</option>
                                         </select>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <table class="data-table table stripe hover nowrap" id="jadwalTable">
@@ -185,7 +186,8 @@
                                         <td class="table-plus">{{ $index + 1 }}</td>
                                         <td>{{ $item->hari }}</td>
                                         <td>{{ $item->matakuliah->Nama_mk ?? 'N/A' }}</td>
-                                        <td><span class="badge badge-primary">Sem {{ $item->matakuliah->semester ?? 'N/A' }}</span></td>
+                                        <td><span class="badge badge-primary">Sem
+                                                {{ $item->matakuliah->semester ?? 'N/A' }}</span></td>
                                         {{-- Mengambil nama dosen dari relasi --}}
                                         <td>{{ $item->matakuliah?->pengampu?->first()?->dosen?->Nama ?? 'Belum Ditentukan' }}
                                         </td>
@@ -245,7 +247,7 @@
                                     <select class="form-control" id="edit_semester_filter">
                                         <option value="all">-- Semua Semester --</option>
                                         @for($i = 1; $i <= 8; $i++)
-                                        <option value="{{ $i }}">Semester {{ $i }}</option>
+                                            <option value="{{ $i }}">Semester {{ $i }}</option>
                                         @endfor
                                     </select>
                                 </div>
@@ -269,7 +271,8 @@
                                     <select class="form-control" name="Kode_mk" id="edit_matakuliah_dropdown" required>
                                         <option value="">-- Pilih Mata Kuliah --</option>
                                         @foreach($matakuliah as $mk)
-                                            <option value="{{ $mk->Kode_mk }}" data-semester="{{ $mk->semester }}">{{ $mk->Nama_mk }} (Sem {{ $mk->semester }})</option>
+                                            <option value="{{ $mk->Kode_mk }}" data-semester="{{ $mk->semester }}">
+                                                {{ $mk->Nama_mk }} (Sem {{ $mk->semester }})</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -337,160 +340,160 @@
     <script src="{{ asset('bootstrap/src/plugins/datatables/js/responsive.bootstrap4.min.js') }}"></script>
 
     <script>
-    $(document).ready(function () {
-        // Setup CSRF Token untuk semua request AJAX
-        $.ajaxSetup({
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
-        });
-
-        // Inisialisasi DataTable
-        var table = $('#jadwalTable').DataTable({
-            // Opsi DataTable Anda bisa ditambahkan di sini
-        });
-
-        // FUNGSI FILTER MATA KULIAH BERDASARKAN SEMESTER (untuk modal edit)
-        function filterEditMataKuliah(semester) {
-            const matakuliahDropdown = $('#edit_matakuliah_dropdown');
-            const options = matakuliahDropdown.find('option');
-            
-            options.each(function() {
-                const option = $(this);
-                const optionSemester = option.data('semester');
-                
-                if (semester === 'all' || semester === '' || optionSemester == semester || option.val() === '') {
-                    option.show();
-                } else {
-                    option.hide();
-                }
+        $(document).ready(function () {
+            // Setup CSRF Token untuk semua request AJAX
+            $.ajaxSetup({
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
             });
-        }
 
-        // HANDLE PERUBAHAN SEMESTER FILTER UNTUK MODAL EDIT
-        $('#edit_semester_filter').on('change', function() {
-            const semester = $(this).val();
-            filterEditMataKuliah(semester);
-            // Reset mata kuliah selection when semester changes
-            $('#edit_matakuliah_dropdown').val('');
-        });
+            // Inisialisasi DataTable
+            var table = $('#jadwalTable').DataTable({
+                // Opsi DataTable Anda bisa ditambahkan di sini
+            });
 
-        // HANDLE FILTER SEMESTER UNTUK TABEL
-        $('#filterSemester').on('change', function() {
-            const semester = $(this).val();
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('semester', semester);
-            window.location.href = currentUrl.toString();
-        });
+            // FUNGSI FILTER MATA KULIAH BERDASARKAN SEMESTER (untuk modal edit)
+            function filterEditMataKuliah(semester) {
+                const matakuliahDropdown = $('#edit_matakuliah_dropdown');
+                const options = matakuliahDropdown.find('option');
 
-        // Filter tabel berdasarkan hari
-        $('#filterHari').on('change', function () {
-            table.column(2).search(this.value).draw(); // Updated column index due to new semester column
-        });
+                options.each(function () {
+                    const option = $(this);
+                    const optionSemester = option.data('semester');
 
-        // FUNGSI EDIT: Mengisi modal saat tombol edit diklik
-        $('body').on('click', '.btn-edit', function () {
-            var id = $(this).data('id');
-            $('#edit_id_jadwal').val(id);
-
-            // Reset semester filter to show all options first
-            $('#edit_semester_filter').val('all');
-            filterEditMataKuliah('all');
-
-            // Mengisi form di dalam modal dengan data dari tombol
-            $('#editForm select[name="hari"]').val($(this).data('hari'));
-            $('#editForm select[name="Kode_mk"]').val($(this).data('kodemk'));
-            $('#editForm select[name="NIP"]').val($(this).data('nip'));
-            $('#editForm select[name="id_ruang"]').val($(this).data('idruang'));
-            $('#editForm select[name="id_Gol"]').val($(this).data('idgol'));
-            
-            // Set semester filter based on selected mata kuliah
-            const selectedMK = $('#editForm select[name="Kode_mk"]').val();
-            if (selectedMK) {
-                const mkSemester = $('#editForm select[name="Kode_mk"] option:selected').data('semester');
-                if (mkSemester) {
-                    $('#edit_semester_filter').val(mkSemester);
-                    filterEditMataKuliah(mkSemester);
-                }
-            }
-            
-            $('#editModal').modal('show');
-        });
-
-        // FUNGSI UPDATE: Menyimpan perubahan dari modal
-        $('#updateBtn').on('click', function () {
-            var form = $('#editForm');
-            var id = $('#edit_id_jadwal').val();
-
-            // Validasi sederhana di sisi client
-            if (!form.find('select[name="hari"]').val() || !form.find('select[name="Kode_mk"]').val() || !form.find('select[name="NIP"]').val() || !form.find('select[name="id_ruang"]').val() || !form.find('select[name="id_Gol"]').val()) {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Semua field wajib diisi!' });
-                return;
-            }
-            
-            // Membuat URL yang benar menggunakan route helper Laravel
-            var url = "{{ route('admin.kelola-jadwal.update', ':id') }}";
-            url = url.replace(':id', id);
-
-            $.ajax({
-                url: url,
-                type: 'POST', // Sesuai dengan route `Route::post` di web.php
-                data: form.serialize(),
-                success: function (response) {
-                    $('#editModal').modal('hide');
-                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.message })
-                        .then(() => {
-                            location.reload(); // Muat ulang halaman untuk melihat perubahan
-                        });
-                },
-                error: function (xhr) {
-                    let errorMessage = 'Terjadi kesalahan pada server.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
+                    if (semester === 'all' || semester === '' || optionSemester == semester || option.val() === '') {
+                        option.show();
+                    } else {
+                        option.hide();
                     }
-                    Swal.fire({
-                        icon: 'error',
-                        title: `Gagal! (Error ${xhr.status})`,
-                        text: errorMessage,
-                    });
-                }
+                });
+            }
+
+            // HANDLE PERUBAHAN SEMESTER FILTER UNTUK MODAL EDIT
+            $('#edit_semester_filter').on('change', function () {
+                const semester = $(this).val();
+                filterEditMataKuliah(semester);
+                // Reset mata kuliah selection when semester changes
+                $('#edit_matakuliah_dropdown').val('');
             });
-        });
 
-        // FUNGSI DELETE: Menghapus data
-        $('body').on('click', '.btn-delete', function () {
-            var id = $(this).data('id');
-            
-            // Membuat URL yang benar menggunakan route helper Laravel
-            var url = "{{ route('admin.kelola-jadwal.destroy', ':id') }}";
-            url = url.replace(':id', id);
+            // HANDLE FILTER SEMESTER UNTUK TABEL
+            $('#filterSemester').on('change', function () {
+                const semester = $(this).val();
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('semester', semester);
+                window.location.href = currentUrl.toString();
+            });
 
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Data jadwal ini akan dihapus secara permanen!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        type: "DELETE", // Method yang benar untuk menghapus
-                        url: url,
-                        success: function (response) {
-                            Swal.fire('Dihapus!', response.message, 'success');
-                            // Hapus baris dari DataTable secara dinamis tanpa reload
-                            table.row('#row-' + id).remove().draw(false);
-                        },
-                        error: function (xhr) {
-                            Swal.fire({ icon: 'error', title: 'Gagal!', text: xhr.responseJSON.message || 'Terjadi kesalahan saat menghapus data.' });
+            // Filter tabel berdasarkan hari
+            $('#filterHari').on('change', function () {
+                table.column(2).search(this.value).draw(); // Updated column index due to new semester column
+            });
+
+            // FUNGSI EDIT: Mengisi modal saat tombol edit diklik
+            $('body').on('click', '.btn-edit', function () {
+                var id = $(this).data('id');
+                $('#edit_id_jadwal').val(id);
+
+                // Reset semester filter to show all options first
+                $('#edit_semester_filter').val('all');
+                filterEditMataKuliah('all');
+
+                // Mengisi form di dalam modal dengan data dari tombol
+                $('#editForm select[name="hari"]').val($(this).data('hari'));
+                $('#editForm select[name="Kode_mk"]').val($(this).data('kodemk'));
+                $('#editForm select[name="NIP"]').val($(this).data('nip'));
+                $('#editForm select[name="id_ruang"]').val($(this).data('idruang'));
+                $('#editForm select[name="id_Gol"]').val($(this).data('idgol'));
+
+                // Set semester filter based on selected mata kuliah
+                const selectedMK = $('#editForm select[name="Kode_mk"]').val();
+                if (selectedMK) {
+                    const mkSemester = $('#editForm select[name="Kode_mk"] option:selected').data('semester');
+                    if (mkSemester) {
+                        $('#edit_semester_filter').val(mkSemester);
+                        filterEditMataKuliah(mkSemester);
+                    }
+                }
+
+                $('#editModal').modal('show');
+            });
+
+            // FUNGSI UPDATE: Menyimpan perubahan dari modal
+            $('#updateBtn').on('click', function () {
+                var form = $('#editForm');
+                var id = $('#edit_id_jadwal').val();
+
+                // Validasi sederhana di sisi client
+                if (!form.find('select[name="hari"]').val() || !form.find('select[name="Kode_mk"]').val() || !form.find('select[name="NIP"]').val() || !form.find('select[name="id_ruang"]').val() || !form.find('select[name="id_Gol"]').val()) {
+                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Semua field wajib diisi!' });
+                    return;
+                }
+
+                // Membuat URL yang benar menggunakan route helper Laravel
+                var url = "{{ route('admin.kelola-jadwal.update', ':id') }}";
+                url = url.replace(':id', id);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST', // Sesuai dengan route `Route::post` di web.php
+                    data: form.serialize(),
+                    success: function (response) {
+                        $('#editModal').modal('hide');
+                        Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.message })
+                            .then(() => {
+                                location.reload(); // Muat ulang halaman untuk melihat perubahan
+                            });
+                    },
+                    error: function (xhr) {
+                        let errorMessage = 'Terjadi kesalahan pada server.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
                         }
-                    });
-                }
+                        Swal.fire({
+                            icon: 'error',
+                            title: `Gagal! (Error ${xhr.status})`,
+                            text: errorMessage,
+                        });
+                    }
+                });
+            });
+
+            // FUNGSI DELETE: Menghapus data
+            $('body').on('click', '.btn-delete', function () {
+                var id = $(this).data('id');
+
+                // Membuat URL yang benar menggunakan route helper Laravel
+                var url = "{{ route('admin.kelola-jadwal.destroy', ':id') }}";
+                url = url.replace(':id', id);
+
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data jadwal ini akan dihapus secara permanen!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "DELETE", // Method yang benar untuk menghapus
+                            url: url,
+                            success: function (response) {
+                                Swal.fire('Dihapus!', response.message, 'success');
+                                // Hapus baris dari DataTable secara dinamis tanpa reload
+                                table.row('#row-' + id).remove().draw(false);
+                            },
+                            error: function (xhr) {
+                                Swal.fire({ icon: 'error', title: 'Gagal!', text: xhr.responseJSON.message || 'Terjadi kesalahan saat menghapus data.' });
+                            }
+                        });
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
 </body>
 
 </html>

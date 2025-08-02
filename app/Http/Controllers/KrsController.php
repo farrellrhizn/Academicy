@@ -39,7 +39,6 @@ class KrsController extends Controller
     public function index()
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        
         // Ambil mata kuliah yang sudah diambil mahasiswa
         $krsAmbil = Krs::where('NIM', $mahasiswa->NIM)
                       ->with([
@@ -51,10 +50,8 @@ class KrsController extends Controller
                           'matakuliah.jadwalAkademik.golongan'
                       ])
                       ->get();
-        
         // Ambil kode mata kuliah yang sudah diambil
         $krsKodeMk = $krsAmbil->pluck('Kode_mk')->toArray();
-        
         // Ambil mata kuliah yang tersedia untuk semester mahasiswa
         $matakuliahTersedia = MataKuliah::where('semester', $mahasiswa->Semester)
                                       ->with([
@@ -69,7 +66,6 @@ class KrsController extends Controller
                                       ->whereNotIn('Kode_mk', $krsKodeMk)
                                       ->orderBy('Nama_mk', 'asc')
                                       ->get();
-        
         return view('mahasiswa.krs.index', compact('krsAmbil', 'matakuliahTersedia', 'mahasiswa'));
     }
     
@@ -247,24 +243,12 @@ class KrsController extends Controller
         }
         
         try {
-            // Log the deletion attempt
-            // \Log::info('KRS Deletion Attempt', [
-            //     'id_krs' => $krs->id_krs,
-            //     'NIM' => $krs->NIM,
-            //     'Kode_mk' => $krs->Kode_mk,
-            //     'matakuliah_name' => $matakuliah->Nama_mk
-            // ]);
             
             // Use DB transaction for data integrity
             DB::transaction(function () use ($krs) {
                 $krs->delete();
             });
             
-            // \Log::info('KRS Deleted Successfully', [
-            //     'id_krs' => $krs->id_krs,
-            //     'NIM' => $krs->NIM,
-            //     'Kode_mk' => $krs->Kode_mk
-            // ]);
             
             $message = "Mata kuliah {$matakuliah->Nama_mk} berhasil dihapus dari KRS.";
             

@@ -18,15 +18,17 @@
 
 <body>
 	<div class="pre-loader">
-		<div class="pre-loader-box">
-			<div class="loader-logo">
-				<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" />
-			</div>
-			<div class="loader-progress" id="progress_div">
-				<div class="bar" id="bar1"></div>
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
 			</div>
 		</div>
-	</div>
 
 	<div class="header">
 		<div class="header-left">
@@ -87,8 +89,7 @@
 	<div class="left-side-bar">
 		<div class="brand-logo">
 			<a href="{{ route('dosen.dashboard') }}">
-				<img src="../../bootstrap/vendors/images/deskapp-logo.svg" alt="" class="dark-logo" />
-				<img src="../../bootstrap/vendors/images/deskapp-logo-white.svg" alt="" class="light-logo" />
+					<span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
 			</a>
 			<div class="close-sidebar" data-toggle="left-sidebar-close">
 				<i class="ion-close-round"></i>
@@ -108,12 +109,10 @@
 						</a>
 					</li>
 					<li>
-						<a href="{{ route('dosen.presensi.simple') }}" class="dropdown-toggle no-arrow">
-							<span class="micon bi bi-journal-check"></span><span class="mtext">Input Presensi
-								Cepat</span>
-						</a>
-					</li>
-
+                        <a href="{{ route('dosen.presensi.simple') }}" class="dropdown-toggle no-arrow">
+                            <span class="micon bi bi-check-circle "></span><span class="mtext">Presensi</span>
+                        </a>
+                    </li>
 					<li>
 						<a href="{{ route('dosen.mata-kuliah-diampu.index') }}" class="dropdown-toggle no-arrow active">
 							<span class="micon bi bi-book"></span><span class="mtext">Mata Kuliah Diampu</span>

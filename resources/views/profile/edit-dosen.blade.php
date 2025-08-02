@@ -372,15 +372,17 @@
 </head>
 <body>
     <div class="pre-loader">
-        <div class="pre-loader-box">
-            <div class="loader-logo">
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" />
-            </div>
-            <div class="loader-progress" id="progress_div">
-                <div class="bar" id="bar1"></div>
-            </div>
-        </div>
-    </div>
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
+			</div>
+		</div>
 
     <div class="header">
         <div class="header-left">
@@ -417,8 +419,7 @@
     <div class="left-side-bar">
         <div class="brand-logo">
             <a href="{{ route('dosen.dashboard') }}">
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
+				<span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
             </a>
             <div class="close-sidebar" data-toggle="left-sidebar-close">
                 <i class="ion-close-round"></i>
@@ -448,7 +449,7 @@
                         </a>
                     </li>
                     <li class="active">
-                        <a href="{{ route('dosen.profile.edit') }}" class="dropdown-toggle no-arrow">
+                        <a href="{{ route('dosen.profile.edit') }}" class="dropdown-toggle no-arrow active">
                             <span class="micon bi bi-person"></span><span class="mtext">Profile</span>
                         </a>
                     </li>
@@ -612,7 +613,7 @@
                                     </div>
 
                                     <div class="row">
-                                        <div class="col-md-8">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="Alamat">
                                                     <i class="icon-copy bi bi-geo-alt-fill"></i> 
@@ -621,7 +622,7 @@
                                                 <textarea class="form-control" name="Alamat" rows="3" required placeholder="Masukkan alamat lengkap Anda">{{ old('Alamat', $dosen->Alamat) }}</textarea>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="Nohp">
                                                     <i class="icon-copy bi bi-phone"></i> 

@@ -374,13 +374,15 @@
     <div class="pre-loader">
         <div class="pre-loader-box">
             <div class="loader-logo">
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" />
+					<span style="font-size: 40px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
             </div>
             <div class="loader-progress" id="progress_div">
-                <div class="bar" id="bar1"></div>
-            </div>
-        </div>
-    </div>
+				<div class="bar" id="bar1"></div>
+			</div>
+			<div class="percent" id="percent1">0%</div>
+			<div class="loading-text">Loading...</div>
+		</div>
+	</div>
 
     <div class="header">
         <div class="header-left">
@@ -415,47 +417,42 @@
     </div>
 
     <div class="left-side-bar">
-        <div class="brand-logo">
-            <a href="{{ route('mahasiswa.dashboard') }}">
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo.svg') }}" alt="" class="dark-logo" />
-                <img src="{{ asset('bootstrap/vendors/images/deskapp-logo-white.svg') }}" alt="" class="light-logo" />
-            </a>
-            <div class="close-sidebar" data-toggle="left-sidebar-close">
-                <i class="ion-close-round"></i>
-            </div>
-        </div>
-        <div class="menu-block customscroll">
-            <div class="sidebar-menu">
-                <ul id="accordion-menu">
-                    <li>
-                        <a href="{{ route('mahasiswa.dashboard') }}" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('mahasiswa.krs.index') }}" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-book"></span><span class="mtext">KRS</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('mahasiswa.jadwal.index') }}" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-calendar"></span><span class="mtext">Jadwal Kuliah</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('mahasiswa.presensi.riwayat') }}" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-check-circle"></span><span class="mtext">Riwayat Presensi</span>
-                        </a>
-                    </li>
-                    <li class="active">
-                        <a href="{{ route('mahasiswa.profile.edit') }}" class="dropdown-toggle no-arrow">
-                            <span class="micon bi bi-person"></span><span class="mtext">Profile</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
+		<div class="brand-logo">
+			<a href="{{ route('mahasiswa.dashboard') }}">
+				<span style="font-size: 36px; font-family: 'Poppins', sans-serif; font-weight: bold;">Academicy</span>
+			</a>
+			<div class="close-sidebar" data-toggle="left-sidebar-close">
+				<i class="ion-close-round"></i>
+			</div>
+		</div>
+		<div class="menu-block customscroll">
+			<div class="sidebar-menu">
+				<ul id="accordion-menu">
+					<li>
+						<a href="{{ route('mahasiswa.dashboard') }}" class="dropdown-toggle no-arrow">
+							<span class="micon bi bi-house"></span><span class="mtext">Dashboard</span>
+						</a>
+					</li>
+					<li>
+						<a href="{{ route('mahasiswa.krs.index') }}" class="dropdown-toggle no-arrow active">
+							<span class="micon bi bi-card-list"></span><span class="mtext">KRS</span>
+						</a>
+					</li>
+					<li>
+						<a href="{{ route('mahasiswa.krs.jadwal') }}" class="dropdown-toggle no-arrow">
+							<span class="micon bi bi-calendar-week"></span><span class="mtext">Jadwal Kuliah</span>
+						</a>
+					</li>
+					<li>
+						<a href="#" class="dropdown-toggle no-arrow">
+							<span class="micon bi bi-check2-square"></span><span class="mtext">Riwayat Presensi</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="mobile-menu-overlay"></div>
 
     <div class="main-container">
         <div class="pd-ltr-20 xs-pd-20-10">

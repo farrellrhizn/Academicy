@@ -24,7 +24,6 @@ class PresensiController extends Controller
         if (!$dosen) {
             return redirect()->route('login')->with('error', 'Sesi tidak valid, silakan login kembali.');
         }
-        
         // Ambil mata kuliah yang diampu dosen
         $matakuliahDiampu = $dosen->matakuliah()->orderBy('Nama_mk')->get();
 
